@@ -1,0 +1,11 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow public read access for viewing content (e.g., programs, gallery, etc.)
+    match /{document=**} {
+      allow read: if true;
+      // Allow write access only for authenticated users
+      allow write: if request.auth != null;
+    }
+  }
+}
