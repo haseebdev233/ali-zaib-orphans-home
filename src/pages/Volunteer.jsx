@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { ref, push, set, serverTimestamp } from 'firebase/database';
 import { db } from '../firebase';
 
 function Volunteer() {
@@ -13,7 +13,6 @@ function Volunteer() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,14 +36,15 @@ function Volunteer() {
     setIsSubmitting(true);
 
     try {
-      // Save to Firestore
-      const docRef = await addDoc(collection(db, 'volunteers'), {
+      // Save to Realtime Database
+      const newRef = push(ref(db, 'volunteers'));
+      await set(newRef, {
         ...formData,
         submittedAt: serverTimestamp(),
         status: 'pending'
       });
 
-      console.log('Volunteer application submitted with ID: ', docRef.id);
+      console.log('Volunteer application submitted with ID: ', newRef.key);
       setSubmitSuccess(true);
 
       // Reset form

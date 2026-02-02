@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { ref, push, set, serverTimestamp } from 'firebase/database';
 import { db } from '../firebase';
 
 // Initialize Stripe (replace with your publishable key)
@@ -22,6 +22,8 @@ function DonationPage() {
   const [isMonthly, setIsMonthly] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+
+  const transactionId = useMemo(() => `DON-${Date.now().toString().slice(-8)}`, []);
 
   const presetAmounts = [100, 250, 500, 1000, 2500, 5000];
 
@@ -568,7 +570,7 @@ function DonationPage() {
                         <div className="text-start">
                           <div className="mb-2">
                             <small className="text-muted">Transaction ID</small>
-                            <div className="fw-bold">DON-{Date.now().toString().slice(-8)}</div>
+                            <div className="fw-bold">{transactionId}</div>
                           </div>
                           <div className="mb-2">
                             <small className="text-muted">Amount</small>
@@ -680,7 +682,7 @@ function CardPaymentForm({ amount, donorInfo, isMonthly, onSuccess }) {
       // Mock payment for demo
       await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // Save donation data to Firestore
+      // Save donation data to Realtime Database
       const donationData = {
         amount,
         donorInfo,
@@ -691,8 +693,9 @@ function CardPaymentForm({ amount, donorInfo, isMonthly, onSuccess }) {
         submittedAt: serverTimestamp()
       };
 
-      const docRef = await addDoc(collection(db, 'donations'), donationData);
-      console.log('Donation saved with ID: ', docRef.id);
+      const newRef = push(ref(db, 'donations'));
+      await set(newRef, donationData);
+      console.log('Donation saved with ID: ', newRef.key);
 
       // Simulate successful payment
       onSuccess();
