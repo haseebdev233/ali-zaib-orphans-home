@@ -1,15 +1,17 @@
 import Hero from "../Components/Hero";
-import JoinSection from "../Components/JoinSection";
+import PremiumJoinSection from "../Components/JoinSection";
 import Services from "../Components/Services";
 import PowerSection from "../Components/PowerSection";
+import JoinUsSection from '../Components/JoinUsSection';
 
 function Home() {
   return (
     <>
       <Hero />
-      <JoinSection />
+      <PremiumJoinSection />
       <Services />
       <PowerSection />
+      <JoinUsSection />
     </>
   );
 }

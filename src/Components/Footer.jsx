@@ -145,16 +145,16 @@ const Footer = () => {
             {/* Social Media Links */}
             <h6 className="text-uppercase text-success mb-3">Follow Us</h6>
             <div className="d-flex">
-              <a href="#" className="text-white me-3 social-icon">
+              <a href="https://www.facebook.com/profile.php?id=61586826886946" target="_blank" rel="noopener noreferrer" className="text-white me-3 social-icon">
                 <i className="bi bi-facebook fs-4"></i>
               </a>
-              <a href="#" className="text-white me-3 social-icon">
+              <a href="https://x.com/Alizaiboorphan" target="_blank" rel="noopener noreferrer" className="text-white me-3 social-icon">
                 <i className="bi bi-twitter fs-4"></i>
               </a>
-              <a href="#" className="text-white me-3 social-icon">
+              <a href="https://www.instagram.com/alizaiborphanhomeaashian/" target="_blank" rel="noopener noreferrer" className="text-white me-3 social-icon">
                 <i className="bi bi-instagram fs-4"></i>
               </a>
-              <a href="#" className="text-white social-icon">
+              <a href="https://www.linkedin.com/in/ali-zaib-orphan-home-undefined-1602a03aa/" target="_blank" rel="noopener noreferrer" className="text-white social-icon">
                 <i className="bi bi-linkedin fs-4"></i>
               </a>
             </div>

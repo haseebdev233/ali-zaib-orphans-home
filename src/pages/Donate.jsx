@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { ref, push, set, serverTimestamp } from 'firebase/database';
@@ -21,9 +21,7 @@ function DonationPage() {
   });
   const [isMonthly, setIsMonthly] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [paymentSuccess, setPaymentSuccess] = useState(false);
-
-  const transactionId = useMemo(() => `DON-${Date.now().toString().slice(-8)}`, []);
+  const [transactionId] = useState(`DON-${Date.now().toString().slice(-8)}`);
 
   const presetAmounts = [100, 250, 500, 1000, 2500, 5000];
 
@@ -57,12 +55,11 @@ function DonationPage() {
   // Mock payment processing
   const handlePayment = async () => {
     setIsProcessing(true);
-    
+
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
+
     setIsProcessing(false);
-    setPaymentSuccess(true);
     setStep(4);
   };
 
@@ -468,7 +465,6 @@ function DonationPage() {
                         donorInfo={donorInfo}
                         isMonthly={isMonthly}
                         onSuccess={() => {
-                          setPaymentSuccess(true);
                           setStep(4);
                         }}
                       />

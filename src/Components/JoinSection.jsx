@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import image1 from "../assets/images/join-img/2.png";
 
 function JoinSection() {
@@ -17,7 +18,7 @@ function JoinSection() {
             >
               {/* Main Heading */}
               <h1 className="display-5 fw-bold mb-4" style={{
-                color: '#0f2c3f',
+                color: '#1e3a8a',
                 lineHeight: '1.2'
               }}>
                 We Have Power Today To Change Tomorrow!
@@ -46,7 +47,7 @@ function JoinSection() {
                       <div style={{
                         minWidth: '24px',
                         height: '24px',
-                        backgroundColor: '#20c997',
+                        backgroundColor: '#fbbf24',
                         borderRadius: '50%',
                         display: 'flex',
                         alignItems: 'center',
@@ -64,7 +65,7 @@ function JoinSection() {
                       <div style={{
                         minWidth: '24px',
                         height: '24px',
-                        backgroundColor: '#20c997',
+                        backgroundColor: '#fbbf24',
                         borderRadius: '50%',
                         display: 'flex',
                         alignItems: 'center',
@@ -92,7 +93,7 @@ function JoinSection() {
                       <div style={{
                         minWidth: '24px',
                         height: '24px',
-                        backgroundColor: '#20c997',
+                        backgroundColor: '#fbbf24',
                         borderRadius: '50%',
                         display: 'flex',
                         alignItems: 'center',
@@ -110,7 +111,7 @@ function JoinSection() {
                       <div style={{
                         minWidth: '24px',
                         height: '24px',
-                        backgroundColor: '#20c997',
+                        backgroundColor: '#fbbf24',
                         borderRadius: '50%',
                         display: 'flex',
                         alignItems: 'center',
@@ -136,29 +137,31 @@ function JoinSection() {
                 transition={{ delay: 0.7, duration: 0.5 }}
                 className="mt-5"
               >
-                <button className="btn btn-lg px-5 py-3 rounded-pill fw-bold"
-                  style={{
-                    backgroundColor: '#20c997',
-                    color: 'white',
-                    border: 'none',
-                    fontSize: '1.1rem',
-                    transition: 'all 0.3s ease',
-                    boxShadow: '0 4px 15px rgba(32, 201, 151, 0.3)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = '#198754';
-                    e.currentTarget.style.transform = 'translateY(-3px)';
-                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(32, 201, 151, 0.4)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#20c997';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(32, 201, 151, 0.3)';
-                  }}
-                >
-                  About Us
-                  <i className="bi bi-arrow-right ms-2"></i>
-                </button>
+                <Link to="/about" style={{ textDecoration: 'none' }}>
+                  <button className="btn btn-lg px-5 py-3 rounded-pill fw-bold"
+                    style={{
+                      backgroundColor: '#20c997',
+                      color: 'white',
+                      border: 'none',
+                      fontSize: '1.1rem',
+                      transition: 'all 0.3s ease',
+                      boxShadow: '0 4px 15px rgba(32, 201, 151, 0.3)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#198754';
+                      e.currentTarget.style.transform = 'translateY(-3px)';
+                      e.currentTarget.style.boxShadow = '0 8px 25px rgba(32, 201, 151, 0.4)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = '#20c997';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 4px 15px rgba(32, 201, 151, 0.3)';
+                    }}
+                  >
+                    About Us
+                    <i className="bi bi-arrow-right ms-2"></i>
+                  </button>
+                </Link>
               </motion.div>
             </motion.div>
           </div>
@@ -221,7 +224,7 @@ function JoinSection() {
                 right: '-20px',
                 width: '150px',
                 height: '150px',
-                backgroundColor: 'rgba(32, 201, 151, 0.1)',
+                background: 'linear-gradient(45deg, rgba(30, 58, 138, 0.1) 0%, rgba(251, 191, 36, 0.1) 100%)',
                 borderRadius: '50%',
                 zIndex: -1
               }}></div>
@@ -232,7 +235,7 @@ function JoinSection() {
                 left: '-15px',
                 width: '100px',
                 height: '100px',
-                backgroundColor: 'rgba(32, 201, 151, 0.05)',
+                background: 'linear-gradient(45deg, rgba(30, 58, 138, 0.05) 0%, rgba(251, 191, 36, 0.05) 100%)',
                 borderRadius: '50%',
                 zIndex: -1
               }}></div>
