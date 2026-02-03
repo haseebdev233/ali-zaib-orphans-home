@@ -417,7 +417,7 @@ function Services() {
                       { icon: 'bi-egg-fried', title: 'Nutrition', desc: 'Healthy meals daily' },
                       { icon: 'bi-house-heart', title: 'Shelter', desc: 'Safe living space' },
                       { icon: 'bi-heart-pulse', title: 'Healthcare', desc: 'Medical checkups' },
-                      { icon: 'bi-tshirt', title: 'Clothing', desc: 'Seasonal outfits' },
+                      { icon: 'bi-tags', title: 'Clothing', desc: 'Seasonal outfits' },
                       { icon: 'bi-emoji-smile', title: 'Happiness', desc: 'Recreational activities' }
                     ].map((item, index) => (
                       <div key={index} className="col-6 col-md-4">
