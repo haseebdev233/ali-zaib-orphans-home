@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import logo from '../assets/images/Ali-zaib-Logo.webp';
 
 function Navbar() {
@@ -28,13 +29,14 @@ function Navbar() {
         { text: "Food Appeal", path: "/donate" },
         { text: "Education Appeal", path: "/donate" },
         { text: "Health Appeal", path: "/donate" },
-        { text: "Winter Appeal", path: "/donate" }
+        { text: "Winter Appeal", path: "/donate" },
+        { text: "Sponsor an Orphan", path: "/sponsor-an-orphan" }
       ]
     }
   ];
 
   return (
-    <nav
+    <motion.nav
       className="navbar navbar-expand-lg fixed-top bg-white"
       style={{
         top: scrolled ? "0" : "50px", // top is 0 when scrolled, 50px when at top
@@ -125,7 +127,7 @@ function Navbar() {
         </Link>
 
       </div>
-    </nav>
+    </motion.nav>
   );
 }
 

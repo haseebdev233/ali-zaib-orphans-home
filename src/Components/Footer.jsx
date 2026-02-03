@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -17,7 +18,12 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-dark text-white pt-5 pb-4">
+    <motion.footer
+      className="bg-dark text-white pt-5 pb-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8 }}
+    >
       <div className="container">
         <div className="row">
           
@@ -200,7 +206,7 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>
+    </motion.footer>
   );
 };
 

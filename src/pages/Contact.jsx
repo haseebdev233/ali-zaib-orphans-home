@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 function Contact() {
   const phoneNumbers = [
@@ -34,7 +35,13 @@ function Contact() {
   };
 
   return (
-    <div className="container-fluid py-5" style={{ backgroundColor: '#f8f9fa' }}>
+    <motion.div
+      className="container-fluid py-5"
+      style={{ backgroundColor: '#f8f9fa' }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8 }}
+    >
       <div className="container">
         <div className="text-center mb-5">
           <h1 className="display-4 fw-bold text-primary">Contact Us</h1>
@@ -124,7 +131,7 @@ function Contact() {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

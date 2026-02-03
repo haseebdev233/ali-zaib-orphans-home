@@ -22,6 +22,7 @@ const Gallery = lazy(() => import("./pages/Gallery"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
+const SponsorAnOrphan = lazy(() => import("./pages/SponsorAnOrphan"));
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -58,6 +59,7 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/terms" element={<Terms />} />
+          <Route path="/sponsor-an-orphan" element={<SponsorAnOrphan />} />
         </Routes>
       </div>
 

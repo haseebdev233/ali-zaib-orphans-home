@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ref as databaseRef, push, set, serverTimestamp } from 'firebase/database';
 import { db } from '../firebase';
 import { toast } from 'react-toastify';
+import { motion } from 'framer-motion';
 
 function CampusAmbassador() {
   const [formData, setFormData] = useState({
@@ -81,7 +82,12 @@ function CampusAmbassador() {
   };
 
   return (
-    <div className="container py-5">
+    <motion.div
+      className="container py-5"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8 }}
+    >
       <div className="row justify-content-center">
         <div className="col-12 col-md-10 col-lg-8">
           {/* Header Section */}
@@ -393,7 +399,7 @@ function CampusAmbassador() {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

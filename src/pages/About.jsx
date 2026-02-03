@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 function About() {
   return (
@@ -21,7 +22,13 @@ function About() {
       </section>
 
       {/* About Us Section */}
-      <section className="py-5">
+      <motion.section
+        className="py-5"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true }}
+      >
         <div className="container">
           <div className="row">
             <div className="col-lg-8 mx-auto text-center">
@@ -35,7 +42,7 @@ function About() {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Vision and Mission */}
       <section className="py-5 bg-light">
@@ -76,7 +83,13 @@ function About() {
       </section>
 
       {/* Facilities Section */}
-      <section className="py-5">
+      <motion.section
+        className="py-5"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.4 }}
+        viewport={{ once: true }}
+      >
         <div className="container">
           <div className="row">
             <div className="col-12 text-center mb-5">
@@ -175,7 +188,7 @@ function About() {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
     </>
   );
 }

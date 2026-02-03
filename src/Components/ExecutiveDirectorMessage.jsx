@@ -1,8 +1,15 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 function ExecutiveDirectorMessage() {
   return (
-    <section className="py-5" style={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)' }}>
+    <motion.section
+      className="py-5"
+      style={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)' }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8 }}
+    >
       <div className="container">
         <div className="row align-items-center justify-content-center">
           <div className="col-lg-8">
@@ -36,7 +43,7 @@ function ExecutiveDirectorMessage() {
           </div>
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }
 

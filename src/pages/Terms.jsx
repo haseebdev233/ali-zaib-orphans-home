@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import image1 from '../assets/images/hero-image/1.png';
 
 function Terms() {
@@ -22,7 +23,13 @@ function Terms() {
       </section>
 
       {/* Terms of Service Content */}
-      <section className="py-5 bg-light">
+      <motion.section
+        className="py-5 bg-light"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true }}
+      >
         <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-10">
@@ -134,7 +141,7 @@ function Terms() {
             </div>
           </div>
         </div>
-      </section>
+      </motion.section>
     </>
   );
 }
