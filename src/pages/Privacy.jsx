@@ -1,5 +1,4 @@
 import React from 'react';
-import image1 from '../assets/images/hero-image/1.png';
 
 function Privacy() {
   return (
@@ -8,7 +7,7 @@ function Privacy() {
       <section
         className="hero-section text-white d-flex align-items-center"
         style={{
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${image1})`,
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(/assets/images/hero-image/1.png)`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
