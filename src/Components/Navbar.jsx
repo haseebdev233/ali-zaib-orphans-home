@@ -43,7 +43,7 @@ function Navbar() {
           onClick={() => setIsOpen(false)}
         >
           <img src={logo} alt="Ali Zaib Orphan Home Logo" style={{ height: '40px', marginRight: '10px' }} />
-          <span className="d-none d-lg-inline">ALIZAIB ORPHAN HOME</span>
+          <span className="d-none d-lg-inline">ALI ZAIB ORPHAN HOME</span>
         </Link>
 
         <button

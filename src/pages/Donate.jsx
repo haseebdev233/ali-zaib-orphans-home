@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { ref as databaseRef, push, set, serverTimestamp } from 'firebase/database';
-import { ref as storageRef, uploadBytesResumable, getDownloadURL, getStorage } from 'firebase/storage';
 import { db } from '../firebase';
 import { toast } from 'react-toastify';
 
@@ -22,11 +21,7 @@ function DonationPage() {
   const [transactionId] = useState(`DON-${Date.now().toString().slice(-8)}`);
   const [receiptData, setReceiptData] = useState(null);
   const [copiedField, setCopiedField] = useState("");
-  const [uploadedFile, setUploadedFile] = useState(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [verificationStatus, setVerificationStatus] = useState('not_verified'); // 'not_verified', 'uploading', 'verifying', 'verified', 'rejected'
-  const [verificationError, setVerificationError] = useState('');
-  const [filePreview, setFilePreview] = useState(null);
+
 
   // Set initial step based on navigation state
   useEffect(() => {
@@ -130,7 +125,21 @@ Please guide me for the next steps.`;
 
       toast.success('Donation record saved successfully!');
       setIsProcessing(false);
-      setStep(4); // Now step 4 is Payment Verification
+
+      // Open WhatsApp with message
+      const whatsappMessage = `Assalam-o-Alaikum! I have made a donation of ${formatCurrency(selectedAmount)} to Ali Zaib Orphan Home.
+
+Reference: ${referenceNumber}
+Name: ${donorInfo.anonymous ? 'Anonymous' : donorInfo.name}
+Phone: ${donorInfo.phone || 'Not provided'}
+Email: ${donorInfo.email || 'Not provided'}
+
+Please find the payment screenshot attached.`;
+      const whatsappUrl = `https://wa.me/923219920015?text=${encodeURIComponent(whatsappMessage)}`;
+      window.open(whatsappUrl, '_blank');
+
+      // Go directly to receipt step (step 5) to show successful payment notification
+      setStep(5);
     }).catch(error => {
       console.error('Error saving donation: ', error);
       toast.error('Failed to save donation. Please try again.');
@@ -308,6 +317,8 @@ Thank you for supporting orphan children!`;
 
     setUploadedFile(file);
     setVerificationError('');
+    setVerificationStatus('not_verified');
+    setUploadProgress(0);
 
     // Create preview for images
     if (file.type.startsWith('image/')) {
@@ -400,7 +411,7 @@ Thank you for supporting orphan children!`;
             <div className="mb-5">
               <div className="d-flex justify-content-between position-relative">
                 <div className="position-absolute top-50 start-0 end-0 h-2 bg-white bg-opacity-25" style={{ zIndex: 1 }}></div>
-                {[1, 2, 3, 4, 5].map((s) => (
+                {[1, 2, 3, 4].map((s) => (
                   <div key={s} className="position-relative" style={{ zIndex: 2 }}>
                     <button
                       className={`btn rounded-circle ${step >= s ? 'btn-primary' : 'btn-light'}`}
@@ -414,8 +425,7 @@ Thank you for supporting orphan children!`;
                       {s === 1 && 'Amount'}
                       {s === 2 && 'Details'}
                       {s === 3 && 'Transfer'}
-                      {s === 4 && 'Verify'}
-                      {s === 5 && 'Receipt'}
+                      {s === 4 && 'Receipt'}
                     </div>
                   </div>
                 ))}
@@ -622,15 +632,28 @@ Thank you for supporting orphan children!`;
                     >
                       <i className="bi bi-arrow-left me-2"></i> Back
                     </button>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="btn btn-primary btn-lg px-5"
-                      onClick={() => setStep(3)}
-                      disabled={!donorInfo.anonymous && (!donorInfo.name || !donorInfo.email || !donorInfo.phone)}
-                    >
-                      Continue to Bank Details <i className="bi bi-arrow-right ms-2"></i>
-                    </motion.button>
+                    <div className="d-flex gap-3">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="btn btn-outline-secondary"
+                        onClick={() => {
+                          handleDonorInfo('anonymous', true);
+                          setStep(3);
+                        }}
+                      >
+                        Skip <i className="bi bi-arrow-right ms-2"></i>
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="btn btn-primary btn-lg px-5"
+                        onClick={() => setStep(3)}
+                        disabled={!donorInfo.anonymous && (!donorInfo.name || !donorInfo.email || !donorInfo.phone)}
+                      >
+                        Continue to Bank Details <i className="bi bi-arrow-right ms-2"></i>
+                      </motion.button>
+                    </div>
                   </div>
                 </div>
               )}

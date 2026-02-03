@@ -116,7 +116,7 @@ function JoinUsSection() {
                 Join Us Now And Become A Supporter!
               </h1>
               
-              <p className="lead text-white-75 mb-5" style={{ 
+              <p className="lead text-success mb-5" style={{ 
                 fontSize: '1.25rem',
                 maxWidth: '700px',
                 margin: '0 auto',
@@ -256,6 +256,87 @@ function JoinUsSection() {
                   transition={{ 
                     duration: 2,
                     repeat: Infinity 
+                  }}
+                  style={{
+                    position: 'absolute',
+                    top: '-10px',
+                    left: '-10px',
+                    right: '-10px',
+                    bottom: '-10px',
+                    borderRadius: '60px',
+                    border: '2px solid rgba(255, 255, 255, 0.3)',
+                    zIndex: 0
+                  }}
+                />
+              </motion.button>
+            </motion.div>
+
+            {/* Campus Ambassador Button */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{
+                duration: 0.8,
+                delay: 0.5,
+                type: "spring",
+                stiffness: 100
+              }}
+              className="mt-4"
+            >
+              <motion.button
+                className="btn btn-lg px-5 py-4 fw-bold"
+                style={{
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
+                  border: 'none',
+                  fontSize: '1.25rem',
+                  letterSpacing: '1px',
+                  borderRadius: '50px',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  boxShadow: '0 10px 30px rgba(102, 126, 234, 0.4)',
+                  minWidth: '350px'
+                }}
+                whileHover={{
+                  scale: 1.05,
+                  boxShadow: '0 15px 40px rgba(102, 126, 234, 0.6)'
+                }}
+                whileTap={{ scale: 0.95 }}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                onClick={() => navigate('/campus-ambassador')}
+              >
+                {/* Button Glow Effect */}
+                <motion.div
+                  animate={isHovered ? { x: '100%' } : { x: '-100%' }}
+                  transition={{ duration: 0.8 }}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent)'
+                  }}
+                />
+
+                {/* Button Content */}
+                <span className="position-relative z-1">
+                  <i className="bi bi-mortarboard-fill me-3"></i>
+                  BECOME A CAMPUS AMBASSADOR
+                  <i className="bi bi-arrow-right ms-3"></i>
+                </span>
+
+                {/* Pulse Effect */}
+                <motion.span
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    opacity: [0.5, 0.8, 0.5]
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity
                   }}
                   style={{
                     position: 'absolute',

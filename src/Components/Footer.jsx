@@ -104,7 +104,7 @@ const Footer = () => {
             <ul className="list-unstyled">
               <li className="mb-3 d-flex">
                 <i className="bi bi-geo-alt-fill text-success me-3 fs-5"></i>
-                <span className="text-white hover-green">P-68 New Civil Lines Ayesha Road Near Sindbad , Faisalabad Pakistan</span>
+                <a href="https://maps.app.goo.gl/95RzoGVnVPZBbJbw9?g_st=aw" target="_blank" rel="noopener noreferrer" className="text-white hover-green text-decoration-none">P-68 New Civil Lines Ayesha Road Near Sindbad , Faisalabad Pakistan</a>
               </li>
               <li className="mb-3 d-flex">
                 <i className="bi bi-telephone-fill text-success me-3 fs-5"></i>
@@ -186,9 +186,9 @@ const Footer = () => {
               </li>
               <li className="list-inline-item mx-2">|</li>
               <li className="list-inline-item">
-                <Link to="/sitemap" className="text-white-50 text-decoration-none hover-green">
-                  Sitemap
-                </Link>
+                <a href="https://haseeb-portfolio-net.netlify.app/" target="_blank" rel="noopener noreferrer" className="text-white-50 text-decoration-none hover-green">
+                  develop by Haseeb Dev
+                </a>
               </li>
             </ul>
           </div>

@@ -1,54 +1,109 @@
 import { useState } from 'react';
 
 function Gallery() {
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedMedia, setSelectedMedia] = useState(null);
 
-  const images = [
-    { src: '/src/assets/images/hero-image/1.png', alt: 'Hero Image 1' },
-    { src: '/src/assets/images/hero-image/2.png', alt: 'Hero Image 2' },
-    { src: '/src/assets/images/hero-image/3.png', alt: 'Hero Image 3' },
-    // Add more images as needed
+  const media = [
+    // Hero images
+    { src: '/assets/images/hero-image/1.png', alt: 'Hero Image 1', type: 'image' },
+    { src: '/assets/images/hero-image/2.png', alt: 'Hero Image 2', type: 'image' },
+    { src: '/assets/images/hero-image/3.png', alt: 'Hero Image 3', type: 'image' },
+    // Gallery images
+    { src: '/assets/images/gallery/1.jpeg', alt: 'Gallery Image 1', type: 'image' },
+    { src: '/assets/images/gallery/2.jpeg', alt: 'Gallery Image 2', type: 'image' },
+    { src: '/assets/images/gallery/3.jpeg', alt: 'Gallery Image 3', type: 'image' },
+    { src: '/assets/images/gallery/4.jpeg', alt: 'Gallery Image 4', type: 'image' },
+    { src: '/assets/images/gallery/5.jpeg', alt: 'Gallery Image 5', type: 'image' },
+    { src: '/assets/images/gallery/6.jpeg', alt: 'Gallery Image 6', type: 'image' },
+    { src: '/assets/images/gallery/7.jpeg', alt: 'Gallery Image 7', type: 'image' },
+    // Join images
+    { src: '/assets/images/join-img/1.png', alt: 'Join Image 1', type: 'image' },
+    { src: '/assets/images/join-img/2.png', alt: 'Join Image 2', type: 'image' },
+    // Logo
+    { src: '/assets/images/Ali-zaib-Logo.webp', alt: 'Ali Zaib Logo', type: 'image' },
+    // Videos
+    { src: '/assets/videos/city-41.mp4', alt: 'City Video 41', type: 'video' },
+    { src: '/assets/videos/wats-1.mp4', alt: 'Wats Video 1', type: 'video' },
+    { src: '/assets/videos/wats-2.mp4', alt: 'Wats Video 2', type: 'video' },
+    { src: '/assets/videos/wats-3.mp4', alt: 'Wats Video 3', type: 'video' },
+    { src: '/assets/videos/wats-4.mp4', alt: 'Wats Video 4', type: 'video' },
+    { src: '/assets/videos/wats-5.mp4', alt: 'Wats Video 5', type: 'video' },
+    { src: '/assets/videos/wats-6.mp4', alt: 'Wats Video 6', type: 'video' },
+    { src: '/assets/videos/wats-7.mp4', alt: 'Wats Video 7', type: 'video' },
   ];
 
-  const openModal = (image) => {
-    setSelectedImage(image);
+  const openModal = (mediaItem) => {
+    setSelectedMedia(mediaItem);
   };
 
   const closeModal = () => {
-    setSelectedImage(null);
+    setSelectedMedia(null);
   };
 
   return (
     <>
       <div className="container py-5">
-        <h2 className="text-center mb-4">Gallery</h2>
+        <h2 className="text-center text-bold text-success mb-4">GALLERY</h2>
         <div className="row">
-          {images.map((image, index) => (
+          {media.map((item, index) => (
             <div key={index} className="col-12 col-sm-6 col-md-4 mb-4">
               <div className="card">
-                <img
-                  src={image.src}
-                  alt={image.alt}
-                  className="card-img-top img-fluid"
-                  style={{ height: '200px', objectFit: 'cover', cursor: 'pointer' }}
-                  onClick={() => openModal(image)}
-                />
+                {item.type === 'image' ? (
+                  <img
+                    src={item.src}
+                    alt={item.alt}
+                    className="card-img-top img-fluid"
+                    style={{ height: '200px', objectFit: 'cover', cursor: 'pointer' }}
+                    onClick={() => openModal(item)}
+                    loading="lazy"
+                    width="300"
+                    height="200"
+                  />
+                ) : (
+                  <div style={{ position: 'relative' }}>
+                    <video
+                      src={item.src}
+                      className="card-img-top"
+                      style={{ height: '200px', objectFit: 'cover', cursor: 'pointer' }}
+                      onClick={() => openModal(item)}
+                      muted
+                    />
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        color: 'white',
+                        fontSize: '48px',
+                        opacity: 0.8,
+                        pointerEvents: 'none',
+                      }}
+                    >
+                      ▶
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {selectedImage && (
+      {selectedMedia && (
         <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}>
           <div className="modal-dialog modal-lg">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">{selectedImage.alt}</h5>
+                <h5 className="modal-title">{selectedMedia.alt}</h5>
                 <button type="button" className="btn-close" onClick={closeModal}></button>
               </div>
               <div className="modal-body text-center">
-                <img src={selectedImage.src} alt={selectedImage.alt} className="img-fluid" />
+                {selectedMedia.type === 'image' ? (
+                  <img src={selectedMedia.src} alt={selectedMedia.alt} className="img-fluid" />
+                ) : (
+                  <video src={selectedMedia.src} controls className="img-fluid" />
+                )}
               </div>
             </div>
           </div>

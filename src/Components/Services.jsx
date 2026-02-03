@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 function Services() {
+  const navigate = useNavigate();
   const [selectedAmount, setSelectedAmount] = useState(500);
   const [customAmount, setCustomAmount] = useState("");
   const [isMonthly, setIsMonthly] = useState(false);
   const [donationTier, setDonationTier] = useState("basic");
   const [animatedValue, setAnimatedValue] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
 
   // Preset donation amounts
   const presetAmounts = [100, 250, 500, 1000, 2500, 5000];
@@ -92,6 +95,26 @@ function Services() {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(amount);
+  };
+
+  const handleOneTimeDonation = () => {
+    navigate('/donate', { state: { step: 3 } });
+  };
+
+  const handlePaymentOption = (option) => {
+    // Navigate to donation page with selected amount and payment step
+    navigate('/donate', {
+      state: {
+        step: 3,
+        selectedAmount: selectedAmount,
+        isMonthly: false,
+        paymentMethod: option === 'online' ? 'card' : 'jazzcash'
+      }
+    });
+  };
+
+  const handleBackToStep1 = () => {
+    setCurrentStep(1);
   };
 
   return (
@@ -269,22 +292,86 @@ function Services() {
                 </div>
 
                 {/* Donate Button */}
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="btn btn-lg w-100 py-3 rounded-pill fw-bold"
-                  style={{
-                    background: 'linear-gradient(135deg, #3498db 0%, #2c3e50 100%)',
-                    color: 'white',
-                    border: 'none',
-                    fontSize: '1.2rem',
-                    boxShadow: '0 10px 20px rgba(52, 152, 219, 0.3)'
-                  }}
-                >
-                  <i className="bi bi-heart-fill me-2"></i>
-                  {isMonthly ? 'Start Monthly Donation' : 'Make One-time Donation'}
-                  <i className="bi bi-arrow-right ms-2"></i>
-                </motion.button>
+                {currentStep === 1 && (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="btn btn-lg w-100 py-3 rounded-pill fw-bold"
+                    style={{
+                      background: 'linear-gradient(135deg, #3498db 0%, #2c3e50 100%)',
+                      color: 'white',
+                      border: 'none',
+                      fontSize: '1.2rem',
+                      boxShadow: '0 10px 20px rgba(52, 152, 219, 0.3)'
+                    }}
+                    onClick={isMonthly ? null : handleOneTimeDonation}
+                  >
+                    <i className="bi bi-heart-fill me-2"></i>
+                    {isMonthly ? 'Start Monthly Donation' : 'Make One-time Donation'}
+                    <i className="bi bi-arrow-right ms-2"></i>
+                  </motion.button>
+                )}
+
+                {/* Step 2: Payment Options */}
+                {currentStep === 2 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="text-center"
+                  >
+                    <h4 className="fw-bold mb-4" style={{ color: '#2c3e50' }}>
+                      Choose Payment Method
+                    </h4>
+                    <div className="row g-3">
+                      <div className="col-6">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="btn btn-lg w-100 py-4 rounded-3 fw-bold"
+                          style={{
+                            background: 'linear-gradient(135deg, #3498db 0%, #2c3e50 100%)',
+                            color: 'white',
+                            border: 'none',
+                            fontSize: '1.1rem',
+                            boxShadow: '0 8px 16px rgba(52, 152, 219, 0.3)'
+                          }}
+                          onClick={() => handlePaymentOption('online')}
+                        >
+                          <i className="bi bi-credit-card-fill me-2"></i>
+                          Online Payment
+                        </motion.button>
+                      </div>
+                      <div className="col-6">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="btn btn-lg w-100 py-4 rounded-3 fw-bold"
+                          style={{
+                            background: 'linear-gradient(135deg, #2c3e50 0%, #3498db 100%)',
+                            color: 'white',
+                            border: 'none',
+                            fontSize: '1.1rem',
+                            boxShadow: '0 8px 16px rgba(44, 62, 80, 0.3)'
+                          }}
+                          onClick={() => handlePaymentOption('bank')}
+                        >
+                          <i className="bi bi-bank me-2"></i>
+                          Bank Transfer
+                        </motion.button>
+                      </div>
+                    </div>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="btn btn-outline-primary mt-4"
+                      onClick={handleBackToStep1}
+                    >
+                      <i className="bi bi-arrow-left me-2"></i>
+                      Back
+                    </motion.button>
+                  </motion.div>
+                )}
               </div>
             </motion.div>
           </div>
