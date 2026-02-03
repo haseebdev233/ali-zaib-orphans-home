@@ -38,7 +38,7 @@ const Footer = () => {
                 </Link>
               </li>
               <li className="mb-2">
-                <Link to="/services" className="text-white text-decoration-none hover-green">
+                <Link to="/programs" className="text-white text-decoration-none hover-green">
                   <i className="bi bi-briefcase me-2"></i>Services
                 </Link>
               </li>
@@ -68,27 +68,27 @@ const Footer = () => {
             <ul className="list-unstyled">
               <li className="mb-3 d-flex align-items-center">
                 <div className="bg-success rounded-circle p-2 me-3">
-                  <i className="bi bi-tree-fill text-white"></i>
+                  <i className="bi bi-book text-white"></i>
                 </div>
-                <span className='hover-green'>No Pollution</span>
+                <Link to="/programs" className="text-white text-decoration-none hover-green">Free Education</Link>
               </li>
               <li className="mb-3 d-flex align-items-center">
                 <div className="bg-success rounded-circle p-2 me-3">
-                  <i className="bi bi-flower1 text-white"></i>
+                  <i className="bi bi-heart-pulse text-white"></i>
                 </div>
-                <span className='hover-green'>Afforestation</span>
+                <Link to="/programs" className="text-white text-decoration-none hover-green">Healthcare Support</Link>
               </li>
               <li className="mb-3 d-flex align-items-center">
                 <div className="bg-success rounded-circle p-2 me-3">
-                  <i className="bi bi-droplet-fill text-white"></i>
+                  <i className="bi bi-tools text-white"></i>
                 </div>
-                <span className='hover-green'>Clean Water</span>
+                <Link to="/programs" className="text-white text-decoration-none hover-green">Skill Development</Link>
               </li>
               <li className="d-flex align-items-center">
                 <div className="bg-success rounded-circle p-2 me-3">
-                  <i className="bi bi-heart-pulse-fill text-white"></i>
+                  <i className="bi bi-house-heart text-white"></i>
                 </div>
-                <span className='hover-green'>Good Health</span>
+                <Link to="/programs" className="text-white text-decoration-none hover-green">Food & Shelter</Link>
               </li>
             </ul>
           </div>
@@ -154,8 +154,14 @@ const Footer = () => {
               <a href="https://www.instagram.com/alizaiborphanhomeaashian/" target="_blank" rel="noopener noreferrer" className="text-white me-3 social-icon">
                 <i className="bi bi-instagram fs-4"></i>
               </a>
-              <a href="https://www.linkedin.com/in/ali-zaib-orphan-home-undefined-1602a03aa/" target="_blank" rel="noopener noreferrer" className="text-white social-icon">
+              <a href="https://www.linkedin.com/in/ali-zaib-orphan-home-undefined-1602a03aa/" target="_blank" rel="noopener noreferrer" className="text-white me-3 social-icon">
                 <i className="bi bi-linkedin fs-4"></i>
+              </a>
+              <a href="https://www.youtube.com/@AliZaibOrphanHome" target="_blank" rel="noopener noreferrer" className="text-white me-3 social-icon">
+                <i className="bi bi-youtube fs-4"></i>
+              </a>
+              <a href="https://www.tiktok.com/@alizaiborphanhome" target="_blank" rel="noopener noreferrer" className="text-white social-icon">
+                <i className="bi bi-tiktok fs-4"></i>
               </a>
             </div>
           </div>

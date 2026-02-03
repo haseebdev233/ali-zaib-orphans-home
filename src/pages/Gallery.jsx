@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 function Gallery() {
   const [selectedMedia, setSelectedMedia] = useState(null);
+  const [loadedImages, setLoadedImages] = useState(new Set());
 
   const media = [
     // Hero images
@@ -9,16 +10,15 @@ function Gallery() {
     { src: '/assets/images/hero-image/2.png', alt: 'Hero Image 2', type: 'image' },
     { src: '/assets/images/hero-image/3.png', alt: 'Hero Image 3', type: 'image' },
     // Gallery images
-    { src: '/assets/images/gallery/1.jpeg', alt: 'Gallery Image 1', type: 'image' },
-    { src: '/assets/images/gallery/2.jpeg', alt: 'Gallery Image 2', type: 'image' },
-    { src: '/assets/images/gallery/3.jpeg', alt: 'Gallery Image 3', type: 'image' },
-    { src: '/assets/images/gallery/4.jpeg', alt: 'Gallery Image 4', type: 'image' },
-    { src: '/assets/images/gallery/5.jpeg', alt: 'Gallery Image 5', type: 'image' },
-    { src: '/assets/images/gallery/6.jpeg', alt: 'Gallery Image 6', type: 'image' },
-    { src: '/assets/images/gallery/7.jpeg', alt: 'Gallery Image 7', type: 'image' },
+    { src: '/assets/images/1.jpeg', alt: 'Gallery Image 1', type: 'image' },
+    { src: '/assets/images/2.jpeg', alt: 'Gallery Image 2', type: 'image' },
+    { src: '/assets/images/3.jpeg', alt: 'Gallery Image 3', type: 'image' },
+    { src: '/assets/images/4.jpeg', alt: 'Gallery Image 4', type: 'image' },
+    { src: '/assets/images/5.jpeg', alt: 'Gallery Image 5', type: 'image' },
+    { src: '/assets/images/6.jpeg', alt: 'Gallery Image 6', type: 'image' },
+    { src: '/assets/images/7.jpeg', alt: 'Gallery Image 7', type: 'image' },
     // Join images
-    { src: '/assets/images/join-img/1.png', alt: 'Join Image 1', type: 'image' },
-    { src: '/assets/images/join-img/2.png', alt: 'Join Image 2', type: 'image' },
+    { src: '/assets/images/1.jpeg', alt: 'Join Image 2', type: 'image' },
     // Logo
     { src: '/assets/images/Ali-zaib-Logo.webp', alt: 'Ali Zaib Logo', type: 'image' },
     // Videos
@@ -40,6 +40,10 @@ function Gallery() {
     setSelectedMedia(null);
   };
 
+  const handleImageLoad = (index) => {
+    setLoadedImages(prev => new Set(prev).add(index));
+  };
+
   return (
     <>
       <div className="container py-5">
@@ -52,9 +56,10 @@ function Gallery() {
                   <img
                     src={item.src}
                     alt={item.alt}
-                    className="card-img-top img-fluid"
+                    className={`card-img-top img-fluid gallery-image ${loadedImages.has(index) ? 'loaded' : ''}`}
                     style={{ height: '200px', objectFit: 'cover', cursor: 'pointer' }}
                     onClick={() => openModal(item)}
+                    onLoad={() => handleImageLoad(index)}
                     loading="lazy"
                     width="300"
                     height="200"

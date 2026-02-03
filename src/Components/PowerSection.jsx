@@ -35,7 +35,7 @@ function PowerSection() {
               <div className="card-body p-4 text-center">
                 <i className="bi bi-quote fs-1 text-primary mb-3"></i>
                 <p className="card-text fst-italic">"Your support has made a real difference in the lives of these children."</p>
-                <footer className="blockquote-footer fw-bold">John Doe</footer>
+                <footer className="blockquote-footer fw-bold">Muhammad Umar</footer>
               </div>
             </div>
           </motion.div>
@@ -61,7 +61,7 @@ function PowerSection() {
               <div className="card-body p-4 text-center">
                 <i className="bi bi-quote fs-1 text-primary mb-3"></i>
                 <p className="card-text fst-italic">"I'm proud to contribute to such a worthy cause."</p>
-                <footer className="blockquote-footer fw-bold">Jane Smith</footer>
+                <footer className="blockquote-footer fw-bold">Ayesha Khan</footer>
               </div>
             </div>
           </motion.div>
@@ -87,7 +87,7 @@ function PowerSection() {
               <div className="card-body p-4 text-center">
                 <i className="bi bi-quote fs-1 text-primary mb-3"></i>
                 <p className="card-text fst-italic">"Seeing the smiles on the children's faces is priceless."</p>
-                <footer className="blockquote-footer fw-bold">Bob Johnson</footer>
+                <footer className="blockquote-footer fw-bold">Ahmed Ali</footer>
               </div>
             </div>
           </motion.div>
@@ -113,7 +113,7 @@ function PowerSection() {
               <div className="card-body p-4 text-center">
                 <i className="bi bi-quote fs-1 text-primary mb-3"></i>
                 <p className="card-text fst-italic">"Thank you for giving these kids a chance at a better future."</p>
-                <footer className="blockquote-footer fw-bold">Alice Brown</footer>
+                <footer className="blockquote-footer fw-bold">Fatima Noor</footer>
               </div>
             </div>
           </motion.div>

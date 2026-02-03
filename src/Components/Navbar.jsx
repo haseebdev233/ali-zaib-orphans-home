@@ -20,7 +20,17 @@ function Navbar() {
     { path: "/about", text: "ABOUT US" },
     { path: "/programs", text: "PROGRAMS" },
     { path: "/gallery", text: "GALLERY" },
-    { path: "/contact", text: "CONTACT" }
+    { path: "/contact", text: "CONTACT" },
+    {
+      text: "CURRENT APPEAL",
+      dropdown: [
+        { text: "Ramadan Appeal", path: "/donate" },
+        { text: "Food Appeal", path: "/donate" },
+        { text: "Education Appeal", path: "/donate" },
+        { text: "Health Appeal", path: "/donate" },
+        { text: "Winter Appeal", path: "/donate" }
+      ]
+    }
   ];
 
   return (
@@ -57,14 +67,42 @@ function Navbar() {
         <div className={`collapse navbar-collapse text-center ${isOpen ? "show" : ""}`}>
           <ul className="navbar-nav mx-auto">
             {navItems.map((item, index) => (
-              <li key={index} className="nav-item">
-                <Link
-                  className="nav-link fw-bold"
-                  to={item.path}
-                  onClick={() => setIsOpen(false)}
-                >
-                  {item.text}
-                </Link>
+              <li key={index} className={`nav-item ${item.dropdown ? 'dropdown' : ''}`}>
+                {item.dropdown ? (
+                  <>
+                    <a
+                      className="nav-link fw-bold dropdown-toggle"
+                      href="#"
+                      id={`navbarDropdown${index}`}
+                      role="button"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                    >
+                      {item.text}
+                    </a>
+                    <ul className="dropdown-menu" aria-labelledby={`navbarDropdown${index}`}>
+                      {item.dropdown.map((subItem, subIndex) => (
+                        <li key={subIndex}>
+                          <Link
+                            className="dropdown-item"
+                            to={subItem.path}
+                            onClick={() => setIsOpen(false)}
+                          >
+                            {subItem.text}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : (
+                  <Link
+                    className="nav-link fw-bold"
+                    to={item.path}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {item.text}
+                  </Link>
+                )}
               </li>
             ))}
           </ul>
@@ -96,6 +134,11 @@ const style = `
   .navbar .nav-link:hover {
     color: #198754 !important;
     text-decoration: underline !important;
+    transition: all 0.3s ease;
+  }
+  .navbar .dropdown-item:hover {
+    background-color: #f8f9fa !important;
+    color: #198754 !important;
     transition: all 0.3s ease;
   }
 `;

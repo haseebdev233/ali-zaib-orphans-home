@@ -9,12 +9,13 @@ function CampusAmbassador() {
     email: '',
     phone: '',
     university: '',
-    major: '',
+    gender: '',
     year: '',
     experience: '',
     motivation: '',
     socialMedia: '',
-    availability: ''
+    availability: '',
+    contribution: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
@@ -35,7 +36,7 @@ function CampusAmbassador() {
     setSubmitSuccess(false);
 
     // Basic validation
-    if (!formData.name || !formData.email || !formData.phone || !formData.university) {
+    if (!formData.name || !formData.email || !formData.phone || !formData.university || !formData.contribution) {
       console.log('Validation failed');
       setSubmitError('Please fill in all required fields.');
       return;
@@ -63,12 +64,13 @@ function CampusAmbassador() {
         email: '',
         phone: '',
         university: '',
-        major: '',
+        gender: '',
         year: '',
         experience: '',
         motivation: '',
         socialMedia: '',
-        availability: ''
+        availability: '',
+        contribution: ''
       });
     } catch (error) {
       console.error('Error submitting campus ambassador application: ', error);
@@ -178,7 +180,7 @@ function CampusAmbassador() {
                   </div>
 
                   <div className="col-md-6">
-                    <label htmlFor="university" className="form-label fw-bold">University/College *</label>
+                    <label htmlFor="university" className="form-label fw-bold">Institute Name</label>
                     <div className="input-group">
                       <span className="input-group-text bg-light">
                         <i className="bi bi-building"></i>
@@ -188,7 +190,7 @@ function CampusAmbassador() {
                         className="form-control"
                         id="university"
                         name="university"
-                        placeholder="University name"
+                        placeholder="Institute Name"
                         value={formData.university}
                         onChange={handleChange}
                         required
@@ -197,20 +199,23 @@ function CampusAmbassador() {
                   </div>
 
                   <div className="col-md-6">
-                    <label htmlFor="major" className="form-label fw-bold">Major/Field of Study</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="major"
-                      name="major"
-                      placeholder="e.g., Computer Science, Business"
-                      value={formData.major}
+                    <label htmlFor="gender" className="form-label fw-bold">Gender</label>
+                    <select
+                      className="form-select"
+                      id="gender"
+                      name="gender"
+                      value={formData.gender}
                       onChange={handleChange}
-                    />
+                    >
+                      <option value="">Select Gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
                   </div>
 
                   <div className="col-md-6">
-                    <label htmlFor="year" className="form-label fw-bold">Academic Year</label>
+                    <label htmlFor="year" className="form-label fw-bold">Academic Grades</label>
                     <select
                       className="form-select"
                       id="year"
@@ -218,14 +223,14 @@ function CampusAmbassador() {
                       value={formData.year}
                       onChange={handleChange}
                     >
-                      <option value="">Select year</option>
-                      <option value="1st Year">1st Year</option>
-                      <option value="2nd Year">2nd Year</option>
-                      <option value="3rd Year">3rd Year</option>
-                      <option value="4th Year">4th Year</option>
-                      <option value="5th Year">5th Year</option>
-                      <option value="Masters">Masters</option>
-                      <option value="PhD">PhD</option>
+                      <option value="">Select Semester Grade</option>
+                      <option value="A">A</option>
+                      <option value="B+">B+</option>
+                      <option value="B">B</option>
+                      <option value="C+">C+</option>
+                      <option value="C">C</option>
+                      <option value="D+">D+</option>
+                      <option value="D">D</option>
                       <option value="Other">Other</option>
                     </select>
                   </div>
@@ -287,6 +292,20 @@ function CampusAmbassador() {
                       rows="4"
                       placeholder="Share your motivation and what you hope to achieve as a campus ambassador..."
                       value={formData.motivation}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+
+                  <div className="col-12">
+                    <label htmlFor="contribution" className="form-label fw-bold">When you become an ambassador, what will you do for this orphan home? *</label>
+                    <textarea
+                      className="form-control"
+                      id="contribution"
+                      name="contribution"
+                      rows="4"
+                      placeholder="Describe your plans and contributions..."
+                      value={formData.contribution}
                       onChange={handleChange}
                       required
                     />

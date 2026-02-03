@@ -2,15 +2,15 @@ import React from 'react';
 
 function Contact() {
   const phoneNumbers = [
-    { number: '0321-9920015', label: 'Phone 1' },
-    { number: '0300-8666468', label: 'Phone 2' },
+    { number: '+92321-9920015', label: 'Phone 1' },
+    { number: '+92300-8666468', label: 'Phone 2' },
     { number: '041-8847000', label: 'Phone 3' },
   ];
 
   const locations = [
     {
-      name: 'Faisalabad Centre',
-      address: 'P-68, New Civil Line, Faisalabad',
+      name: 'Orphan Home',
+      address: 'P-68 New Civil Lines Ayesha Road Near Sindbad , Faisalabad Pakistan',
       mapLink: 'https://maps.app.goo.gl/95RzoGVnVPZBbJbw9?g_st=aw',
     },
     {
@@ -38,7 +38,7 @@ function Contact() {
       <div className="container">
         <div className="text-center mb-5">
           <h1 className="display-4 fw-bold text-primary">Contact Us</h1>
-          <p className="lead text-muted">Get in touch with Ali Zaib Foundation</p>
+          <p className="lead text-muted">Get in touch with Ali Zaib Orphan Home</p>
         </div>
 
         <div className="row g-4">

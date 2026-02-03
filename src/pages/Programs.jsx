@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import PremiumCampusAmbassadorSection from "../Components/CampusAmbassadorSection";
+import PremiumJoinUsSection from '../Components/JoinUsSection';
 
 function Programs() {
   const navigate = useNavigate();
@@ -228,6 +230,10 @@ function Programs() {
           </div>
         </motion.div>
       </div>
+
+      {/* Added Sections */}
+      <PremiumCampusAmbassadorSection />
+      <PremiumJoinUsSection />
 
       {/* Custom Styles */}
       <style>{`

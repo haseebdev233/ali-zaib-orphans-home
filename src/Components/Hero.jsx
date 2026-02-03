@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 function Hero() {
-  const images = ["/assets/images/hero-image/1.png", "/assets/images/hero-image/2.png", "/assets/images/hero-image/3.png"];
+  const images = ["/assets/images/hero-image/1.png", "/assets/images/hero-image/2.png", "/assets/images/hero-image/3.png", "/assets/images/hero-image/hadees.jpeg"];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {

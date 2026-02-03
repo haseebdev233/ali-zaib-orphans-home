@@ -1,3 +1,2 @@
-- [x] Update Hero.jsx: Change animation interval to 25 seconds (25000 ms)
-- [x] Update Hero.jsx: Modify JSX to use multiple background divs for smooth fade transitions
-- [x] Update index.css: Add CSS for hero background fade animation
+- [x] Remove the "Message from the Executive Director" section from src/pages/About.jsx
+- [x] Add the "Message from the Executive Director" section to src/pages/Home.jsx after <PremiumJoinSection />
