@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { ref, push, set, serverTimestamp } from 'firebase/database';
+import { ref as databaseRef, push, set, serverTimestamp } from 'firebase/database';
 import { db } from '../firebase';
+import { toast } from 'react-toastify';
 
 function Volunteer() {
   const [formData, setFormData] = useState({
@@ -13,6 +14,7 @@ function Volunteer() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -23,21 +25,24 @@ function Volunteer() {
   };
 
   const handleSubmit = async (e) => {
+    console.log('handleSubmit called');
     e.preventDefault();
     setSubmitError(null);
     setSubmitSuccess(false);
 
     // Basic validation
     if (!formData.name || !formData.email || !formData.phone) {
+      console.log('Validation failed');
       setSubmitError('Please fill in all required fields.');
       return;
     }
 
+    console.log('Validation passed, submitting...');
     setIsSubmitting(true);
 
     try {
       // Save to Realtime Database
-      const newRef = push(ref(db, 'volunteers'));
+      const newRef = push(databaseRef(db, 'volunteers'));
       await set(newRef, {
         ...formData,
         submittedAt: serverTimestamp(),
@@ -46,6 +51,7 @@ function Volunteer() {
 
       console.log('Volunteer application submitted with ID: ', newRef.key);
       setSubmitSuccess(true);
+      toast.success('Volunteer application submitted successfully!');
 
       // Reset form
       setFormData({
@@ -161,7 +167,7 @@ function Volunteer() {
                   ></textarea>
                 </div>
 
-                <button type="submit" className="btn btn-primary w-100" disabled={isSubmitting}>
+                <button type="button" className="btn btn-primary w-100" disabled={isSubmitting} onClick={handleSubmit}>
                   {isSubmitting ? (
                     <>
                       <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -172,6 +178,18 @@ function Volunteer() {
                   )}
                 </button>
               </form>
+
+              {submitError && (
+                <div className="alert alert-danger mt-3" role="alert">
+                  {submitError}
+                </div>
+              )}
+
+              {submitSuccess && (
+                <div className="alert alert-success mt-3" role="alert">
+                  Volunteer application submitted successfully!
+                </div>
+              )}
             </div>
           </div>
         </div>

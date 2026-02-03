@@ -1,27 +1,42 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
-import { ref, push, set, serverTimestamp } from 'firebase/database';
+import { ref as databaseRef, push, set, serverTimestamp } from 'firebase/database';
+import { ref as storageRef, uploadBytesResumable, getDownloadURL, getStorage } from 'firebase/storage';
 import { db } from '../firebase';
-
-// Initialize Stripe (replace with your publishable key)
-const stripePromise = loadStripe("pk_test_51NtY6cSEeBd7H6oK2YQ8Z8p4wJkLmN1A2bC3d4eF5g6h7i8j9k0l1m2n3o4p5q6r7s8t9u0v1w2x3y4z5");
+import { toast } from 'react-toastify';
 
 function DonationPage() {
+  const location = useLocation();
   const [step, setStep] = useState(1);
   const [selectedAmount, setSelectedAmount] = useState(500);
   const [customAmount, setCustomAmount] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("card");
   const [donorInfo, setDonorInfo] = useState({
     name: "",
     email: "",
     phone: "",
-    message: ""
+    message: "",
+    anonymous: false
   });
-  const [isMonthly, setIsMonthly] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [transactionId] = useState(`DON-${Date.now().toString().slice(-8)}`);
+  const [receiptData, setReceiptData] = useState(null);
+  const [copiedField, setCopiedField] = useState("");
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [verificationStatus, setVerificationStatus] = useState('not_verified'); // 'not_verified', 'uploading', 'verifying', 'verified', 'rejected'
+  const [verificationError, setVerificationError] = useState('');
+  const [filePreview, setFilePreview] = useState(null);
+
+  // Set initial step based on navigation state
+  useEffect(() => {
+    if (location.state?.step) {
+      setStep(location.state.step);
+    }
+    if (location.state?.selectedAmount) {
+      setSelectedAmount(location.state.selectedAmount);
+    }
+  }, [location.state]);
 
   const presetAmounts = [100, 250, 500, 1000, 2500, 5000];
 
@@ -52,20 +67,311 @@ function DonationPage() {
 
   const totalAmount = selectedAmount;
 
-  // Mock payment processing
-  const handlePayment = async () => {
-    setIsProcessing(true);
-
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    setIsProcessing(false);
-    setStep(4);
+  // Copy to clipboard function
+  const copyToClipboard = (text, fieldName) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedField(fieldName);
+      toast.success(`${fieldName} copied to clipboard!`);
+      setTimeout(() => setCopiedField(""), 2000);
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+      toast.error('Failed to copy. Please try again.');
+    });
   };
 
-  const handleJazzCashPayment = () => {
-    // In real implementation, this would redirect to JazzCash payment
-    window.open(`https://sandbox.jazzcash.com.pk/ApplicationAPI/API/Payment/DoTransaction?Amount=${selectedAmount}&ReturnURL=${window.location.origin}/thank-you`, '_blank');
+  // Generate WhatsApp message
+  const generateWhatsAppMessage = () => {
+    const reference = `DON-${donorInfo.name?.slice(0, 3).toUpperCase() || "DON"}-${Date.now().toString().slice(-6)}`;
+    const message = `Assalam-o-Alaikum! I want to donate ${formatCurrency(selectedAmount)} to Ali Zaib Orphan Home.
+
+Reference: ${reference}
+Name: ${donorInfo.anonymous ? 'Anonymous' : donorInfo.name}
+Phone: ${donorInfo.phone || 'Not provided'}
+Email: ${donorInfo.email || 'Not provided'}
+
+Please guide me for the next steps.`;
+
+    return encodeURIComponent(message);
+  };
+
+  const handleDonationSubmit = () => {
+    setIsProcessing(true);
+
+    // Generate reference number
+    const referenceNumber = `DON-${donorInfo.name?.slice(0, 3).toUpperCase() || "DON"}-${Date.now().toString().slice(-6)}`;
+
+    // Prepare donation data
+    const donationData = {
+      amount: selectedAmount,
+      donorInfo,
+      paymentMethod: 'bank_transfer',
+      status: 'pending',
+      transactionId,
+      reference: referenceNumber,
+      submittedAt: serverTimestamp(),
+      date: new Date().toISOString()
+    };
+
+    // Save to Firebase
+    const newRef = push(databaseRef(db, 'donations'));
+    set(newRef, donationData).then(() => {
+      console.log('Donation saved with ID: ', newRef.key);
+
+      // Set receipt data
+      setReceiptData({
+        ...donationData,
+        id: newRef.key,
+        date: new Date().toLocaleDateString('en-PK', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })
+      });
+
+      toast.success('Donation record saved successfully!');
+      setIsProcessing(false);
+      setStep(4); // Now step 4 is Payment Verification
+    }).catch(error => {
+      console.error('Error saving donation: ', error);
+      toast.error('Failed to save donation. Please try again.');
+      setIsProcessing(false);
+    });
+  };
+
+  // Generate receipt as text file
+  const downloadReceipt = () => {
+    if (!receiptData) return;
+    
+    const receiptContent = `
+ALI ZAIB ORPHAN HOME
+(UNDER THE PATRONAGE OF ALI ZAIB FOUNDATION)
+P-68, New Civil Line, Ayesha Road, behind Sind Bad, Faisalabad
+
+==========================================
+            DONATION RECEIPT
+==========================================
+
+Receipt No: ${receiptData.transactionId}
+Date: ${receiptData.date}
+Donor Name: ${receiptData.donorInfo.anonymous ? 'Anonymous Donor' : receiptData.donorInfo.name}
+Phone: ${receiptData.donorInfo.phone || 'Not provided'}
+Email: ${receiptData.donorInfo.email || 'Not provided'}
+
+------------------------------------------
+Amount: ${formatCurrency(receiptData.amount)}
+------------------------------------------
+
+Payment Method: Bank Transfer
+Reference Number: ${receiptData.reference}
+
+Bank Transfer Details:
+- JazzCash: 0321 9920015
+- BankIslami: 218500047820005
+- IBAN: PK73BKIP0218500047820005
+
+==========================================
+
+This is an official receipt for your donation to Ali Zaib Orphan Home.
+For any queries, contact: 0321-9920015 | 0300-8666468
+
+Thank you for your generous contribution!
+`;
+
+    const blob = new Blob([receiptContent], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Donation-Receipt-${receiptData.transactionId}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  };
+
+  // Share receipt via WhatsApp
+  const shareReceipt = () => {
+    if (!receiptData) return;
+    
+    const message = `I just donated ${formatCurrency(receiptData.amount)} to Ali Zaib Orphan Home! 
+    
+Receipt Details:
+📋 Receipt No: ${receiptData.transactionId}
+📅 Date: ${receiptData.date}
+💰 Amount: ${formatCurrency(receiptData.amount)}
+🙏 Donor: ${receiptData.donorInfo.anonymous ? 'Anonymous' : receiptData.donorInfo.name}
+📞 Contact: ${receiptData.donorInfo.phone || 'Not provided'}
+
+Thank you for supporting orphan children!`;
+
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
+  // Print receipt
+  const printReceipt = () => {
+    const printContent = `
+      <html>
+        <head>
+          <title>Donation Receipt - ${receiptData.transactionId}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .title { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+            .subtitle { font-size: 14px; color: #666; }
+            .section { margin: 20px 0; }
+            .amount {
+              font-size: 28px;
+              font-weight: bold;
+              text-align: center;
+              margin: 30px 0;
+              padding: 20px;
+              border: 2px solid #000;
+            }
+            .footer { margin-top: 40px; font-size: 12px; text-align: center; }
+            @media print {
+              body { padding: 0; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="title">ALI ZAIB ORPHAN HOME</div>
+            <div class="subtitle">(UNDER THE PATRONAGE OF ALI ZAIB FOUNDATION)</div>
+            <div class="subtitle">P-68, New Civil Line, Ayesha Road, behind Sind Bad, Faisalabad</div>
+          </div>
+
+          <div class="title" style="text-align: center; margin-bottom: 30px;">DONATION RECEIPT</div>
+
+          <div class="section">
+            <strong>Receipt No:</strong> ${receiptData.transactionId}<br>
+            <strong>Date:</strong> ${receiptData.date}<br>
+            <strong>Donor Name:</strong> ${receiptData.donorInfo.anonymous ? 'Anonymous Donor' : receiptData.donorInfo.name}<br>
+            <strong>Phone:</strong> ${receiptData.donorInfo.phone || 'Not provided'}<br>
+            <strong>Email:</strong> ${receiptData.donorInfo.email || 'Not provided'}
+          </div>
+
+          <div class="amount">
+            Amount: ${formatCurrency(receiptData.amount)}
+          </div>
+
+          <div class="section">
+            <strong>Payment Method:</strong> Bank Transfer<br>
+            <strong>Reference Number:</strong> ${receiptData.reference}
+          </div>
+
+          <div class="section">
+            <strong>Bank Transfer Details:</strong><br>
+            - JazzCash: 0321 9920015<br>
+            - BankIslami: 218500047820005<br>
+            - IBAN: PK73BKIP0218500047820005
+          </div>
+
+          <div class="footer">
+            This is an official receipt for your donation to Ali Zaib Orphan Home.<br>
+            For any queries, contact: 0321-9920015 | 0300-8666468<br><br>
+            Thank you for your generous contribution!
+          </div>
+
+          <div class="no-print" style="margin-top: 40px; text-align: center;">
+            <button onclick="window.print()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+              Print Receipt
+            </button>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.focus();
+  };
+
+  // File handling functions
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      setVerificationError('Please select a JPG, PNG, or PDF file.');
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      setVerificationError('File size must be less than 5MB.');
+      return;
+    }
+
+    setUploadedFile(file);
+    setVerificationError('');
+
+    // Create preview for images
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => setFilePreview(e.target.result);
+      reader.readAsDataURL(file);
+    } else {
+      setFilePreview(null);
+    }
+  };
+
+  const handleFileUpload = () => {
+    if (!uploadedFile) return;
+
+    setVerificationStatus('uploading');
+    setUploadProgress(0);
+
+    const fileName = `${transactionId}_${Date.now()}_${uploadedFile.name}`;
+    const storageReference = storageRef(getStorage(), `payment-proofs/${fileName}`);
+
+    const uploadTask = uploadBytesResumable(storageReference, uploadedFile);
+
+    uploadTask.on(
+      'state_changed',
+      (snapshot) => {
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setUploadProgress(progress);
+      },
+      (error) => {
+        console.error('Upload error:', error);
+        setVerificationStatus('rejected');
+        setVerificationError('Upload failed. Please try again.');
+        toast.error('Upload failed. Please try again.');
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          console.log('File available at', downloadURL);
+          setVerificationStatus('verifying');
+
+          // Simulate verification process (in real app, this would be server-side)
+          setTimeout(() => {
+            setVerificationStatus('verified');
+            toast.success('Payment proof uploaded and verified successfully!');
+
+            // Update donation record with proof URL
+            const donationRef = databaseRef(db, `donations/${receiptData.id}`);
+            set(donationRef, {
+              ...receiptData,
+              paymentProof: downloadURL,
+              verificationStatus: 'verified',
+              verifiedAt: serverTimestamp()
+            }).catch(error => {
+              console.error('Error updating donation:', error);
+            });
+          }, 2000);
+        });
+      }
+    );
+  };
+
+  const proceedToReceipt = () => {
+    if (verificationStatus === 'verified') {
+      setStep(5);
+    }
   };
 
   return (
@@ -94,7 +400,7 @@ function DonationPage() {
             <div className="mb-5">
               <div className="d-flex justify-content-between position-relative">
                 <div className="position-absolute top-50 start-0 end-0 h-2 bg-white bg-opacity-25" style={{ zIndex: 1 }}></div>
-                {[1, 2, 3, 4].map((s) => (
+                {[1, 2, 3, 4, 5].map((s) => (
                   <div key={s} className="position-relative" style={{ zIndex: 2 }}>
                     <button
                       className={`btn rounded-circle ${step >= s ? 'btn-primary' : 'btn-light'}`}
@@ -107,8 +413,9 @@ function DonationPage() {
                     <div className="position-absolute start-50 translate-middle-x mt-2 small text-white text-nowrap">
                       {s === 1 && 'Amount'}
                       {s === 2 && 'Details'}
-                      {s === 3 && 'Payment'}
-                      {s === 4 && 'Complete'}
+                      {s === 3 && 'Transfer'}
+                      {s === 4 && 'Verify'}
+                      {s === 5 && 'Receipt'}
                     </div>
                   </div>
                 ))}
@@ -159,34 +466,6 @@ function DonationPage() {
                         onChange={handleCustomAmount}
                       />
                       <span className="input-group-text bg-light border-primary">PKR</span>
-                    </div>
-                  </div>
-
-                  {/* Monthly/One-time */}
-                  <div className="mb-4">
-                    <div className="form-check form-check-inline">
-                      <input
-                        className="form-check-input"
-                        type="radio"
-                        id="oneTime"
-                        checked={!isMonthly}
-                        onChange={() => setIsMonthly(false)}
-                      />
-                      <label className="form-check-label fw-medium" htmlFor="oneTime">
-                        One-time Donation
-                      </label>
-                    </div>
-                    <div className="form-check form-check-inline">
-                      <input
-                        className="form-check-input"
-                        type="radio"
-                        id="monthly"
-                        checked={isMonthly}
-                        onChange={() => setIsMonthly(true)}
-                      />
-                      <label className="form-check-label fw-medium" htmlFor="monthly">
-                        <span className="text-success">Monthly Donation</span> (10% recurring discount)
-                      </label>
                     </div>
                   </div>
 
@@ -269,7 +548,7 @@ function DonationPage() {
                     </div>
                     
                     <div className="col-md-6">
-                      <label className="form-label fw-bold">Phone Number</label>
+                      <label className="form-label fw-bold">Phone Number *</label>
                       <div className="input-group">
                         <span className="input-group-text bg-light">
                           <i className="bi bi-telephone"></i>
@@ -280,6 +559,7 @@ function DonationPage() {
                           placeholder="+92 300 1234567"
                           value={donorInfo.phone}
                           onChange={(e) => handleDonorInfo('phone', e.target.value)}
+                          required
                         />
                       </div>
                     </div>
@@ -325,6 +605,8 @@ function DonationPage() {
                           className="form-check-input"
                           type="checkbox"
                           id="anonymous"
+                          checked={donorInfo.anonymous}
+                          onChange={(e) => handleDonorInfo('anonymous', e.target.checked)}
                         />
                         <label className="form-check-label" htmlFor="anonymous">
                           Make this donation anonymous
@@ -345,18 +627,18 @@ function DonationPage() {
                       whileTap={{ scale: 0.95 }}
                       className="btn btn-primary btn-lg px-5"
                       onClick={() => setStep(3)}
-                      disabled={!donorInfo.name || !donorInfo.email}
+                      disabled={!donorInfo.anonymous && (!donorInfo.name || !donorInfo.email || !donorInfo.phone)}
                     >
-                      Continue to Payment <i className="bi bi-arrow-right ms-2"></i>
+                      Continue to Bank Details <i className="bi bi-arrow-right ms-2"></i>
                     </motion.button>
                   </div>
                 </div>
               )}
 
-              {/* Step 3: Payment Method */}
+              {/* Step 3: Bank Transfer Details */}
               {step === 3 && (
                 <div className="card-body p-5">
-                  <h3 className="fw-bold mb-4 text-primary">Payment Method</h3>
+                  <h3 className="fw-bold mb-4 text-primary">Bank Transfer Details</h3>
                   
                   {/* Donation Summary */}
                   <div className="p-4 rounded-3 mb-4" style={{ backgroundColor: '#f8f9fa' }}>
@@ -368,179 +650,413 @@ function DonationPage() {
                           <div className="fw-bold">{formatCurrency(selectedAmount)}</div>
                         </div>
                         <div className="mb-2">
-                          <small className="text-muted">Frequency</small>
-                          <div className="fw-bold">{isMonthly ? 'Monthly' : 'One-time'}</div>
+                          <small className="text-muted">Donor</small>
+                          <div className="fw-bold">{donorInfo.anonymous ? 'Anonymous Donor' : donorInfo.name}</div>
                         </div>
                       </div>
                       <div className="col-md-6">
                         <div className="mb-2">
-                          <small className="text-muted">Donor</small>
-                          <div className="fw-bold">{donorInfo.name}</div>
+                          <small className="text-muted">Contact</small>
+                          <div className="fw-bold">{donorInfo.anonymous ? 'Anonymous' : donorInfo.email}</div>
                         </div>
                         <div className="mb-2">
-                          <small className="text-muted">Contact</small>
-                          <div className="fw-bold">{donorInfo.email}</div>
+                          <small className="text-muted">Phone</small>
+                          <div className="fw-bold">{donorInfo.anonymous ? 'Anonymous' : donorInfo.phone}</div>
                         </div>
                       </div>
                     </div>
                     <div className="border-top pt-3 mt-3">
                       <div className="d-flex justify-content-between">
-                        <span className="fw-bold">Total</span>
+                        <span className="fw-bold">Total Amount</span>
                         <span className="fw-bold fs-4 text-primary">{formatCurrency(totalAmount)}</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Payment Methods */}
+                  {/* Bank Transfer Details */}
                   <div className="mb-4">
-                    <h5 className="fw-bold mb-3">Select Payment Method</h5>
+                    <h5 className="fw-bold mb-3">
+                      <i className="bi bi-bank me-2"></i>
+                      Transfer to Our Accounts
+                    </h5>
                     
-                    <div className="row g-3">
-                      {/* Credit/Debit Card */}
-                      <div className="col-md-6">
-                        <div 
-                          className={`p-4 rounded-3 border ${paymentMethod === 'card' ? 'border-primary bg-primary bg-opacity-10' : 'border-light'}`}
-                          style={{ cursor: 'pointer' }}
-                          onClick={() => setPaymentMethod('card')}
-                        >
-                          <div className="d-flex align-items-center mb-3">
-                            <div className={`me-3 p-2 rounded ${paymentMethod === 'card' ? 'bg-primary text-white' : 'bg-light'}`}>
-                              <i className="bi bi-credit-card-2-front fs-4"></i>
-                            </div>
-                            <div>
-                              <h6 className="fw-bold mb-0">Credit/Debit Card</h6>
-                              <small className="text-muted">Visa, MasterCard, American Express</small>
-                            </div>
-                            {paymentMethod === 'card' && (
-                              <div className="ms-auto">
-                                <i className="bi bi-check-circle-fill text-primary fs-5"></i>
-                              </div>
-                            )}
-                          </div>
-                          <div className="d-flex gap-2">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" height="30" alt="Visa" />
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" height="30" alt="MasterCard" />
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/American_Express_logo_%282018%29.svg" height="30" alt="Amex" />
-                          </div>
+                    {/* JazzCash Account */}
+                    <div className="mb-4 p-4 rounded-3 border bg-white">
+                      <div className="d-flex align-items-center mb-3">
+                        <div className="me-3 p-2 rounded bg-warning text-white">
+                          <i className="bi bi-phone fs-4"></i>
+                        </div>
+                        <div>
+                          <h6 className="fw-bold mb-0">JazzCash Wallet</h6>
+                          <small className="text-muted">Mobile Wallet Transfer</small>
                         </div>
                       </div>
-
-                      {/* JazzCash */}
-                      <div className="col-md-6">
-                        <div 
-                          className={`p-4 rounded-3 border ${paymentMethod === 'jazzcash' ? 'border-primary bg-primary bg-opacity-10' : 'border-light'}`}
-                          style={{ cursor: 'pointer' }}
-                          onClick={() => setPaymentMethod('jazzcash')}
-                        >
-                          <div className="d-flex align-items-center mb-3">
-                            <div className={`me-3 p-2 rounded ${paymentMethod === 'jazzcash' ? 'bg-primary text-white' : 'bg-light'}`}>
-                              <i className="bi bi-phone fs-4"></i>
-                            </div>
-                            <div>
-                              <h6 className="fw-bold mb-0">JazzCash</h6>
-                              <small className="text-muted">Mobile Wallet & Bank Transfer</small>
-                            </div>
-                            {paymentMethod === 'jazzcash' && (
-                              <div className="ms-auto">
-                                <i className="bi bi-check-circle-fill text-primary fs-5"></i>
-                              </div>
-                            )}
-                          </div>
-                          <div className="d-flex gap-2">
-                            <img src="https://www.jazzcash.com.pk/images/jazzcash-logo.svg" height="30" alt="JazzCash" />
-                            <span className="badge bg-success">Popular in Pakistan</span>
-                          </div>
+                      
+                      <div className="mb-3">
+                        <div className="d-flex justify-content-between align-items-center mb-1">
+                          <small className="text-muted">JazzCash Number:</small>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="btn btn-sm btn-outline-warning"
+                            onClick={() => copyToClipboard('03219920015', 'JazzCash Number')}
+                          >
+                            <i className={`bi ${copiedField === 'JazzCash Number' ? 'bi-check' : 'bi-copy'} me-1`}></i>
+                            Copy
+                          </motion.button>
                         </div>
+                        <h5 className="fw-bold mb-0">0321 9920015</h5>
                       </div>
-
-                      {/* More payment methods can be added here */}
+                      
+                      <div className="mb-2">
+                        <small className="text-muted">Account Title:</small>
+                        <div className="fw-bold">Ali Zaib Orphan Home</div>
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Payment Form */}
-                  {paymentMethod === 'card' && (
-                    <Elements stripe={stripePromise}>
-                      <CardPaymentForm 
-                        amount={totalAmount}
-                        donorInfo={donorInfo}
-                        isMonthly={isMonthly}
-                        onSuccess={() => {
-                          setStep(4);
-                        }}
-                      />
-                    </Elements>
-                  )}
-
-                  {paymentMethod === 'jazzcash' && (
-                    <div className="mt-4">
-                      <div className="alert alert-info">
-                        <i className="bi bi-info-circle me-2"></i>
-                        You will be redirected to JazzCash secure payment portal
+                    {/* BankIslami Account */}
+                    <div className="mb-4 p-4 rounded-3 border bg-white">
+                      <div className="d-flex align-items-center mb-3">
+                        <div className="me-3 p-2 rounded bg-primary text-white">
+                          <i className="bi bi-bank fs-4"></i>
+                        </div>
+                        <div>
+                          <h6 className="fw-bold mb-0">BankIslami</h6>
+                          <small className="text-muted">Bank Account Transfer</small>
+                        </div>
                       </div>
-                      <div className="d-grid">
+                      
+                      <div className="mb-3">
+                        <div className="d-flex justify-content-between align-items-center mb-1">
+                          <small className="text-muted">Account Number:</small>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="btn btn-sm btn-outline-primary"
+                            onClick={() => copyToClipboard('218500047820005', 'Account Number')}
+                          >
+                            <i className={`bi ${copiedField === 'Account Number' ? 'bi-check' : 'bi-copy'} me-1`}></i>
+                            Copy
+                          </motion.button>
+                        </div>
+                        <h5 className="fw-bold mb-0">218500047820005</h5>
+                      </div>
+                      
+                      <div className="mb-3">
+                        <div className="d-flex justify-content-between align-items-center mb-1">
+                          <small className="text-muted">IBAN Number:</small>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="btn btn-sm btn-outline-primary"
+                            onClick={() => copyToClipboard('PK73BKIP0218500047820005', 'IBAN Number')}
+                          >
+                            <i className={`bi ${copiedField === 'IBAN Number' ? 'bi-check' : 'bi-copy'} me-1`}></i>
+                            Copy
+                          </motion.button>
+                        </div>
+                        <div className="fw-bold">PK73BKIP0218500047820005</div>
+                      </div>
+                      
+                      <div className="mb-2">
+                        <small className="text-muted">Account Title:</small>
+                        <div className="fw-bold">Ali Zaib Foundation (Orphan Home)</div>
+                      </div>
+                    </div>
+
+                    {/* Reference Number */}
+                    <div className="mb-4 p-4 rounded-3 border bg-light">
+                      <div className="d-flex justify-content-between align-items-center">
+                        <div>
+                          <small className="text-muted d-block">Your Reference Number:</small>
+                          <h6 className="fw-bold mb-0">
+                            DON-{donorInfo.name?.slice(0, 3).toUpperCase() || "DON"}-{Date.now().toString().slice(-6)}
+                          </h6>
+                          <small className="text-muted">Mention this reference when transferring</small>
+                        </div>
                         <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          className="btn btn-warning btn-lg"
-                          onClick={handleJazzCashPayment}
-                          disabled={isProcessing}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="btn btn-sm btn-outline-secondary"
+                          onClick={() => copyToClipboard(`DON-${donorInfo.name?.slice(0, 3).toUpperCase() || "DON"}-${Date.now().toString().slice(-6)}`, 'Reference Number')}
                         >
-                          {isProcessing ? (
-                            <>
-                              <span className="spinner-border spinner-border-sm me-2"></span>
-                              Processing...
-                            </>
-                          ) : (
-                            <>
-                              <i className="bi bi-arrow-right-circle me-2"></i>
-                              Proceed to JazzCash Payment
-                            </>
-                          )}
+                          <i className={`bi ${copiedField === 'Reference Number' ? 'bi-check' : 'bi-copy'} me-1`}></i>
+                          Copy
                         </motion.button>
                       </div>
                     </div>
-                  )}
 
-                  <div className="d-flex justify-content-between mt-4">
-                    <button
-                      className="btn btn-outline-primary"
-                      onClick={() => setStep(2)}
-                    >
-                      <i className="bi bi-arrow-left me-2"></i> Back
-                    </button>
-                    
-                    {/* Alternative: Direct Payment Button */}
-                    <button
-                      className="btn btn-outline-secondary"
-                      onClick={handlePayment}
-                      disabled={isProcessing}
-                    >
-                      {isProcessing ? 'Processing...' : 'Test Payment (Demo)'}
-                    </button>
+                    {/* Instructions */}
+                    <div className="alert alert-info">
+                      <h6 className="fw-bold mb-2">
+                        <i className="bi bi-info-circle me-2"></i>
+                        Instructions:
+                      </h6>
+                      <ol className="mb-0 ps-3">
+                        <li className="mb-2">Transfer <strong>{formatCurrency(selectedAmount)}</strong> to any of the above accounts</li>
+                        <li className="mb-2">Use the Reference Number in transaction details</li>
+                        <li className="mb-2">Take screenshot of successful transaction</li>
+                        <li>Click "I've Made the Transfer" to get your receipt</li>
+                      </ol>
+                    </div>
+
+                    {/* Contact Information */}
+                    <div className="alert alert-light">
+                      <h6 className="fw-bold mb-2">Need Help? Contact Us:</h6>
+                      <div className="row">
+                        <div className="col-md-6">
+                          <div className="mb-2">
+                            <small className="text-muted">Phone Numbers:</small>
+                            <div className="fw-bold">0321-9920015</div>
+                            <div className="fw-bold">0300-8666468</div>
+                            <div className="fw-bold">041-8847000</div>
+                          </div>
+                        </div>
+                        <div className="col-md-6">
+                          <div className="mb-2">
+                            <small className="text-muted">Address:</small>
+                            <div className="small">
+                              P-68, New Civil Line, Ayesha Road,<br />
+                              behind Sind Bad, Faisalabad
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Security Info */}
-                  <div className="mt-4 pt-4 border-top">
-                    <div className="d-flex flex-wrap gap-3 justify-content-center">
-                      <div className="d-flex align-items-center">
-                        <i className="bi bi-shield-check text-success me-2"></i>
-                        <small>256-bit SSL Secure</small>
-                      </div>
-                      <div className="d-flex align-items-center">
-                        <i className="bi bi-lock text-success me-2"></i>
-                        <small>PCI-DSS Compliant</small>
-                      </div>
-                      <div className="d-flex align-items-center">
-                        <i className="bi bi-credit-card text-success me-2"></i>
-                        <small>No Card Data Stored</small>
-                      </div>
+                  <div className="d-grid gap-3">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="btn btn-success btn-lg py-3"
+                      onClick={handleDonationSubmit}
+                      disabled={isProcessing}
+                    >
+                      {isProcessing ? (
+                        <>
+                          <span className="spinner-border spinner-border-sm me-2"></span>
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          <i className="bi bi-check-circle me-2"></i>
+                          I've Made the Transfer
+                        </>
+                      )}
+                    </motion.button>
+                    
+                    <div className="d-flex gap-2">
+                      <button
+                        className="btn btn-outline-primary flex-grow-1"
+                        onClick={() => setStep(2)}
+                      >
+                        <i className="bi bi-arrow-left me-2"></i> Back
+                      </button>
+                      
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="btn btn-outline-success flex-grow-1"
+                        onClick={() => {
+                          const whatsappUrl = `https://wa.me/923219920015?text=${generateWhatsAppMessage()}`;
+                          window.open(whatsappUrl, '_blank');
+                        }}
+                      >
+                        <i className="bi bi-whatsapp me-2"></i>
+                        Need Help?
+                      </motion.button>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Step 4: Confirmation */}
-              {step === 4 && (
+              {/* Step 4: Payment Verification */}
+              {step === 4 && receiptData && (
+                <div className="card-body p-5">
+                  <h3 className="fw-bold mb-4 text-primary">Payment Verification</h3>
+
+                  {/* Donation Summary */}
+                  <div className="p-4 rounded-3 mb-4" style={{ backgroundColor: '#f8f9fa' }}>
+                    <h5 className="fw-bold mb-3">Donation Summary</h5>
+                    <div className="row">
+                      <div className="col-md-6">
+                        <div className="mb-2">
+                          <small className="text-muted">Amount</small>
+                          <div className="fw-bold">{formatCurrency(receiptData.amount)}</div>
+                        </div>
+                        <div className="mb-2">
+                          <small className="text-muted">Reference</small>
+                          <div className="fw-bold">{receiptData.reference}</div>
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="mb-2">
+                          <small className="text-muted">Donor</small>
+                          <div className="fw-bold">{receiptData.donorInfo.anonymous ? 'Anonymous Donor' : receiptData.donorInfo.name}</div>
+                        </div>
+                        <div className="mb-2">
+                          <small className="text-muted">Transaction ID</small>
+                          <div className="fw-bold">{receiptData.transactionId}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Upload Requirements */}
+                  <div className="alert alert-info mb-4">
+                    <h6 className="fw-bold mb-2">
+                      <i className="bi bi-info-circle me-2"></i>
+                      Payment Verification Required
+                    </h6>
+                    <p className="mb-2">⚠️ Before receiving your receipt, you must upload proof of payment:</p>
+                    <div className="row">
+                      <div className="col-md-6">
+                        <strong>Upload Screenshot Requirements:</strong>
+                        <ul className="mb-0 mt-2">
+                          <li>✅ Must clearly show:</li>
+                          <ul>
+                            <li>Transaction amount (Rs {receiptData.amount})</li>
+                            <li>Reference Number used</li>
+                            <li>Date and time of transaction</li>
+                            <li>Successful transaction status</li>
+                            <li>Beneficiary account details</li>
+                          </ul>
+                        </ul>
+                      </div>
+                      <div className="col-md-6">
+                        <strong>❌ Will be rejected if:</strong>
+                        <ul className="mb-0 mt-2">
+                          <li>Screenshot is blurry or incomplete</li>
+                          <li>Amount or reference doesn't match</li>
+                          <li>Transaction shows as failed/pending</li>
+                          <li>Sensitive information is edited/blocked</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* File Upload Area */}
+                  <div className="mb-4">
+                    <label className="form-label fw-bold">Upload Payment Proof:</label>
+                    <div className="border-2 border-dashed border-primary rounded-3 p-4 text-center" style={{ minHeight: '200px' }}>
+                      {uploadedFile ? (
+                        <div>
+                          {filePreview && (
+                            <img src={filePreview} alt="Payment proof" className="img-fluid mb-3" style={{ maxHeight: '150px' }} />
+                          )}
+                          <div className="mb-3">
+                            <i className="bi bi-file-earmark-check text-success fs-1"></i>
+                            <p className="mb-1 fw-bold">{uploadedFile.name}</p>
+                            <small className="text-muted">{(uploadedFile.size / 1024 / 1024).toFixed(2)} MB</small>
+                          </div>
+                          <button
+                            className="btn btn-outline-danger btn-sm me-2"
+                            onClick={() => {
+                              setUploadedFile(null);
+                              setFilePreview(null);
+                              setVerificationError('');
+                              setVerificationStatus('not_verified');
+                            }}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ) : (
+                        <div>
+                          <i className="bi bi-cloud-upload text-primary fs-1 mb-3"></i>
+                          <p className="mb-3">Drag and drop your payment screenshot here, or click to browse</p>
+                          <input
+                            type="file"
+                            className="d-none"
+                            id="fileUpload"
+                            accept="image/jpeg,image/png,application/pdf"
+                            onChange={handleFileSelect}
+                          />
+                          <label htmlFor="fileUpload" className="btn btn-primary">
+                            <i className="bi bi-folder me-2"></i>
+                            Choose File
+                          </label>
+                          <p className="mt-2 mb-0 small text-muted">Allowed: JPG, PNG, PDF | Max: 5MB</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Upload Progress and Status */}
+                  {verificationStatus !== 'not_verified' && (
+                    <div className="mb-4">
+                      <div className="d-flex align-items-center mb-2">
+                        <div className="me-3">
+                          {verificationStatus === 'uploading' && <div className="spinner-border spinner-border-sm text-primary"></div>}
+                          {verificationStatus === 'verifying' && <i className="bi bi-hourglass-split text-warning fs-4"></i>}
+                          {verificationStatus === 'verified' && <i className="bi bi-check-circle-fill text-success fs-4"></i>}
+                          {verificationStatus === 'rejected' && <i className="bi bi-x-circle-fill text-danger fs-4"></i>}
+                        </div>
+                        <div>
+                          <div className="fw-bold">
+                            {verificationStatus === 'uploading' && 'Uploading...'}
+                            {verificationStatus === 'verifying' && 'Processing verification...'}
+                            {verificationStatus === 'verified' && 'Verification Successful!'}
+                            {verificationStatus === 'rejected' && 'Verification Failed'}
+                          </div>
+                          {verificationStatus === 'uploading' && (
+                            <div className="progress mt-2" style={{ height: '6px' }}>
+                              <div
+                                className="progress-bar bg-primary"
+                                style={{ width: `${uploadProgress}%` }}
+                              ></div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      {verificationError && (
+                        <div className="alert alert-danger mt-2">
+                          <i className="bi bi-exclamation-triangle me-2"></i>
+                          {verificationError}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="d-flex justify-content-between">
+                    <button
+                      className="btn btn-outline-primary"
+                      onClick={() => setStep(3)}
+                    >
+                      <i className="bi bi-arrow-left me-2"></i> Back
+                    </button>
+                    <div className="d-flex gap-2">
+                      {uploadedFile && verificationStatus === 'not_verified' && (
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="btn btn-primary"
+                          onClick={handleFileUpload}
+                        >
+                          <i className="bi bi-upload me-2"></i>
+                          Upload & Verify
+                        </motion.button>
+                      )}
+                      {verificationStatus === 'verified' && (
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="btn btn-success"
+                          onClick={proceedToReceipt}
+                        >
+                          <i className="bi bi-check-circle me-2"></i>
+                          Get Receipt
+                        </motion.button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 5: Receipt */}
+              {step === 5 && receiptData && (
                 <div className="card-body p-5 text-center">
                   <motion.div
                     initial={{ scale: 0 }}
@@ -553,32 +1069,37 @@ function DonationPage() {
                     </div>
                   </motion.div>
                   
-                  <h2 className="fw-bold mb-3 text-success">Thank You for Your Generous Donation!</h2>
+                  <h2 className="fw-bold mb-3 text-success">Thank You for Your Donation!</h2>
                   
                   <p className="lead mb-4">
-                    Your contribution of <span className="fw-bold text-primary">{formatCurrency(totalAmount)}</span> will make a significant difference in the lives of our children.
+                    Your contribution of <span className="fw-bold text-primary">{formatCurrency(receiptData.amount)}</span> will help orphan children in need.
                   </p>
                   
+                  {/* Receipt Preview */}
                   <div className="row g-4 mb-4">
                     <div className="col-md-6">
                       <div className="p-4 rounded-3 border">
                         <h6 className="fw-bold mb-3">Donation Details</h6>
                         <div className="text-start">
                           <div className="mb-2">
-                            <small className="text-muted">Transaction ID</small>
-                            <div className="fw-bold">{transactionId}</div>
+                            <small className="text-muted">Receipt No:</small>
+                            <div className="fw-bold">{receiptData.transactionId}</div>
                           </div>
                           <div className="mb-2">
-                            <small className="text-muted">Amount</small>
-                            <div className="fw-bold">{formatCurrency(totalAmount)}</div>
+                            <small className="text-muted">Date:</small>
+                            <div className="fw-bold">{receiptData.date}</div>
                           </div>
                           <div className="mb-2">
-                            <small className="text-muted">Date</small>
-                            <div className="fw-bold">{new Date().toLocaleDateString()}</div>
+                            <small className="text-muted">Amount:</small>
+                            <div className="fw-bold">{formatCurrency(receiptData.amount)}</div>
                           </div>
                           <div className="mb-2">
-                            <small className="text-muted">Payment Method</small>
-                            <div className="fw-bold text-capitalize">{paymentMethod}</div>
+                            <small className="text-muted">Donor:</small>
+                            <div className="fw-bold">{receiptData.donorInfo.anonymous ? 'Anonymous Donor' : receiptData.donorInfo.name}</div>
+                          </div>
+                          <div className="mb-2">
+                            <small className="text-muted">Reference:</small>
+                            <div className="fw-bold">{receiptData.reference}</div>
                           </div>
                         </div>
                       </div>
@@ -586,45 +1107,87 @@ function DonationPage() {
                     
                     <div className="col-md-6">
                       <div className="p-4 rounded-3 border">
-                        <h6 className="fw-bold mb-3">Next Steps</h6>
-                        <ul className="text-start">
-                          <li className="mb-2">
-                            <i className="bi bi-envelope-check text-primary me-2"></i>
-                            Receipt sent to {donorInfo.email}
-                          </li>
-                          <li className="mb-2">
-                            <i className="bi bi-calendar-check text-primary me-2"></i>
-                            Impact report in 2 weeks
-                          </li>
-                          <li>
-                            <i className="bi bi-heart text-primary me-2"></i>
-                            Thank you certificate by email
-                          </li>
-                        </ul>
+                        <h6 className="fw-bold mb-3">Receipt Options</h6>
+                        <div className="text-start">
+                          <div className="mb-3">
+                            <i className="bi bi-file-text text-primary me-2"></i>
+                            <strong>Download Receipt</strong> as text file
+                          </div>
+                          <div className="mb-3">
+                            <i className="bi bi-printer text-info me-2"></i>
+                            <strong>Print Receipt</strong> for physical copy
+                          </div>
+                          <div className="mb-3">
+                            <i className="bi bi-whatsapp text-success me-2"></i>
+                            <strong>Share on WhatsApp</strong> with friends
+                          </div>
+                          <div>
+                            <i className="bi bi-envelope text-warning me-2"></i>
+                            <strong>Email Receipt</strong> sent to {receiptData.donorInfo.email}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="d-flex flex-wrap justify-content-center gap-3">
-                    <button className="btn btn-outline-primary">
+                  {/* Action Buttons */}
+                  <div className="d-flex flex-wrap justify-content-center gap-3 mb-4">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="btn btn-primary btn-lg px-4"
+                      onClick={downloadReceipt}
+                    >
                       <i className="bi bi-download me-2"></i>
                       Download Receipt
-                    </button>
-                    <button className="btn btn-primary">
+                    </motion.button>
+                    
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="btn btn-info btn-lg px-4"
+                      onClick={printReceipt}
+                    >
+                      <i className="bi bi-printer me-2"></i>
+                      Print Receipt
+                    </motion.button>
+                    
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="btn btn-success btn-lg px-4"
+                      onClick={shareReceipt}
+                    >
                       <i className="bi bi-share me-2"></i>
-                      Share Your Contribution
-                    </button>
-                    <button className="btn btn-success" onClick={() => window.location.reload()}>
+                      Share on WhatsApp
+                    </motion.button>
+                  </div>
+                  
+                  <div className="d-flex justify-content-center gap-3">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="btn btn-outline-primary px-4"
+                      onClick={() => {
+                        setStep(1);
+                        setSelectedAmount(500);
+                        setDonorInfo({ name: '', email: '', phone: '', message: '', anonymous: false });
+                        setReceiptData(null);
+                      }}
+                    >
                       <i className="bi bi-heart-fill me-2"></i>
                       Make Another Donation
-                    </button>
+                    </motion.button>
                   </div>
                   
                   <div className="mt-5 pt-4 border-top">
                     <p className="text-muted">
                       <i className="bi bi-info-circle me-2"></i>
-                      For any questions about your donation, contact us at donations@alizaiborphanhome.org
+                      Your donation receipt has been emailed to <strong>{receiptData.donorInfo.email}</strong>
                     </p>
+                    <div className="small text-muted">
+                      For any questions, contact us at <strong>0321-9920015</strong> or visit our office in Faisalabad
+                    </div>
                   </div>
                 </div>
               )}
@@ -635,15 +1198,15 @@ function DonationPage() {
               <div className="d-flex flex-wrap justify-content-center gap-4">
                 <div className="text-white">
                   <i className="bi bi-shield-check fs-4 me-2"></i>
-                  <span>Secure Payment</span>
+                  <span>Secure Process</span>
                 </div>
                 <div className="text-white">
-                  <i className="bi bi-lock fs-4 me-2"></i>
-                  <span>Encrypted Data</span>
+                  <i className="bi bi-receipt fs-4 me-2"></i>
+                  <span>Tax Receipt</span>
                 </div>
                 <div className="text-white">
                   <i className="bi bi-award fs-4 me-2"></i>
-                  <span>Trusted Charity</span>
+                  <span>Registered Charity</span>
                 </div>
               </div>
             </div>
@@ -654,171 +1217,9 @@ function DonationPage() {
   );
 }
 
-// Stripe Card Payment Component
-function CardPaymentForm({ amount, donorInfo, isMonthly, onSuccess }) {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [error, setError] = useState(null);
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    if (!stripe || !elements) {
-      return;
-    }
-
-    setIsProcessing(true);
-    setError(null);
-
-    try {
-      // In production, you would create a PaymentIntent on your server
-      // const { clientSecret } = await createPaymentIntent({ amount, donorInfo });
-
-      // Mock payment for demo
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Save donation data to Realtime Database
-      const donationData = {
-        amount,
-        donorInfo,
-        isMonthly,
-        paymentMethod: 'card',
-        status: 'completed',
-        transactionId: `DON-${Date.now().toString().slice(-8)}`,
-        submittedAt: serverTimestamp()
-      };
-
-      const newRef = push(ref(db, 'donations'));
-      await set(newRef, donationData);
-      console.log('Donation saved with ID: ', newRef.key);
-
-      // Simulate successful payment
-      onSuccess();
-    } catch (err) {
-      console.error('Error processing donation: ', err);
-      setError(err.message || 'Payment failed. Please try again.');
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="mt-4">
-      <div className="mb-4">
-        <label className="form-label fw-bold">Card Details</label>
-        <div className="p-3 rounded border bg-white">
-          <CardElement
-            options={{
-              style: {
-                base: {
-                  fontSize: '16px',
-                  color: '#424770',
-                  '::placeholder': {
-                    color: '#aab7c4',
-                  },
-                },
-                invalid: {
-                  color: '#9e2146',
-                },
-              },
-            }}
-          />
-        </div>
-      </div>
-
-      <div className="row g-3 mb-4">
-        <div className="col-md-6">
-          <label className="form-label fw-bold">Cardholder Name</label>
-          <input
-            type="text"
-            className="form-control"
-            placeholder="As on card"
-            defaultValue={donorInfo.name}
-            required
-          />
-        </div>
-        <div className="col-md-3">
-          <label className="form-label fw-bold">Expiry</label>
-          <input
-            type="text"
-            className="form-control"
-            placeholder="MM/YY"
-            maxLength="5"
-            required
-          />
-        </div>
-        <div className="col-md-3">
-          <label className="form-label fw-bold">CVC</label>
-          <input
-            type="text"
-            className="form-control"
-            placeholder="123"
-            maxLength="4"
-            required
-          />
-        </div>
-      </div>
-
-      {error && (
-        <div className="alert alert-danger">
-          <i className="bi bi-exclamation-triangle me-2"></i>
-          {error}
-        </div>
-      )}
-
-      <div className="d-grid">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="btn btn-primary btn-lg"
-          type="submit"
-          disabled={!stripe || isProcessing}
-        >
-          {isProcessing ? (
-            <>
-              <span className="spinner-border spinner-border-sm me-2"></span>
-              Processing Payment...
-            </>
-          ) : (
-            <>
-              <i className="bi bi-lock-fill me-2"></i>
-              Pay {new Intl.NumberFormat('en-PK', { style: 'currency', currency: 'PKR' }).format(amount)}
-            </>
-          )}
-        </motion.button>
-      </div>
-
-      <div className="text-center mt-3">
-        <small className="text-muted">
-          <i className="bi bi-lock me-1"></i>
-          Your payment is secure and encrypted
-        </small>
-      </div>
-    </form>
-  );
-}
-
 // CSS Styles
 const DonationPageStyles = () => (
   <style>{`
-    /* Custom styles for donation page */
-    .StripeElement {
-      padding: 10px 12px;
-    }
-    
-    .StripeElement--focus {
-      box-shadow: 0 1px 3px 0 #cfd7df;
-    }
-    
-    .StripeElement--invalid {
-      border-color: #fa755a;
-    }
-    
-    .StripeElement--webkit-autofill {
-      background-color: #fefde5 !important;
-    }
-    
     /* Smooth transitions */
     .card {
       transition: all 0.3s ease;
@@ -834,13 +1235,6 @@ const DonationPageStyles = () => (
       animation: stepGlow 2s infinite;
     }
     
-    /* Payment method hover effect */
-    .border-light:hover {
-      border-color: #0d6efd !important;
-      transform: translateY(-2px);
-      transition: all 0.3s ease;
-    }
-    
     /* Success animation */
     @keyframes successPulse {
       0% { transform: scale(1); }
@@ -850,6 +1244,17 @@ const DonationPageStyles = () => (
     
     .text-success i {
       animation: successPulse 2s infinite;
+    }
+    
+    /* Copy button animation */
+    @keyframes copyPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    
+    .btn-outline-primary:active {
+      animation: copyPulse 0.3s;
     }
     
     /* Responsive adjustments */
@@ -905,16 +1310,14 @@ const DonationPageStyles = () => (
       box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
     }
     
-    /* Loading animation */
-   @keyframes shimmer {
-      0% { background-position: -1000px 0; }
-      100% { background-position: 1000px 0; }
+    /* Bank details styling */
+    .bg-light.rounded {
+      transition: all 0.3s ease;
     }
     
-    .loading-shimmer {
-      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-      background-size: 1000px 100%;
-      animation: shimmer 2s infinite linear;
+    .bg-light.rounded:hover {
+      background-color: #f8f9fa !important;
+      border-color: #dee2e6 !important;
     }
   `}</style>
 );
