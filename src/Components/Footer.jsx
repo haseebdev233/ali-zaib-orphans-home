@@ -69,7 +69,7 @@ const Footer = () => {
           {/* Services Column */}
           <div className="col-lg-3 col-md-6 mb-4 mb-md-0">
             <h5 className="text-uppercase text-success mb-4">
-              <i className="bi bi-tools me-2 "></i>Services
+              <i className="bi bi-tools me-2 "></i>Services For Orphan
             </h5>
             <ul className="list-unstyled">
               <li className="mb-3 d-flex align-items-center">

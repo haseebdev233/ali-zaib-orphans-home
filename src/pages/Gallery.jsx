@@ -6,19 +6,23 @@ function Gallery() {
 
   const media = [
     // Hero images
-    { src: '/assets/images/hero-image/1.png', alt: 'Hero Image 1', type: 'image' },
+    { src: '/assets/images/hero-image/1.jpeg', alt: 'Hero Image 1', type: 'image' },
     { src: '/assets/images/hero-image/2.png', alt: 'Hero Image 2', type: 'image' },
     { src: '/assets/images/hero-image/3.png', alt: 'Hero Image 3', type: 'image' },
+    { src: '/assets/images/hero-image/4.jpeg', alt: 'Hero Image 4', type: 'image' },
+    { src: '/assets/images/hero-image/5.png', alt: 'Hero Image 5', type: 'image' },
+    { src: '/assets/images/hero-image/6.png', alt: 'Hero Image 6', type: 'image' },
+    { src: '/assets/images/hero-image/7.jpeg', alt: 'Hero Image 7', type: 'image' },
+    { src: '/assets/images/hero-image/hadees.jpeg', alt: 'Hadees Image', type: 'image' },
     // Gallery images
     { src: '/assets/images/1.jpeg', alt: 'Gallery Image 1', type: 'image' },
     { src: '/assets/images/2.jpeg', alt: 'Gallery Image 2', type: 'image' },
     { src: '/assets/images/3.jpeg', alt: 'Gallery Image 3', type: 'image' },
-    { src: '/assets/images/4.jpeg', alt: 'Gallery Image 4', type: 'image' },
     { src: '/assets/images/5.jpeg', alt: 'Gallery Image 5', type: 'image' },
     { src: '/assets/images/6.jpeg', alt: 'Gallery Image 6', type: 'image' },
     { src: '/assets/images/7.jpeg', alt: 'Gallery Image 7', type: 'image' },
-    // Join images
-    { src: '/assets/images/1.jpeg', alt: 'Join Image 2', type: 'image' },
+    // CEO image
+    { src: '/assets/ceo/ceo.png', alt: 'CEO Image', type: 'image' },
     // Logo
     { src: '/assets/images/Ali-zaib-Logo.webp', alt: 'Ali Zaib Logo', type: 'image' },
     // Videos

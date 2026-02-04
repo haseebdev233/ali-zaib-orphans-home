@@ -8,7 +8,7 @@ function About() {
       <section
         className="hero-section text-white d-flex align-items-center"
         style={{
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(/assets/images/hero-image/1.png)`,
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(/assets/images/hero-image/2.png)`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -17,7 +17,7 @@ function About() {
       >
         <div className="container text-center">
           <h1 className="display-4 fw-bold mb-4">About Ali Zaib Orphan Home</h1>
-          <p className="lead">Transforming lives and building hope for orphaned children</p>
+          <p className="lead text-center">Transforming lives and building hope for orphaned children</p>
         </div>
       </section>
 
@@ -35,9 +35,6 @@ function About() {
               <h2 className="text-success mb-4">About Us</h2>
               <p className="lead mb-4">
                 Ali Zaib Orphan Home operates under the patronage of Ali Zaib Foundation, a charitable, non-profit organization serving humanity in need since 1995. It is dedicated to nurturing orphaned and vulnerable children, providing them with a safe and supportive environment where hope and opportunity replace loss and despair.
-              </p>
-              <p className="lead">
-                Ali Zaib Orphan Home offer shelter, education, healthcare, and life skills to empower children to face the future with confidence. Beyond basic care, we focus on building emotional strength, resilience, and creativity, helping them grow into independent and compassionate individuals. Every effort is aimed at creating a space where children can dream, learn, and build meaningful lives despite the hardships they have endured.
               </p>
             </div>
           </div>

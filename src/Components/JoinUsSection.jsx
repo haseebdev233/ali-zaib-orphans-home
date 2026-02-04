@@ -116,7 +116,7 @@ function JoinUsSection() {
                 Join Us Now And Become A Supporter!
               </h1>
               
-              <p className="lead text-success mb-5" style={{ 
+              <p className="lead text-success mb-5 text-center" style={{ 
                 fontSize: '1.25rem',
                 maxWidth: '700px',
                 margin: '0 auto',

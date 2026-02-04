@@ -7,8 +7,84 @@ function JoinSection() {
     <section className="py-5 bg-light">
       <div className="container py-5">
         <div className="row align-items-center g-5">
-          
-          {/* Left Content Column */}
+
+          {/* Left Image Column */}
+          <div className="col-lg-5">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="position-relative"
+            >
+              <div style={{
+                position: 'relative',
+                borderRadius: '20px',
+                overflow: 'hidden',
+                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)'
+              }}>
+                <img
+                  src={image1}
+                  className="img-fluid w-100"
+                  alt="Children at Ali Zaib Orphan Home"
+                  style={{
+                    height: '500px',
+                    objectFit: 'cover',
+                    transition: 'transform 0.5s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'scale(1.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }}
+                />
+
+                {/* Image Overlay */}
+                <div style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  background: 'linear-gradient(transparent, rgba(0, 0, 0, 0.7))',
+                  padding: '30px',
+                  color: 'white'
+                }}>
+                  <h4 className="mb-2" style={{ fontWeight: '600' }}>
+                    Building Brighter Futures
+                  </h4>
+                  <p className="mb-0" style={{ fontSize: '0.9rem', opacity: '0.9' }}>
+                    Join us in creating lasting impact
+                  </p>
+                </div>
+              </div>
+
+              {/* Decorative Elements */}
+              <div style={{
+                position: 'absolute',
+                top: '-20px',
+                right: '-20px',
+                width: '150px',
+                height: '150px',
+                background: 'linear-gradient(45deg, rgba(30, 58, 138, 0.1) 0%, rgba(251, 191, 36, 0.1) 100%)',
+                borderRadius: '50%',
+                zIndex: -1
+              }}></div>
+
+              <div style={{
+                position: 'absolute',
+                bottom: '-15px',
+                left: '-15px',
+                width: '100px',
+                height: '100px',
+                background: 'linear-gradient(45deg, rgba(30, 58, 138, 0.05) 0%, rgba(251, 191, 36, 0.05) 100%)',
+                borderRadius: '50%',
+                zIndex: -1
+              }}></div>
+            </motion.div>
+          </div>
+
+          {/* Right Content Column */}
           <div className="col-lg-7">
             <motion.div
               initial={{ opacity: 0, x: -50 }}
@@ -23,112 +99,144 @@ function JoinSection() {
               }}>
                 We Have Power Today To Change Tomorrow!
               </h1>
-              
+
               {/* Description Text */}
-              <p className="lead mb-4" style={{ 
+              <p className="lead mb-4" style={{
                 color: '#555',
                 fontSize: '1.1rem',
                 lineHeight: '1.8'
               }}>
                 Ali Zaib Orphan Home believes that every child deserves a secure childhood and a hopeful future. Our foster care system ensures emotional stability while our educational and spiritual guidance builds confidence and discipline.
               </p>
-              
-              {/* Bullet Points */}
+
+              {/* Feature Boxes */}
               <div className="row mt-5">
-                <div className="col-md-6">
-                  <motion.ul 
-                    className="list-unstyled"
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
+                <div className="col-lg-3 col-md-6 mb-4">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.3, duration: 0.5 }}
+                    className="text-center p-4 h-100"
+                    style={{
+                      backgroundColor: '#f8f9fa',
+                      borderRadius: '15px',
+                      boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
+                      border: '1px solid #e9ecef'
+                    }}
                   >
-                    <li className="mb-3 d-flex align-items-start">
-                      <div style={{
-                        minWidth: '24px',
-                        height: '24px',
-                        backgroundColor: '#fbbf24',
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginRight: '15px',
-                        marginTop: '2px'
-                      }}>
-                        <i className="bi bi-check-lg text-white" style={{ fontSize: '12px' }}></i>
-                      </div>
-                      <span style={{ color: '#333', fontSize: '1rem' }}>
-                        Loving foster mother system
-                      </span>
-                    </li>
-                    <li className="mb-3 d-flex align-items-start">
-                      <div style={{
-                        minWidth: '24px',
-                        height: '24px',
-                        backgroundColor: '#fbbf24',
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginRight: '15px',
-                        marginTop: '2px'
-                      }}>
-                        <i className="bi bi-check-lg text-white" style={{ fontSize: '12px' }}></i>
-                      </div>
-                      <span style={{ color: '#333', fontSize: '1rem' }}>
-                        Academic & Islamic tutors
-                      </span>
-                    </li>
-                  </motion.ul>
+                    <div style={{
+                      width: '50px',
+                      height: '50px',
+                      backgroundColor: '#fbbf24',
+                      borderRadius: '50%',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: '15px'
+                    }}>
+                      <i className="bi bi-book text-white" style={{ fontSize: '20px' }}></i>
+                    </div>
+                    <h5 style={{ color: '#333', fontSize: '1.1rem', fontWeight: '600' }}>
+                      Free Education
+                    </h5>
+                  </motion.div>
                 </div>
-                <div className="col-md-6">
-                  <motion.ul 
-                    className="list-unstyled"
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
+                <div className="col-lg-3 col-md-6 mb-4">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.4, duration: 0.5 }}
+                    className="text-center p-4 h-100"
+                    style={{
+                      backgroundColor: '#f8f9fa',
+                      borderRadius: '15px',
+                      boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
+                      border: '1px solid #e9ecef'
+                    }}
+                  >
+                    <div style={{
+                      width: '50px',
+                      height: '50px',
+                      backgroundColor: '#fbbf24',
+                      borderRadius: '50%',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: '15px'
+                    }}>
+                      <i className="bi bi-heart-pulse text-white" style={{ fontSize: '20px' }}></i>
+                    </div>
+                    <h5 style={{ color: '#333', fontSize: '1.1rem', fontWeight: '600' }}>
+                      Healthcare Support
+                    </h5>
+                  </motion.div>
+                </div>
+                <div className="col-lg-3 col-md-6 mb-4">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.5, duration: 0.5 }}
+                    className="text-center p-4 h-100"
+                    style={{
+                      backgroundColor: '#f8f9fa',
+                      borderRadius: '15px',
+                      boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
+                      border: '1px solid #e9ecef'
+                    }}
                   >
-                    <li className="mb-3 d-flex align-items-start">
-                      <div style={{
-                        minWidth: '24px',
-                        height: '24px',
-                        backgroundColor: '#fbbf24',
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginRight: '15px',
-                        marginTop: '2px'
-                      }}>
-                        <i className="bi bi-check-lg text-white" style={{ fontSize: '12px' }}></i>
-                      </div>
-                      <span style={{ color: '#333', fontSize: '1rem' }}>
-                        Monthly recreational trips
-                      </span>
-                    </li>
-                    <li className="mb-3 d-flex align-items-start">
-                      <div style={{
-                        minWidth: '24px',
-                        height: '24px',
-                        backgroundColor: '#fbbf24',
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginRight: '15px',
-                        marginTop: '2px'
-                      }}>
-                        <i className="bi bi-check-lg text-white" style={{ fontSize: '12px' }}></i>
-                      </div>
-                      <span style={{ color: '#333', fontSize: '1rem' }}>
-                        Safe, disciplined environment
-                      </span>
-                    </li>
-                  </motion.ul>
+                    <div style={{
+                      width: '50px',
+                      height: '50px',
+                      backgroundColor: '#fbbf24',
+                      borderRadius: '50%',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: '15px'
+                    }}>
+                      <i className="bi bi-tools text-white" style={{ fontSize: '20px' }}></i>
+                    </div>
+                    <h5 style={{ color: '#333', fontSize: '1.1rem', fontWeight: '600' }}>
+                      Skill Development
+                    </h5>
+                  </motion.div>
+                </div>
+                <div className="col-lg-3 col-md-6 mb-4">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.6, duration: 0.5 }}
+                    className="text-center p-4 h-100"
+                    style={{
+                      backgroundColor: '#f8f9fa',
+                      borderRadius: '15px',
+                      boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
+                      border: '1px solid #e9ecef'
+                    }}
+                  >
+                    <div style={{
+                      width: '50px',
+                      height: '50px',
+                      backgroundColor: '#fbbf24',
+                      borderRadius: '50%',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: '15px'
+                    }}>
+                      <i className="bi bi-house text-white" style={{ fontSize: '20px' }}></i>
+                    </div>
+                    <h5 style={{ color: '#333', fontSize: '1.1rem', fontWeight: '600' }}>
+                      Food & Shelter
+                    </h5>
+                  </motion.div>
                 </div>
               </div>
-              
+
               {/* About Us Button */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -165,83 +273,7 @@ function JoinSection() {
               </motion.div>
             </motion.div>
           </div>
-          
-          {/* Right Image Column */}
-          <div className="col-lg-5">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="position-relative"
-            >
-              <div style={{
-                position: 'relative',
-                borderRadius: '20px',
-                overflow: 'hidden',
-                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)'
-              }}>
-                <img
-                  src={image1}
-                  className="img-fluid w-100"
-                  alt="Children at Ali Zaib Orphan Home"
-                  style={{
-                    height: '500px',
-                    objectFit: 'cover',
-                    transition: 'transform 0.5s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'scale(1.05)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'scale(1)';
-                  }}
-                />
-                
-                {/* Image Overlay */}
-                <div style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  background: 'linear-gradient(transparent, rgba(0, 0, 0, 0.7))',
-                  padding: '30px',
-                  color: 'white'
-                }}>
-                  <h4 className="mb-2" style={{ fontWeight: '600' }}>
-                    Building Brighter Futures
-                  </h4>
-                  <p className="mb-0" style={{ fontSize: '0.9rem', opacity: '0.9' }}>
-                    Join us in creating lasting impact
-                  </p>
-                </div>
-              </div>
-              
-              {/* Decorative Elements */}
-              <div style={{
-                position: 'absolute',
-                top: '-20px',
-                right: '-20px',
-                width: '150px',
-                height: '150px',
-                background: 'linear-gradient(45deg, rgba(30, 58, 138, 0.1) 0%, rgba(251, 191, 36, 0.1) 100%)',
-                borderRadius: '50%',
-                zIndex: -1
-              }}></div>
 
-              <div style={{
-                position: 'absolute',
-                bottom: '-15px',
-                left: '-15px',
-                width: '100px',
-                height: '100px',
-                background: 'linear-gradient(45deg, rgba(30, 58, 138, 0.05) 0%, rgba(251, 191, 36, 0.05) 100%)',
-                borderRadius: '50%',
-                zIndex: -1
-              }}></div>
-            </motion.div>
-          </div>
-          
         </div>
       </div>
     </section>

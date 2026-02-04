@@ -85,7 +85,7 @@ function CampusAmbassadorSection() {
                 viewport={{ once: true }}
               >
                 <div className="d-flex align-items-center">
-                  <i className="bi bi-certificate text-success me-3 fs-4"></i>
+                  <i className="bi bi-award-fill text-success me-3 fs-4"></i>
                   <span>Earn Certificates</span>
                 </div>
               </motion.div>

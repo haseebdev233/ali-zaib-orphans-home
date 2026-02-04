@@ -37,6 +37,18 @@ function App() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Scroll to lower part after navigation
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.scrollTo({
+        top: window.innerHeight - 120, // Scroll to below the hero, accounting for navbar
+        behavior: 'smooth'
+      });
+    }, 100); // Small delay to ensure page is rendered
+
+    return () => clearTimeout(timer);
+  }, []);
+
   if (loading) {
     return <Loader />;
   }

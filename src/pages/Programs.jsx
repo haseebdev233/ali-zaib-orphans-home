@@ -76,9 +76,9 @@ function Programs() {
             color: '#2c3e50',
             textShadow: '2px 2px 4px rgba(0,0,0,0.1)'
           }}>
-            Our <span style={{ color: '#3498db' }}>Programs</span>
+            Our <span style={{ color: '#3498db' }}>Services</span>
           </h1>
-          <p className="lead text-muted mb-4">
+          <p className="lead text-muted text-center mb-4">
             Comprehensive support programs designed to nurture, educate, and empower orphaned children
           </p>
           <motion.div

@@ -3,9 +3,10 @@ import { motion } from 'framer-motion';
 
 function Contact() {
   const phoneNumbers = [
-    { number: '+92321-9920015', label: 'Phone 1' },
-    { number: '+92300-8666468', label: 'Phone 2' },
-    { number: '041-8847000', label: 'Phone 3' },
+    { number: '+92321-9920015', label: 'Orphan Home' },
+    { number: '+92300-8666468', label: 'Orphan Home' },
+    { number: '041-8847000', label: 'Orphan Home' },
+    { number: '+92 41 871 4848', label: 'Account Office' },
   ];
 
   const locations = [
@@ -18,6 +19,11 @@ function Contact() {
       name: 'Head Office',
       address: 'Ali Zaib Foundation, inside Faisalabad Teaching Hospital, Ghulam Muhammad Abad, Faisalabad',
       mapLink: 'https://www.google.com/maps/search/?api=1&query=Ali+Zaib+Foundation,+inside+Faisalabad+Teaching+Hospital,+Ghulam+Muhammad+Abad,+Faisalabad',
+    },
+    {
+      name: 'Account Office',
+      address: '16 Y L , Madina Town, Faisalabad',
+      mapLink: 'https://www.google.com/maps/search/16+Y+L+,+Madina+Town,+Faisalabad/@31.430014,73.0223434,12z/data=!3m1!4b1?entry=ttu&g_ep=EgoyMDI2MDIwMS4wIKXMDSoASAFQAw%3D%3D',
     },
   ];
 

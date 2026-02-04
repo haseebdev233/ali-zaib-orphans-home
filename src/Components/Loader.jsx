@@ -6,7 +6,7 @@ const Loader = () => {
     <div className="loader-overlay">
       <div className="loader-container">
         <div className="spinner"></div>
-        <p className="loader-text">Loading Ali-Zaib Orphan Home...</p>
+        <p className="loader-text">Loading Ali Zaib Orphan Home...</p>
       </div>
     </div>
   );
