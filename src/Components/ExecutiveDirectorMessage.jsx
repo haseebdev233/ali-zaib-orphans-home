@@ -26,7 +26,7 @@ function ExecutiveDirectorMessage() {
               >
                 <div className="position-relative">
                   <img
-                    src="/assets/ceo/ceo.png"
+                    src="/assets/images-webp/ceo.webp"
                     alt="Syed Shahid Ali Zaidi - Executive Director"
                     className="img-fluid shadow-lg rounded-circle"
                     style={{
@@ -36,6 +36,7 @@ function ExecutiveDirectorMessage() {
                       border: '8px solid #28a745',
                       boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
                     }}
+                    loading="lazy"
                   />
                   <div
                     className="position-absolute"

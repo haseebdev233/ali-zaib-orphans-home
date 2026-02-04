@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import image1 from "../assets/images/join-img/2.png";
+import image1 from "../assets/images-webp/2.webp";
 
 function JoinSection() {
   return (
@@ -38,6 +38,7 @@ function JoinSection() {
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = 'scale(1)';
                   }}
+                  loading="lazy"
                 />
 
                 {/* Image Overlay */}

@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 function Gallery() {
   const [selectedMedia, setSelectedMedia] = useState(null);
   const [loadedImages, setLoadedImages] = useState(new Set());
+  const [loadedVideos, setLoadedVideos] = useState(new Set());
+  const videoRefs = useRef([]);
 
   const media = [
     // Hero images
@@ -48,6 +50,29 @@ function Gallery() {
     setLoadedImages(prev => new Set(prev).add(index));
   };
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const index = parseInt(entry.target.getAttribute('data-index'));
+            if (media[index] && media[index].type === 'video') {
+              setLoadedVideos(prev => new Set(prev).add(index));
+              observer.unobserve(entry.target);
+            }
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    videoRefs.current.forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => observer.disconnect();
+  }, [media]);
+
   return (
     <>
       <div className="container py-5">
@@ -69,14 +94,20 @@ function Gallery() {
                     height="200"
                   />
                 ) : (
-                  <div style={{ position: 'relative' }}>
-                    <video
-                      src={item.src}
-                      className="card-img-top"
-                      style={{ height: '200px', objectFit: 'cover', cursor: 'pointer' }}
-                      onClick={() => openModal(item)}
-                      muted
-                    />
+                  <div style={{ position: 'relative' }} ref={(el) => (videoRefs.current[index] = el)} data-index={index}>
+                    {loadedVideos.has(index) ? (
+                      <video
+                        src={item.src}
+                        className="card-img-top"
+                        style={{ height: '200px', objectFit: 'cover', cursor: 'pointer' }}
+                        onClick={() => openModal(item)}
+                        muted
+                      />
+                    ) : (
+                      <div style={{ height: '200px', backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span>Loading...</span>
+                      </div>
+                    )}
                     <div
                       style={{
                         position: 'absolute',

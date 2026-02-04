@@ -1,8 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useEffect, useState, Suspense, lazy } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min.js";
-import "bootstrap-icons/font/bootstrap-icons.css";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -29,25 +26,11 @@ function App() {
 
   useEffect(() => {
     console.log("Ali Zaib Orphan Home Website Loaded");
-    // Simulate loading time
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 3000); // 3 seconds
-
-    return () => clearTimeout(timer);
+    // Remove artificial loading delay for better performance
+    setLoading(false);
   }, []);
 
-  // Scroll to lower part after navigation
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      window.scrollTo({
-        top: window.innerHeight - 120, // Scroll to below the hero, accounting for navbar
-        behavior: 'smooth'
-      });
-    }, 100); // Small delay to ensure page is rendered
-
-    return () => clearTimeout(timer);
-  }, []);
+  // Removed automatic scroll to prevent CLS
 
   if (loading) {
     return <Loader />;

@@ -22,7 +22,7 @@ function CampusAmbassadorSection() {
           >
             <div className="text-center">
               <img
-                src="/assets/images/hero-image/3.png"
+                src="/assets/images-webp/3.webp"
                 alt="Campus Ambassador"
                 className="img-fluid rounded shadow"
                 style={{ maxHeight: '400px' }}

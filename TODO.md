@@ -1,11 +1,30 @@
-# Donate Now Floating Button Implementation
+# Performance Optimization TODO
 
-## Completed Tasks
-- [x] Add HTML for donate floating button in App.jsx (positioned left, opposite to WhatsApp)
-- [x] Add CSS styles for donate-float class in index.css (red gradient, responsive design)
-- [x] Link button to "/donate" page
-- [x] Use heart icon (bi-heart-fill) for donate button
-- [x] Ensure responsive design for mobile devices
+## High Priority
+- [x] Remove artificial 3-second loader delay in App.jsx
+- [x] Add lazy loading for Hero images
+- [x] Add lazy loading for Gallery videos
+- [x] Preload critical assets in index.html
+- [x] Optimize images (convert to WebP, compress)
+- [x] Optimize videos (compress, lazy load)
 
-## Summary
-Successfully added a floating "Donate Now" button positioned on the bottom left (opposite to the existing WhatsApp button on the right). The button uses a red gradient color scheme, heart icon, and links to the donate page. Both buttons are fully responsive and have hover/active animations.
+## Medium Priority
+- [x] Remove or async load Bootstrap JS
+- [x] Optimize CSS (remove unused styles)
+- [x] Add service worker for caching
+- [x] Update Vite config for better chunking
+
+## Low Priority
+- [ ] Tree shake dependencies
+- [ ] Add image optimization plugin to Vite
+- [ ] Test load times after optimizations
+
+## New Performance Optimizations
+- [x] Convert images to WebP and compress using imagemin-cli
+- [x] Add lazy loading to all images in components
+- [x] Load Bootstrap CSS asynchronously
+- [x] Implement lazy loading for Hero slideshow (first 3 images preloaded, others lazy loaded)
+- [ ] Compress videos (consider using WebM or MP4 compression tools)
+- [x] Remove CLS-causing scroll behavior in App.jsx
+- [x] Update preloads in index.html
+- [x] Build and check bundle sizes (ui: 150KB, firebase: 153KB, main: 197KB - could be optimized further)

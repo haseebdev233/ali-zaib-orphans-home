@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 function Hero() {
-  const images = ["/assets/images/hero-image/1.jpeg", "/assets/images/hero-image/2.png", "/assets/images/hero-image/3.png", "/assets/images/hero-image/4.jpeg", "/assets/images/hero-image/5.png", "/assets/images/hero-image/6.png", "/assets/images/hero-image/7.jpeg"];
+  const images = ["/assets/images-webp/1.webp", "/assets/images-webp/2.webp", "/assets/images-webp/3.webp", "/assets/images-webp/4.webp", "/assets/images-webp/5.webp", "/assets/images-webp/6.webp", "/assets/images-webp/7.webp"];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const intervalRef = useRef(null);
 
@@ -11,7 +11,7 @@ function Hero() {
     if (!intervalRef.current) {
       intervalRef.current = setInterval(() => {
         setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
-      }, 3000); // Fixed interval of 2 seconds
+      }, 3000); // Fixed interval of 3 seconds
     }
 
     return () => {
@@ -21,6 +21,13 @@ function Hero() {
       }
     };
   }, [images.length]);
+
+  // Preload next image for better performance
+  useEffect(() => {
+    const nextIndex = (currentImageIndex + 1) % images.length;
+    const img = new Image();
+    img.src = images[nextIndex];
+  }, [currentImageIndex, images]);
 
   return (
     <section className="hero-section text-white d-flex align-items-center" style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>

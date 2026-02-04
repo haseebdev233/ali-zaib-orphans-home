@@ -16,9 +16,10 @@ function WhoWeAre() {
           </div>
           <div className="col-md-6">
             <img
-              src="/assets/images/hero-image/5.png"
+              src="/assets/images-webp/5.webp"
               alt="Who We Are"
               className="img-fluid rounded"
+              loading="lazy"
             />
           </div>
         </div>
