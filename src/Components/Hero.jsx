@@ -11,7 +11,7 @@ function Hero() {
     if (!intervalRef.current) {
       intervalRef.current = setInterval(() => {
         setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
-      }, 2000); // Fixed interval of 2 seconds
+      }, 3000); // Fixed interval of 2 seconds
     }
 
     return () => {
