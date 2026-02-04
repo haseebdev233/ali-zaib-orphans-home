@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import image1 from '../assets/images/hero-image/1.png';
+import heroImage from '../assets/images-webp/1.webp';
 
 function Terms() {
   return (
@@ -9,7 +9,7 @@ function Terms() {
       <section
         className="hero-section text-white d-flex align-items-center"
         style={{
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${image1})`,
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${heroImage})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',

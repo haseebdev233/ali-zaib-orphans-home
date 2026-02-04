@@ -7,11 +7,12 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
-          ui: ['bootstrap', 'framer-motion', 'react-toastify'],
-          firebase: ['firebase']
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return;
+          if (id.includes('firebase')) return 'firebase-vendor';
+          if (id.includes('react-router')) return 'router';
+          if (id.includes('bootstrap') || id.includes('framer-motion') || id.includes('react-toastify')) return 'ui';
+          if (id.includes('react-dom') || id.includes('react')) return 'react-vendor';
         }
       }
     },

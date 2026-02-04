@@ -10,20 +10,13 @@ function SponsorAnOrphan() {
     '/assets/images/1.jpeg',
     '/assets/images/2.jpeg',
     '/assets/images/3.jpeg',
-    '/assets/images/4.jpeg',
     '/assets/images/5.jpeg',
     '/assets/images/6.jpeg',
     '/assets/images/7.jpeg',
-    '/assets/images/hero-image/1.png',
-    '/assets/images/hero-image/2.png',
-    '/assets/images/hero-image/3.png',
-    '/assets/images/gallery/1.jpeg',
-    '/assets/images/gallery/2.jpeg',
-    '/assets/images/gallery/3.jpeg',
-    '/assets/images/gallery/4.jpeg',
-    '/assets/images/gallery/5.jpeg',
-    '/assets/images/gallery/6.jpeg',
-    '/assets/images/gallery/7.jpeg'
+    // Prefer WebP hero images to reduce payload
+    '/assets/images-webp/1.webp',
+    '/assets/images-webp/2.webp',
+    '/assets/images-webp/3.webp'
   ];
 
   const handleImageLoad = (index) => {
@@ -110,7 +103,7 @@ function SponsorAnOrphan() {
             </div>
             <div className="col-lg-6 text-center">
               <motion.img
-                src="/assets/images/hero-image/hadees.jpeg"
+                src="/assets/images-webp/hadees.webp"
                 alt="Hadith about orphan care"
                 className="img-fluid rounded shadow"
                 style={{ maxWidth: '300px', width: '100%' }}
@@ -118,6 +111,7 @@ function SponsorAnOrphan() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.5, duration: 0.8 }}
                 viewport={{ once: true }}
+                loading="lazy"
               />
             </div>
           </div>
@@ -160,6 +154,8 @@ function SponsorAnOrphan() {
                     style={{ height: '200px', objectFit: 'cover' }}
                     onLoad={() => handleImageLoad(index)}
                     loading="lazy"
+                    width="300"
+                    height="200"
                   />
                 </div>
               </motion.div>

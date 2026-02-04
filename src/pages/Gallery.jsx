@@ -1,4 +1,36 @@
-import { useState, useRef, useEffect } from 'react';
+﻿import { useState, useRef, useEffect } from 'react';
+
+const MEDIA = [
+  // Hero images (prefer WebP variants)
+  { src: '/assets/images-webp/1.webp', alt: 'Hero Image 1', type: 'image' },
+  { src: '/assets/images-webp/2.webp', alt: 'Hero Image 2', type: 'image' },
+  { src: '/assets/images-webp/3.webp', alt: 'Hero Image 3', type: 'image' },
+  { src: '/assets/images-webp/4.webp', alt: 'Hero Image 4', type: 'image' },
+  { src: '/assets/images-webp/5.webp', alt: 'Hero Image 5', type: 'image' },
+  { src: '/assets/images-webp/6.webp', alt: 'Hero Image 6', type: 'image' },
+  { src: '/assets/images-webp/7.webp', alt: 'Hero Image 7', type: 'image' },
+  { src: '/assets/images-webp/hadees.webp', alt: 'Hadees Image', type: 'image' },
+  // Gallery images
+  { src: '/assets/images/1.jpeg', alt: 'Gallery Image 1', type: 'image' },
+  { src: '/assets/images/2.jpeg', alt: 'Gallery Image 2', type: 'image' },
+  { src: '/assets/images/3.jpeg', alt: 'Gallery Image 3', type: 'image' },
+  { src: '/assets/images/5.jpeg', alt: 'Gallery Image 5', type: 'image' },
+  { src: '/assets/images/6.jpeg', alt: 'Gallery Image 6', type: 'image' },
+  { src: '/assets/images/7.jpeg', alt: 'Gallery Image 7', type: 'image' },
+  // CEO image (prefer WebP)
+  { src: '/assets/images-webp/ceo.webp', alt: 'CEO Image', type: 'image' },
+  // Logo
+  { src: '/assets/images/Ali-zaib-Logo.webp', alt: 'Ali Zaib Logo', type: 'image' },
+  // Videos
+  { src: '/assets/videos/city-41.mp4', alt: 'City Video 41', type: 'video' },
+  { src: '/assets/videos/wats-1.mp4', alt: 'Wats Video 1', type: 'video' },
+  { src: '/assets/videos/wats-2.mp4', alt: 'Wats Video 2', type: 'video' },
+  { src: '/assets/videos/wats-3.mp4', alt: 'Wats Video 3', type: 'video' },
+  { src: '/assets/videos/wats-4.mp4', alt: 'Wats Video 4', type: 'video' },
+  { src: '/assets/videos/wats-5.mp4', alt: 'Wats Video 5', type: 'video' },
+  { src: '/assets/videos/wats-6.mp4', alt: 'Wats Video 6', type: 'video' },
+  { src: '/assets/videos/wats-7.mp4', alt: 'Wats Video 7', type: 'video' },
+];
 
 function Gallery() {
   const [selectedMedia, setSelectedMedia] = useState(null);
@@ -6,37 +38,6 @@ function Gallery() {
   const [loadedVideos, setLoadedVideos] = useState(new Set());
   const videoRefs = useRef([]);
 
-  const media = [
-    // Hero images
-    { src: '/assets/images/hero-image/1.jpeg', alt: 'Hero Image 1', type: 'image' },
-    { src: '/assets/images/hero-image/2.png', alt: 'Hero Image 2', type: 'image' },
-    { src: '/assets/images/hero-image/3.png', alt: 'Hero Image 3', type: 'image' },
-    { src: '/assets/images/hero-image/4.jpeg', alt: 'Hero Image 4', type: 'image' },
-    { src: '/assets/images/hero-image/5.png', alt: 'Hero Image 5', type: 'image' },
-    { src: '/assets/images/hero-image/6.png', alt: 'Hero Image 6', type: 'image' },
-    { src: '/assets/images/hero-image/7.jpeg', alt: 'Hero Image 7', type: 'image' },
-    { src: '/assets/images/hero-image/hadees.jpeg', alt: 'Hadees Image', type: 'image' },
-    // Gallery images
-    { src: '/assets/images/1.jpeg', alt: 'Gallery Image 1', type: 'image' },
-    { src: '/assets/images/2.jpeg', alt: 'Gallery Image 2', type: 'image' },
-    { src: '/assets/images/3.jpeg', alt: 'Gallery Image 3', type: 'image' },
-    { src: '/assets/images/5.jpeg', alt: 'Gallery Image 5', type: 'image' },
-    { src: '/assets/images/6.jpeg', alt: 'Gallery Image 6', type: 'image' },
-    { src: '/assets/images/7.jpeg', alt: 'Gallery Image 7', type: 'image' },
-    // CEO image
-    { src: '/assets/ceo/ceo.png', alt: 'CEO Image', type: 'image' },
-    // Logo
-    { src: '/assets/images/Ali-zaib-Logo.webp', alt: 'Ali Zaib Logo', type: 'image' },
-    // Videos
-    { src: '/assets/videos/city-41.mp4', alt: 'City Video 41', type: 'video' },
-    { src: '/assets/videos/wats-1.mp4', alt: 'Wats Video 1', type: 'video' },
-    { src: '/assets/videos/wats-2.mp4', alt: 'Wats Video 2', type: 'video' },
-    { src: '/assets/videos/wats-3.mp4', alt: 'Wats Video 3', type: 'video' },
-    { src: '/assets/videos/wats-4.mp4', alt: 'Wats Video 4', type: 'video' },
-    { src: '/assets/videos/wats-5.mp4', alt: 'Wats Video 5', type: 'video' },
-    { src: '/assets/videos/wats-6.mp4', alt: 'Wats Video 6', type: 'video' },
-    { src: '/assets/videos/wats-7.mp4', alt: 'Wats Video 7', type: 'video' },
-  ];
 
   const openModal = (mediaItem) => {
     setSelectedMedia(mediaItem);
@@ -56,7 +57,7 @@ function Gallery() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const index = parseInt(entry.target.getAttribute('data-index'));
-            if (media[index] && media[index].type === 'video') {
+            if (MEDIA[index] && MEDIA[index].type === 'video') {
               setLoadedVideos(prev => new Set(prev).add(index));
               observer.unobserve(entry.target);
             }
@@ -71,14 +72,14 @@ function Gallery() {
     });
 
     return () => observer.disconnect();
-  }, [media]);
+  }, []);
 
   return (
     <>
       <div className="container py-5">
         <h2 className="text-center text-bold text-success mb-4">GALLERY</h2>
         <div className="row">
-          {media.map((item, index) => (
+          {MEDIA.map((item, index) => (
             <div key={index} className="col-12 col-sm-6 col-md-4 mb-4">
               <div className="card">
                 {item.type === 'image' ? (
@@ -102,6 +103,7 @@ function Gallery() {
                         style={{ height: '200px', objectFit: 'cover', cursor: 'pointer' }}
                         onClick={() => openModal(item)}
                         muted
+                        preload="metadata"
                       />
                     ) : (
                       <div style={{ height: '200px', backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -154,3 +156,4 @@ function Gallery() {
 }
 
 export default Gallery;
+

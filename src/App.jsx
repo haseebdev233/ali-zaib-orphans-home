@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useEffect, useState, Suspense, lazy } from "react";
+import { Suspense, lazy } from "react";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -23,20 +23,6 @@ const Terms = lazy(() => import("./pages/Terms"));
 const SponsorAnOrphan = lazy(() => import("./pages/SponsorAnOrphan"));
 
 function App() {
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    console.log("Ali Zaib Orphan Home Website Loaded");
-    // Remove artificial loading delay for better performance
-    setLoading(false);
-  }, []);
-
-  // Removed automatic scroll to prevent CLS
-
-  if (loading) {
-    return <Loader />;
-  }
-
   return (
     <Router>
 
@@ -45,19 +31,21 @@ function App() {
       <HadithHeadline />
 
       <div style={{ marginTop: "120px" }}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/programs" element={<Programs />} />
-          <Route path="/gallery" element={<Gallery />} />
-          <Route path="/donate" element={<Donate />} />
-          <Route path="/volunteer" element={<Volunteer />} />
-          <Route path="/campus-ambassador" element={<CampusAmbassador />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/sponsor-an-orphan" element={<SponsorAnOrphan />} />
-        </Routes>
+        <Suspense fallback={<Loader />}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/programs" element={<Programs />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/donate" element={<Donate />} />
+            <Route path="/volunteer" element={<Volunteer />} />
+            <Route path="/campus-ambassador" element={<CampusAmbassador />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/sponsor-an-orphan" element={<SponsorAnOrphan />} />
+          </Routes>
+        </Suspense>
       </div>
 
       <Footer />

@@ -1,40 +1,46 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
+const HERO_IMAGES = [
+  "/assets/images-webp/1.webp",
+  "/assets/images-webp/2.webp",
+  "/assets/images-webp/3.webp",
+  "/assets/images-webp/4.webp",
+  "/assets/images-webp/5.webp",
+  "/assets/images-webp/6.webp",
+  "/assets/images-webp/7.webp",
+];
+
 function Hero() {
-  const images = ["/assets/images-webp/1.webp", "/assets/images-webp/2.webp", "/assets/images-webp/3.webp", "/assets/images-webp/4.webp", "/assets/images-webp/5.webp", "/assets/images-webp/6.webp", "/assets/images-webp/7.webp"];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const intervalRef = useRef(null);
 
   useEffect(() => {
-    if (!intervalRef.current) {
-      intervalRef.current = setInterval(() => {
-        setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
-      }, 3000); // Fixed interval of 3 seconds
-    }
+    const intervalId = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % HERO_IMAGES.length);
+    }, 3000); // Fixed interval of 3 seconds
 
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
-  }, [images.length]);
+    return () => clearInterval(intervalId);
+  }, []);
 
   // Preload next image for better performance
   useEffect(() => {
-    const nextIndex = (currentImageIndex + 1) % images.length;
+    const nextIndex = (currentImageIndex + 1) % HERO_IMAGES.length;
     const img = new Image();
-    img.src = images[nextIndex];
-  }, [currentImageIndex, images]);
+    img.src = HERO_IMAGES[nextIndex];
+  }, [currentImageIndex]);
 
   return (
     <section className="hero-section text-white d-flex align-items-center" style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
       <AnimatePresence>
         <motion.img
           key={currentImageIndex}
-          src={images[currentImageIndex]}
+          src={HERO_IMAGES[currentImageIndex]}
+          alt=""
+          aria-hidden="true"
+          decoding="async"
+          fetchPriority={currentImageIndex === 0 ? "high" : "auto"}
+          loading={currentImageIndex === 0 ? "eager" : "lazy"}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
