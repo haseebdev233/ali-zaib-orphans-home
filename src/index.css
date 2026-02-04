@@ -75,6 +75,50 @@
 }
 
 /* ============================= */
+/* DONATE NOW FLOATING BUTTON */
+/* ============================= */
+
+.donate-float {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #dc3545, #c82333);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 24px;
+  text-decoration: none;
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.donate-float:hover {
+  background: linear-gradient(135deg, #c82333, #a02622);
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.6);
+}
+
+.donate-float:active {
+  transform: scale(0.95);
+}
+
+/* Responsive adjustments for donate button */
+@media (max-width: 576px) {
+  .donate-float {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+    bottom: 15px;
+    left: 15px;
+  }
+}
+
+/* ============================= */
 /* HERO SECTION BACKGROUND ANIMATION */
 /* ============================= */
 

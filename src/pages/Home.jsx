@@ -5,6 +5,7 @@ import ExecutiveDirectorMessage from "../Components/ExecutiveDirectorMessage";
 import Services from "../Components/Services";
 import PowerSection from "../Components/PowerSection";
 import WhoWeAre from "../Components/WhoWeAre";
+import ButtonsSection from "../Components/ButtonsSection";
 
 
 function Home() {
@@ -13,6 +14,7 @@ function Home() {
       <HadithHeadline />
       <Hero />
       <WhoWeAre />
+      <ButtonsSection />
       <PremiumJoinSection />
       <ExecutiveDirectorMessage />
       <Services />

@@ -11,7 +11,7 @@ function Hero() {
     if (!intervalRef.current) {
       intervalRef.current = setInterval(() => {
         setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
-      }, 5000); // Fixed interval of 5 seconds
+      }, 2000); // Fixed interval of 2 seconds
     }
 
     return () => {
@@ -28,22 +28,22 @@ function Hero() {
         <motion.img
           key={currentImageIndex}
           src={images[currentImageIndex]}
-          initial={{ scale: 1.2 }}
-          animate={{ scale: 1 }}
-          exit={{ scale: 1.2 }}
-          transition={{ duration: 5, ease: 'easeOut' }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 2, ease: 'easeOut' }}
           style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: -1 }}
         />
       </AnimatePresence>
       <div className="container text-center" style={{ position: 'relative', zIndex: 1 }}>
         <motion.h1
-          className="fw-bold display-5"
+          className="fw-bold text-danger display-5"
           style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          Make a Difference in a Child’s Life
+          ALi Zaib Orphan Home
         </motion.h1>
 
         <motion.p
@@ -53,7 +53,7 @@ function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          Ali-Zaib Orphan Home  Foundation provides care, education and support
+          Ali-Zaib Orphan Home  provides care, education and support
           for orphan children.
         </motion.p>
 
@@ -66,18 +66,6 @@ function Hero() {
           <Link to="/donate" className="btn btn-success px-4 me-3 mb-2 rounded-pill fw-bold">
             <i className="bi bi-heart-fill me-2"></i>DONATE NOW
           </Link>
-
-          <Link to="/campus-ambassador" className="btn btn-success px-4 me-3 mb-2 rounded-pill fw-bold">
-            <i className="bi bi-star-fill me-2"></i>BECOME A CAMPUS AMBASSADOR
-          </Link>
-
-          <Link to="/volunteer" className="btn btn-success px-4 me-3 mb-2 rounded-pill fw-bold">
-            <i className="bi bi-person-plus-fill me-2"></i>BECOME A VOLUNTEER
-          </Link>
-
-          <a href="https://chat.whatsapp.com/DW5GhjiufMc5Ab78m3f41z" target="_blank" rel="noopener noreferrer" className="btn btn-success px-4 rounded-pill fw-bold">
-            <i className="bi bi-whatsapp me-2"></i>Join Our WhatsApp Community
-          </a>
         </motion.div>
       </div>
     </section>

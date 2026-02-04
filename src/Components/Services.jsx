@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 function Services() {
   const [selectedAmount, setSelectedAmount] = useState(500);
@@ -40,7 +41,7 @@ function Services() {
               <div className="card border-0 shadow-lg rounded-4">
                 <div className="card-body p-5">
                   <h4 className="fw-bold mb-4 text-center" style={{ color: '#2c3e50', fontSize: '2rem' }}>
-                    What Your Donation Provides
+                    What Your Donation Provides to the Orphans
                   </h4>
                   <div className="row g-4">
                     {[
@@ -121,6 +122,42 @@ function Services() {
                   </div>
                 </div>
               </div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="text-center mt-4"
+            >
+              <Link
+                to="/donate"
+                className="btn btn-lg d-inline-flex align-items-center justify-content-center"
+                style={{
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  border: 'none',
+                  color: 'white',
+                  padding: '15px 30px',
+                  borderRadius: '50px',
+                  fontSize: '1.2rem',
+                  fontWeight: 'bold',
+                  textDecoration: 'none',
+                  boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)',
+                  transition: 'all 0.3s ease',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.transform = 'translateY(-3px)';
+                  e.target.style.boxShadow = '0 12px 35px rgba(102, 126, 234, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 8px 25px rgba(102, 126, 234, 0.3)';
+                }}
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              >
+                <i className="bi bi-heart-fill me-2"></i>
+                One Time Donation
+              </Link>
             </motion.div>
           </div>
         </div>

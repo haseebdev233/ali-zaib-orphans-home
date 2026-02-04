@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 const HadithHeadline = () => {
-  const englishText = "The Prophet (ﷺ) said, \"I and the person who looks after an orphan and provides for him, will be in Paradise like this,\" putting his index and middle fingers together Sahih al-Bukhari 6005.";
+  const englishText = "عَنْ سَهْلِ بْنِ سَعْدٍ قَالَ: قَالَ رَسُولُ اللَّهِ ﷺ: «أَنَا وَكَافِلُ اليَتِيمِ فِي الجَنَّةِ هَكَذَا» وَأَشَارَ بِالسَّبَّابَةِ وَالوَسْطَى، وَفَرَّجَ بَيْنَهُمَا. ";
   const urduText = "نبی کریم ﷺ نے فرمایا: میں اور وہ شخص جو یتیم کی دیکھ بھال کرتا ہے اور اس کی کفالت کرتا ہے، جنت میں اس طرح ہوں گے، اپنی انگلیاں ایک ساتھ ملا کر۔ صحیح البخاری 6005۔";
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -99,26 +99,6 @@ const HadithHeadline = () => {
             </span>
           </span>
         </motion.div>
-      </div>
-      
-      {/* Optional: Breaking News Icon */}
-      <div 
-        style={{
-          position: "absolute",
-          left: "15px",
-          background: "#d32f2f",
-          padding: "2px 10px",
-          borderRadius: "3px",
-          fontSize: "12px",
-          fontWeight: "bold",
-          zIndex: 10000,
-          display: "flex",
-          alignItems: "center",
-          gap: "5px"
-        }}
-      >
-        <span className="bi bi-broadcast me-1"></span>
-        HADITH
       </div>
     </section>
   );

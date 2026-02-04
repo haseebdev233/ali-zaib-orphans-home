@@ -88,6 +88,15 @@ function App() {
         <i className="bi bi-whatsapp"></i>
       </a>
 
+      {/* Donate Now Floating Button */}
+      <a
+        href="/donate"
+        className="donate-float"
+        aria-label="Donate Now"
+      >
+        <i className="bi bi-heart-fill"></i>
+      </a>
+
       {/* Toast Notifications */}
       <ToastContainer
         position="top-right"
