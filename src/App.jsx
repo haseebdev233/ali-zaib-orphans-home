@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -62,13 +62,13 @@ function App() {
       </a>
 
       {/* Donate Now Floating Button */}
-      <a
-        href="/donate"
+      <Link
+        to="/donate"
         className="donate-float"
         aria-label="Donate Now"
       >
         <i className="bi bi-heart-fill"></i> Donate Now
-      </a>
+      </Link>
 
       {/* Toast Notifications */}
       <ToastContainer
