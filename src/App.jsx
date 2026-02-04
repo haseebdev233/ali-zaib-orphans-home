@@ -5,6 +5,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import TopBar from "./Components/TopBar";
 import Navbar from "./Components/Navbar";
+import HadithHeadline from "./Components/HadithHeadline";
 import Footer from "./Components/Footer";
 import Loader from "./Components/Loader";
 
@@ -41,6 +42,7 @@ function App() {
 
       <TopBar />
       <Navbar />
+      <HadithHeadline />
 
       <div style={{ marginTop: "120px" }}>
         <Routes>

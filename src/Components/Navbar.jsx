@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import logo from '../assets/images/Ali-zaib-Logo.webp';
 
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,7 +20,7 @@ function Navbar() {
   const navItems = [
     { path: "/", text: "HOME" },
     { path: "/about", text: "ABOUT US" },
-    { path: "/programs", text: "PROGRAMS" },
+    { path: "/programs", text: "SERVICES" },
     { path: "/gallery", text: "GALLERY" },
     { path: "/contact", text: "CONTACT" },
     {
@@ -66,56 +67,76 @@ function Navbar() {
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        <div className={`collapse navbar-collapse text-center ${isOpen ? "show" : ""}`}>
-          <ul className="navbar-nav mx-auto">
-            {navItems.map((item, index) => (
-              <li key={index} className={`nav-item ${item.dropdown ? 'dropdown' : ''}`}>
-                {item.dropdown ? (
-                  <>
-                    <a
-                      className="nav-link fw-bold dropdown-toggle"
-                      href="#"
-                      id={`navbarDropdown${index}`}
-                      role="button"
-                      data-bs-toggle="dropdown"
-                      aria-expanded="false"
+        <div className={`collapse navbar-collapse ${isOpen ? "show" : ""}`}>
+          <div className="d-flex flex-column align-items-center">
+            <ul className="navbar-nav">
+              {navItems.map((item, index) => (
+                <li key={index} className={`nav-item ${item.dropdown ? 'dropdown' : ''}`}>
+                  {item.dropdown ? (
+                    <div className="dropdown">
+                      <button
+                        className="nav-link fw-bold dropdown-toggle border-0 bg-transparent"
+                        type="button"
+                        onClick={() => setDropdownOpen(!dropdownOpen)}
+                        aria-expanded={dropdownOpen}
+                      >
+                        {item.text}
+                      </button>
+                      <AnimatePresence>
+                        {dropdownOpen && (
+                          <motion.ul
+                            className="dropdown-menu show"
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.3, ease: "easeOut" }}
+                          >
+                            {item.dropdown.map((subItem, subIndex) => (
+                              <motion.li
+                                key={subIndex}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: subIndex * 0.1, duration: 0.3 }}
+                                whileHover={{ scale: 1.05, x: 5 }}
+                                whileTap={{ scale: 0.95 }}
+                              >
+                                <Link
+                                  className="dropdown-item"
+                                  to={subItem.path}
+                                  onClick={() => {
+                                    setIsOpen(false);
+                                    setDropdownOpen(false);
+                                  }}
+                                >
+                                  {subItem.text}
+                                </Link>
+                              </motion.li>
+                            ))}
+                          </motion.ul>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ) : (
+                    <Link
+                      className="nav-link fw-bold"
+                      to={item.path}
+                      onClick={() => setIsOpen(false)}
                     >
                       {item.text}
-                    </a>
-                    <ul className="dropdown-menu" aria-labelledby={`navbarDropdown${index}`}>
-                      {item.dropdown.map((subItem, subIndex) => (
-                        <li key={subIndex}>
-                          <Link
-                            className="dropdown-item"
-                            to={subItem.path}
-                            onClick={() => setIsOpen(false)}
-                          >
-                            {subItem.text}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                ) : (
-                  <Link
-                    className="nav-link fw-bold"
-                    to={item.path}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {item.text}
-                  </Link>
-                )}
-              </li>
-            ))}
-          </ul>
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ul>
 
-          <Link
-            to="/donate"
-            className="btn btn-success rounded-pill px-4 d-lg-none mt-3"
-            onClick={() => setIsOpen(false)}
-          >
-            Donate Now
-          </Link>
+            <Link
+              to="/donate"
+              className="btn btn-success rounded-pill px-4 d-lg-none mt-3"
+              onClick={() => setIsOpen(false)}
+            >
+              Donate Now
+            </Link>
+          </div>
         </div>
 
         <Link

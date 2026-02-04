@@ -1,4 +1,3 @@
-import HadithHeadline from "../Components/HadithHeadline";
 import Hero from "../Components/Hero";
 import PremiumJoinSection from "../Components/JoinSection";
 import ExecutiveDirectorMessage from "../Components/ExecutiveDirectorMessage";
@@ -11,7 +10,6 @@ import ButtonsSection from "../Components/ButtonsSection";
 function Home() {
   return (
     <>
-      <HadithHeadline />
       <Hero />
       <WhoWeAre />
       <ButtonsSection />
