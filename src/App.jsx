@@ -77,7 +77,7 @@ function App() {
         className="donate-float"
         aria-label="Donate Now"
       >
-        <i className="bi bi-heart-fill"></i>
+        <i className="bi bi-heart-fill"></i> Donate Now
       </a>
 
       {/* Toast Notifications */}

@@ -82,24 +82,28 @@
   position: fixed;
   bottom: 20px;
   left: 20px;
-  width: 60px;
+  width: auto;
+  min-width: 120px;
   height: 60px;
   background: linear-gradient(135deg, #dc3545, #c82333);
-  border-radius: 50%;
+  border-radius: 30px;
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 8px;
   color: white;
-  font-size: 24px;
+  font-size: 16px;
+  font-weight: bold;
   text-decoration: none;
   box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
   transition: all 0.3s ease;
   z-index: 1000;
+  padding: 0 15px;
 }
 
 .donate-float:hover {
   background: linear-gradient(135deg, #c82333, #a02622);
-  transform: scale(1.1);
+  transform: scale(1.05);
   box-shadow: 0 6px 20px rgba(220, 53, 69, 0.6);
 }
 
@@ -110,11 +114,12 @@
 /* Responsive adjustments for donate button */
 @media (max-width: 576px) {
   .donate-float {
-    width: 50px;
+    min-width: 100px;
     height: 50px;
-    font-size: 20px;
+    font-size: 14px;
     bottom: 15px;
     left: 15px;
+    padding: 0 10px;
   }
 }
 
