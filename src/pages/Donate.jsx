@@ -153,7 +153,7 @@ Please find the payment screenshot attached.`;
     
     const receiptContent = `
 ALI ZAIB ORPHAN HOME
-(UNDER THE PATRONAGE OF ALI ZAIB FOUNDATION)
+(UNDER THE PATRONAGE OF ALI ZAIB ORPHAN HOME)
 P-68, New Civil Line, Ayesha Road, behind Sind Bad, Faisalabad
 
 ==========================================
@@ -400,7 +400,7 @@ Thank you for supporting orphan children!`;
           <h1 className="display-4 fw-bold text-white mb-3">
             Support Our Children
           </h1>
-          <p className="lead text-white-75 mb-0">
+          <p className="lead text-white-75 text-center mb-0">
             Your donation creates lasting impact on young lives
           </p>
         </motion.div>
