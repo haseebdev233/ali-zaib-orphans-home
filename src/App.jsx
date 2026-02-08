@@ -21,14 +21,15 @@ const Contact = lazy(() => import("./pages/Contact"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const SponsorAnOrphan = lazy(() => import("./pages/SponsorAnOrphan"));
+const Zakat = lazy(() => import("./pages/Zakat"));
 
 function App() {
   return (
     <Router>
 
       <TopBar />
-      <Navbar />
       <HadithHeadline />
+      <Navbar />
 
       <div style={{ marginTop: "120px" }}>
         <Suspense fallback={<Loader />}>
@@ -44,6 +45,7 @@ function App() {
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/sponsor-an-orphan" element={<SponsorAnOrphan />} />
+            <Route path="/zakat" element={<Zakat />} />
           </Routes>
         </Suspense>
       </div>

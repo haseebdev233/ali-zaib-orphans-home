@@ -62,12 +62,12 @@ const HadithHeadline = () => {
     <section
       className="hadith-headline bg-success text-white py-2"
       style={{
-        marginTop: "20px",
+        marginTop: "0px",
         height: "40px",
         display: "flex",
         alignItems: "center",
         position: "fixed",
-        top: scrolled ? "45px" : "90px",
+        top: scrolled ? "0" : "50px",
         left: 0,
         right: 0,
         zIndex: 9999,

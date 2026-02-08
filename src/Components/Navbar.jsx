@@ -7,6 +7,7 @@ function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,6 +18,15 @@ function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
   const navItems = [
     { path: "/", text: "HOME" },
     { path: "/about", text: "ABOUT US" },
@@ -24,14 +34,10 @@ function Navbar() {
     { path: "/gallery", text: "GALLERY" },
     { path: "/contact", text: "CONTACT" },
     {
-      text: "CURRENT APPEAL",
+      text: "SUPPORT AN ORPHAN",
       dropdown: [
-        { text: "Ramadan Appeal", path: "/donate" },
-        { text: "Food Appeal", path: "/donate" },
-        { text: "Education Appeal", path: "/donate" },
-        { text: "Health Appeal", path: "/donate" },
-        { text: "Winter Appeal", path: "/donate" },
-        { text: "Sponsor an Orphan", path: "/sponsor-an-orphan" }
+        { text: "Sponsor an Orphan", path: "/sponsor-an-orphan", icon: "bi bi-person-heart me-2" },
+        { text: "Zakat for Orphans", path: "/zakat", icon: "bi bi-currency-exchange me-2" }
       ]
     }
   ];
@@ -40,7 +46,7 @@ function Navbar() {
     <motion.nav
       className="navbar navbar-expand-lg fixed-top bg-white"
       style={{
-        top: scrolled ? "0" : "50px", // top is 0 when scrolled, 50px when at top
+        top: scrolled ? "40px" : "90px", // top is 40px when scrolled, 90px when at top
         zIndex: 1050,
         boxShadow: scrolled
           ? "0 4px 15px rgba(0,0,0,0.1)"
@@ -56,7 +62,7 @@ function Navbar() {
           onClick={() => setIsOpen(false)}
         >
           <img src={logo} alt="Ali Zaib Orphan Home Logo" style={{ height: '40px', marginRight: '10px' }} />
-          <span className="d-none d-lg-inline">ALI ZAIB ORPHAN HOME</span>
+          <span className="d-none d-lg-inline">Ali ZAIB ORPHAN HOME</span>
         </Link>
 
         <button
@@ -108,6 +114,7 @@ function Navbar() {
                                     setDropdownOpen(false);
                                   }}
                                 >
+                                  <i className={subItem.icon}></i>
                                   {subItem.text}
                                 </Link>
                               </motion.li>

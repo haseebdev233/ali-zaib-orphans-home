@@ -31,6 +31,30 @@ function DonationPage() {
     if (location.state?.selectedAmount) {
       setSelectedAmount(location.state.selectedAmount);
     }
+    if (location.state?.zakatAmount) {
+      setSelectedAmount(location.state.zakatAmount);
+      setCustomAmount(location.state.zakatAmount.toString());
+      // Scroll to custom amount section after a short delay to ensure DOM is rendered
+      setTimeout(() => {
+        const customAmountInput = document.getElementById('custom-amount-input');
+        if (customAmountInput) {
+          customAmountInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          customAmountInput.focus();
+        }
+      }, 100);
+    }
+    if (location.state?.aqiqaAmount) {
+      setSelectedAmount(location.state.aqiqaAmount);
+      setCustomAmount(location.state.aqiqaAmount.toString());
+      // Scroll to custom amount section after a short delay to ensure DOM is rendered
+      setTimeout(() => {
+        const customAmountInput = document.getElementById('custom-amount-input');
+        if (customAmountInput) {
+          customAmountInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          customAmountInput.focus();
+        }
+      }, 100);
+    }
   }, [location.state]);
 
   const presetAmounts = [100, 250, 500, 1000, 2500, 5000];
@@ -469,6 +493,7 @@ Thank you for supporting orphan children!`;
                         <i className="bi bi-currency-rupee"></i>
                       </span>
                       <input
+                        id="custom-amount-input"
                         type="text"
                         className="form-control border-primary"
                         placeholder="Enter amount in PKR"

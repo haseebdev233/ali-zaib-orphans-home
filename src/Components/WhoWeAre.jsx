@@ -24,6 +24,13 @@ function WhoWeAre() {
           </div>
         </div>
       </div>
+      <style jsx>{`
+        @media (max-width: 767px) {
+          .who-we-are-section {
+            padding-bottom: 0 !important;
+          }
+        }
+      `}</style>
     </section>
   );
 }

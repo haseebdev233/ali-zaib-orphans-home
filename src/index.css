@@ -142,6 +142,17 @@
   opacity: 1;
 }
 
+/* Hero background image responsive adjustments */
+.hero-bg-img {
+  object-fit: cover;
+}
+
+@media (max-width: 768px) {
+  .hero-bg-img {
+    object-fit: contain !important;
+  }
+}
+
 /* ============================= */
 /* GALLERY IMAGE LOADING ANIMATION */
 /* ============================= */
