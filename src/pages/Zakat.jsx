@@ -18,10 +18,12 @@ const ZakatCalculatorComponent = memo(({ calculatorData, handleCalculatorChange,
         <div className="card-body">
           <div className="row g-3">
             <div className="col-md-6">
-              <label className="form-label">Cash & Bank Balances (Rs)</label>
+              <label htmlFor="cash-balance" className="form-label">Cash & Bank Balances (Rs)</label>
               <input
                 type="number"
                 className="form-control"
+                id="cash-balance"
+                name="cash"
                 value={calculatorData.cash}
                 onChange={(e) => handleCalculatorChange('cash', e.target.value)}
                 min="0"
@@ -29,10 +31,12 @@ const ZakatCalculatorComponent = memo(({ calculatorData, handleCalculatorChange,
               />
             </div>
             <div className="col-md-6">
-              <label className="form-label">Gold Weight (Tolas)</label>
+              <label htmlFor="gold-weight" className="form-label">Gold Weight (Tolas)</label>
               <input
                 type="number"
                 className="form-control"
+                id="gold-weight"
+                name="goldWeight"
                 value={calculatorData.goldWeight}
                 onChange={(e) => handleCalculatorChange('goldWeight', e.target.value)}
                 min="0"
@@ -40,10 +44,12 @@ const ZakatCalculatorComponent = memo(({ calculatorData, handleCalculatorChange,
               />
             </div>
             <div className="col-md-6">
-              <label className="form-label">Silver Weight (Tolas)</label>
+              <label htmlFor="silver-weight" className="form-label">Silver Weight (Tolas)</label>
               <input
                 type="number"
                 className="form-control"
+                id="silver-weight"
+                name="silverWeight"
                 value={calculatorData.silverWeight}
                 onChange={(e) => handleCalculatorChange('silverWeight', e.target.value)}
                 min="0"
@@ -51,10 +57,12 @@ const ZakatCalculatorComponent = memo(({ calculatorData, handleCalculatorChange,
               />
             </div>
             <div className="col-md-6">
-              <label className="form-label">Investments & Shares (Rs)</label>
+              <label htmlFor="investments-shares" className="form-label">Investments & Shares (Rs)</label>
               <input
                 type="number"
                 className="form-control"
+                id="investments-shares"
+                name="investments"
                 value={calculatorData.investments}
                 onChange={(e) => handleCalculatorChange('investments', e.target.value)}
                 min="0"
@@ -62,10 +70,12 @@ const ZakatCalculatorComponent = memo(({ calculatorData, handleCalculatorChange,
               />
             </div>
             <div className="col-md-6">
-              <label className="form-label">Business Inventory (Rs)</label>
+              <label htmlFor="business-inventory" className="form-label">Business Inventory (Rs)</label>
               <input
                 type="number"
                 className="form-control"
+                id="business-inventory"
+                name="businessInventory"
                 value={calculatorData.businessInventory}
                 onChange={(e) => handleCalculatorChange('businessInventory', e.target.value)}
                 min="0"
@@ -73,10 +83,12 @@ const ZakatCalculatorComponent = memo(({ calculatorData, handleCalculatorChange,
               />
             </div>
             <div className="col-md-6">
-              <label className="form-label">Receivables (Rs)</label>
+              <label htmlFor="receivables" className="form-label">Receivables (Rs)</label>
               <input
                 type="number"
                 className="form-control"
+                id="receivables"
+                name="receivables"
                 value={calculatorData.receivables}
                 onChange={(e) => handleCalculatorChange('receivables', e.target.value)}
                 min="0"
@@ -84,10 +96,12 @@ const ZakatCalculatorComponent = memo(({ calculatorData, handleCalculatorChange,
               />
             </div>
             <div className="col-md-6">
-              <label className="form-label">Other Assets (Rs)</label>
+              <label htmlFor="other-assets" className="form-label">Other Assets (Rs)</label>
               <input
                 type="number"
                 className="form-control"
+                id="other-assets"
+                name="otherAssets"
                 value={calculatorData.otherAssets}
                 onChange={(e) => handleCalculatorChange('otherAssets', e.target.value)}
                 min="0"
@@ -95,10 +109,12 @@ const ZakatCalculatorComponent = memo(({ calculatorData, handleCalculatorChange,
               />
             </div>
             <div className="col-md-6">
-              <label className="form-label">Debts & Liabilities (Rs)</label>
+              <label htmlFor="debts-liabilities" className="form-label">Debts & Liabilities (Rs)</label>
               <input
                 type="number"
                 className="form-control"
+                id="debts-liabilities"
+                name="debts"
                 value={calculatorData.debts}
                 onChange={(e) => handleCalculatorChange('debts', e.target.value)}
                 min="0"
