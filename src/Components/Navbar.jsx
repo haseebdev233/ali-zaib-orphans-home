@@ -55,7 +55,15 @@ function Navbar() {
           to="/"
           onClick={() => setIsOpen(false)}
         >
-          <img src={logo} alt="Ali Zaib Orphan Home Logo" style={{ height: '40px', marginRight: '10px' }} />
+          <img
+            src={logo}
+            alt="Ali Zaib Orphan Home Logo"
+            style={{ height: '40px', marginRight: '10px' }}
+            width="160"
+            height="40"
+            decoding="async"
+            loading="eager"
+          />
           <span className="d-none d-lg-inline">ALI ZAIB ORPHAN HOME (Aashiana)</span>
         </Link>
 

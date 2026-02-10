@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 function ExecutiveDirectorMessage() {
   return (
     <motion.section
-      className="py-5"
+      className="py-5 cv-auto"
       style={{
         background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
         minHeight: '80vh'
@@ -37,6 +37,9 @@ function ExecutiveDirectorMessage() {
                       boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
                     }}
                     loading="lazy"
+                    decoding="async"
+                    width="400"
+                    height="400"
                   />
                   <div
                     className="position-absolute"

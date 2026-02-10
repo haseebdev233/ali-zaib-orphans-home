@@ -4,7 +4,7 @@ import image1 from "../assets/images-webp/2.webp";
 
 function JoinSection() {
   return (
-    <section className="py-5 bg-light">
+    <section className="py-5 bg-light cv-auto">
       <div className="container py-5">
         <div className="row align-items-center g-5">
 
@@ -39,6 +39,9 @@ function JoinSection() {
                     e.currentTarget.style.transform = 'scale(1)';
                   }}
                   loading="lazy"
+                  decoding="async"
+                  width="900"
+                  height="500"
                 />
 
                 {/* Image Overlay */}

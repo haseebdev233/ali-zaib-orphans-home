@@ -18,6 +18,8 @@ function Hero() {
   const [isTouch, setIsTouch] = useState(false);
   const [isSlowConnection, setIsSlowConnection] = useState(false);
   const [isStatic, setIsStatic] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [saveData, setSaveData] = useState(false);
   const heroRef = useRef(null);
 
   // Detect screen size for mobile adjustments
@@ -42,20 +44,45 @@ function Hero() {
     if ('connection' in navigator) {
       const connection = navigator.connection;
       setIsSlowConnection(connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g');
+      setSaveData(Boolean(connection.saveData));
     }
   }, []);
 
+  // Detect reduced motion preference
+  useEffect(() => {
+    if (!window.matchMedia) return;
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    const handler = (event) => setPrefersReducedMotion(event.matches);
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handler);
+    } else {
+      mediaQuery.addListener(handler);
+    }
+    return () => {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener('change', handler);
+      } else {
+        mediaQuery.removeListener(handler);
+      }
+    };
+  }, []);
+
+  const shouldAnimate = !prefersReducedMotion && !isSlowConnection && !isStatic && !saveData;
+
   // Image cycling with adjusted interval for slow connections
   useEffect(() => {
-    const interval = isSlowConnection ? 5000 : 3000;
+    if (!shouldAnimate) return;
+    const interval = 3000;
     const intervalId = setInterval(() => {
       setCurrentImageIndex((prevIndex) => (prevIndex + 1) % HERO_IMAGES.length);
     }, interval);
     return () => clearInterval(intervalId);
-  }, [isSlowConnection]);
+  }, [shouldAnimate]);
 
   // IntersectionObserver for lazy loading (preload next image when visible)
   useEffect(() => {
+    if (!shouldAnimate) return;
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -70,11 +97,11 @@ function Hero() {
     );
     if (heroRef.current) observer.observe(heroRef.current);
     return () => observer.disconnect();
-  }, [currentImageIndex]);
+  }, [currentImageIndex, shouldAnimate]);
 
   // CSS custom properties for responsive values
   const parallaxIntensity = isMobile ? 0.5 : 1;
-  const animationDuration = isMobile ? 1 : (isSlowConnection ? 3 : 2);
+  const animationDuration = isMobile ? 1 : 2;
 
   return (
     <section
@@ -104,13 +131,56 @@ function Hero() {
           }}
         />
       )}
-      <AnimatePresence>
-        <motion.div
-          key={currentImageIndex}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: animationDuration, ease: 'easeOut' }}
+      {shouldAnimate ? (
+        <AnimatePresence>
+          <motion.div
+            key={currentImageIndex}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: animationDuration, ease: 'easeOut' }}
+            style={{
+              position: 'absolute',
+              top: '0',
+              left: 0,
+              width: '100%',
+              height: '100%',
+              zIndex: -1,
+              willChange: 'transform',
+            }}
+          >
+            <picture>
+              <source
+                media="(max-width: 768px)"
+                srcSet={HERO_IMAGES[currentImageIndex]}
+              />
+              <source
+                media="(max-width: 480px)"
+                srcSet={HERO_IMAGES[currentImageIndex]}
+              />
+              <img
+                src={HERO_IMAGES[currentImageIndex]}
+                alt="Hero background"
+                aria-hidden="true"
+                decoding="async"
+                fetchPriority={currentImageIndex === 0 ? "high" : "auto"}
+                loading={currentImageIndex === 0 ? "eager" : "lazy"}
+                width="1920"
+                height="1080"
+                sizes="100vw"
+                className="hero-bg-img"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: isMobile ? 'cover' : 'cover',
+                  willChange: 'transform',
+                }}
+              />
+            </picture>
+          </motion.div>
+        </AnimatePresence>
+      ) : (
+        <div
           style={{
             position: 'absolute',
             top: '0',
@@ -118,42 +188,37 @@ function Hero() {
             width: '100%',
             height: '100%',
             zIndex: -1,
-            willChange: 'transform',
           }}
         >
           <picture>
-            <source
-              media="(max-width: 768px)"
-              srcSet={HERO_IMAGES[currentImageIndex]}
-            />
-            <source
-              media="(max-width: 480px)"
-              srcSet={HERO_IMAGES[currentImageIndex]}
-            />
+            <source media="(max-width: 768px)" srcSet={HERO_IMAGES[0]} />
+            <source media="(max-width: 480px)" srcSet={HERO_IMAGES[0]} />
             <img
-              src={HERO_IMAGES[currentImageIndex]}
+              src={HERO_IMAGES[0]}
               alt="Hero background"
               aria-hidden="true"
               decoding="async"
-              fetchPriority={currentImageIndex === 0 ? "high" : "auto"}
-              loading={currentImageIndex === 0 ? "eager" : "lazy"}
+              fetchPriority="high"
+              loading="eager"
+              width="1920"
+              height="1080"
+              sizes="100vw"
               className="hero-bg-img"
               style={{
                 width: '100%',
                 height: '100%',
                 objectFit: isMobile ? 'cover' : 'cover',
-                willChange: 'transform',
               }}
             />
           </picture>
-        </motion.div>
-      </AnimatePresence>
+        </div>
+      )}
       <div className="container text-center" style={{ position: 'relative', zIndex: 1 }}>
         <motion.h1
           className="fw-bold text-danger display-5"
           style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5), 0 0 10px rgba(255,255,0,0.8), 0 0 20px rgba(255,255,0,0.6)' }}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
+          animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
           Ali Zaib Orphan Home
@@ -162,16 +227,16 @@ function Hero() {
         <motion.p
           className="mt-3 text-center fs-3 fw-semibold"
           style={{ textShadow: '2px 2px 4px yellow'}}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
+          animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
           Caring Orphans, Building Futures
         </motion.p>
         <motion.div
           className="mt-4"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
+          animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
         >
           <Link to="/donate" className="btn btn-success px-4 me-3 mb-2 rounded-pill fw-bold">
