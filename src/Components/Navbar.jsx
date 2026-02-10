@@ -14,17 +14,22 @@ function Navbar() {
       setScrolled(window.scrollY > 50);
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth < 768);
     };
+    
+    // Initialize on mount
     checkScreenSize();
+    
+    // Add event listeners
+    window.addEventListener("scroll", handleScroll);
     window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener('resize', checkScreenSize);
+    };
   }, []);
 
   const navItems = [
