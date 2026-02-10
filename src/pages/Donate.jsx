@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { ref as databaseRef, push, set, get, serverTimestamp, runTransaction } from 'firebase/database';
+import { ref as databaseRef, push, set, serverTimestamp, runTransaction } from 'firebase/database';
 import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { db } from '../firebase';
 import { toast } from 'react-toastify';
@@ -222,23 +222,20 @@ function DonationPage() {
     let nextNumber = 1;
     
     try {
-      // Try to get counter from Firebase first
+      // Use atomic transaction to increment counter - more efficient and race-condition safe
       const counterRef = databaseRef(db, 'counters/donationId');
-      const counterSnapshot = await get(counterRef);
       
-      if (counterSnapshot.exists()) {
-        const counterValue = counterSnapshot.val();
-        nextNumber = typeof counterValue === 'number' ? counterValue + 1 : 1;
-      } else {
-        // If no counter, count existing donations
-        const donationsRef = databaseRef(db, 'donations');
-        const donationsSnapshot = await get(donationsRef);
-        
-        if (donationsSnapshot.exists()) {
-          const donations = donationsSnapshot.val();
-          const donationCount = Object.keys(donations).length;
-          nextNumber = donationCount + 1;
+      const result = await runTransaction(counterRef, (currentValue) => {
+        // If counter doesn't exist, initialize to 1
+        if (currentValue === null) {
+          return 1;
         }
+        // Increment counter atomically
+        return currentValue + 1;
+      });
+      
+      if (result.committed) {
+        nextNumber = result.snapshot.val();
       }
     } catch (error) {
       console.log('Using localStorage for reference generation');
