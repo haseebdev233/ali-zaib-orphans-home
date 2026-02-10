@@ -1,8 +1,77 @@
-﻿﻿import { useState } from "react";
+﻿﻿import { useState, useCallback, useMemo } from "react";
 import SECTIONS from "../data/gallery-sections.js";
+
+// Move inline styles to constants for better performance
+const mediaCardStyle = {
+  height: "220px",
+  objectFit: "cover",
+  cursor: "pointer",
+};
+
+const playButtonContainerStyle = {
+  position: "relative"
+};
+
+const playButtonStyle = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  fontSize: "38px",
+  color: "#fff",
+  pointerEvents: "none",
+};
+
+const modalBackdropStyle = {
+  backgroundColor: "rgba(0,0,0,0.85)"
+};
 
 function Gallery() {
   const [selectedMedia, setSelectedMedia] = useState(null);
+
+  // Memoize close handler to prevent re-creation on every render
+  const handleCloseModal = useCallback(() => {
+    setSelectedMedia(null);
+  }, []);
+
+  // Memoize modal content to prevent unnecessary re-renders
+  const modalContent = useMemo(() => {
+    if (!selectedMedia) return null;
+
+    return (
+      <div className="modal show d-block" style={modalBackdropStyle}>
+        <div className="modal-dialog modal-xl modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">{selectedMedia.alt}</h5>
+              <button
+                type="button"
+                className="btn-close"
+                onClick={handleCloseModal}
+              ></button>
+            </div>
+
+            <div className="modal-body text-center">
+              {selectedMedia.type === "image" ? (
+                <img
+                  src={selectedMedia.src}
+                  alt={selectedMedia.alt}
+                  className="img-fluid"
+                />
+              ) : (
+                <video
+                  src={selectedMedia.src}
+                  controls
+                  autoPlay
+                  className="img-fluid"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }, [selectedMedia, handleCloseModal]);
 
   return (
     <>
@@ -31,11 +100,7 @@ function Gallery() {
                         src={item.src}
                         alt={item.alt}
                         className="card-img-top"
-                        style={{
-                          height: "220px",
-                          objectFit: "cover",
-                          cursor: "pointer",
-                        }}
+                        style={mediaCardStyle}
                         loading="lazy"
                         onClick={() => setSelectedMedia(item)}
                       />
@@ -43,30 +108,16 @@ function Gallery() {
 
                     {/* VIDEO */}
                     {item.type === "video" && (
-                      <div style={{ position: "relative" }}>
+                      <div style={playButtonContainerStyle}>
                         <video
                           src={item.src}
                           className="card-img-top"
-                          style={{
-                            height: "220px",
-                            objectFit: "cover",
-                            cursor: "pointer",
-                          }}
+                          style={mediaCardStyle}
                           muted
                           preload="metadata"
                           onClick={() => setSelectedMedia(item)}
                         />
-                        <div
-                          style={{
-                            position: "absolute",
-                            top: "50%",
-                            left: "50%",
-                            transform: "translate(-50%, -50%)",
-                            fontSize: "38px",
-                            color: "#fff",
-                            pointerEvents: "none",
-                          }}
-                        >
+                        <div style={playButtonStyle}>
                           ▶
                         </div>
                       </div>
@@ -81,44 +132,7 @@ function Gallery() {
       </div>
 
       {/* MODAL */}
-      {selectedMedia && (
-        <div
-          className="modal show d-block"
-          style={{ backgroundColor: "rgba(0,0,0,0.85)" }}
-        >
-          <div className="modal-dialog modal-xl modal-dialog-centered">
-            <div className="modal-content">
-
-              <div className="modal-header">
-                <h5 className="modal-title">{selectedMedia.alt}</h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setSelectedMedia(null)}
-                ></button>
-              </div>
-
-              <div className="modal-body text-center">
-                {selectedMedia.type === "image" ? (
-                  <img
-                    src={selectedMedia.src}
-                    alt={selectedMedia.alt}
-                    className="img-fluid"
-                  />
-                ) : (
-                  <video
-                    src={selectedMedia.src}
-                    controls
-                    autoPlay
-                    className="img-fluid"
-                  />
-                )}
-              </div>
-
-            </div>
-          </div>
-        </div>
-      )}
+      {modalContent}
     </>
   );
 }
