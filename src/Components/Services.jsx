@@ -82,7 +82,7 @@ const donationItems = [
 ];
 
 // Memoized donation card component
-const DonationCard = memo(({ item, index }) => {
+const DonationCard = memo(({ item }) => {
   const cardStyle = useMemo(() => ({
     backgroundColor: item.bgColor,
     border: `2px solid ${item.color}`,
@@ -106,7 +106,7 @@ const DonationCard = memo(({ item, index }) => {
   }), []);
 
   return (
-    <div key={index} className="col-12 col-md-6 col-lg-4">
+    <div className="col-12 col-md-6 col-lg-4">
       <motion.div
         whileHover={{ y: -10, scale: 1.02 }}
         className="text-center p-4 rounded-4 h-100"
@@ -166,8 +166,8 @@ function Services() {
                     What Your Donation Provides to the Orphans
                   </h4>
                   <div className="row g-4">
-                    {donationItems.map((item, index) => (
-                      <DonationCard key={index} item={item} index={index} />
+                    {donationItems.map((item) => (
+                      <DonationCard key={item.title} item={item} />
                     ))}
                   </div>
                 </div>

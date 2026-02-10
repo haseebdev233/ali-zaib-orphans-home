@@ -69,9 +69,9 @@ function PowerSection() {
         </motion.h2>
 
         <div className="row mt-4 g-4">
-          {testimonials.map((testimonial, index) => (
+          {testimonials.map((testimonial) => (
             <TestimonialCard 
-              key={index} 
+              key={testimonial.author} 
               quote={testimonial.quote} 
               author={testimonial.author} 
               delay={testimonial.delay} 
