@@ -1,13 +1,186 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { ref as databaseRef, push, set, serverTimestamp } from 'firebase/database';
+import { ref as databaseRef, push, set, get, serverTimestamp, runTransaction } from 'firebase/database';
+import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { db } from '../firebase';
 import { toast } from 'react-toastify';
+
+const SimpleDonationTypeSelector = ({ selectedType, setSelectedType }) => {
+  return (
+    <div style={{
+      fontFamily: 'system-ui, -apple-system, sans-serif',
+      padding: '20px',
+      maxWidth: '400px',
+      margin: '0 auto'
+    }}>
+      <div style={{ marginBottom: '20px' }}>
+        {/* Zakat */}
+        <div
+          onClick={() => setSelectedType('zakat')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            marginBottom: '15px',
+            cursor: 'pointer',
+            padding: '10px',
+            borderRadius: '8px',
+            background: selectedType === 'zakat' ? '#f0f9f4' : 'transparent',
+            border: selectedType === 'zakat' ? '1px solid #0a5c36' : '1px solid transparent'
+          }}
+        >
+          <span style={{
+            fontSize: '20px',
+            marginRight: '15px',
+            color: '#0a5c36',
+            width: '24px',
+            textAlign: 'center'
+          }}>
+            {selectedType === 'zakat' ? '☑' : '○'}
+          </span>
+          <div>
+            <div style={{
+              fontWeight: '500',
+              color: '#0a5c36',
+              marginBottom: '2px'
+            }}>
+              Zakat
+            </div>
+            <div style={{
+              fontSize: '14px',
+              color: '#666'
+            }}>
+              strictly Shariah compliant
+            </div>
+          </div>
+        </div>
+
+        {/* Khairat */}
+        <div
+          onClick={() => setSelectedType('khairat')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            marginBottom: '15px',
+            cursor: 'pointer',
+            padding: '10px',
+            borderRadius: '8px',
+            background: selectedType === 'khairat' ? '#f0f9f4' : 'transparent',
+            border: selectedType === 'khairat' ? '1px solid #2a9d8f' : '1px solid transparent'
+          }}
+        >
+          <span style={{
+            fontSize: '20px',
+            marginRight: '15px',
+            color: '#2a9d8f',
+            width: '24px',
+            textAlign: 'center'
+          }}>
+            {selectedType === 'khairat' ? '☑' : '○'}
+          </span>
+          <div>
+            <div style={{
+              fontWeight: '500',
+              color: '#2a9d8f'
+            }}>
+              Khairat
+            </div>
+          </div>
+        </div>
+
+        {/* Sadaqah */}
+        <div
+          onClick={() => setSelectedType('sadaqah')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            marginBottom: '15px',
+            cursor: 'pointer',
+            padding: '10px',
+            borderRadius: '8px',
+            background: selectedType === 'sadaqah' ? '#f0f9f4' : 'transparent',
+            border: selectedType === 'sadaqah' ? '1px solid #d4af37' : '1px solid transparent'
+          }}
+        >
+          <span style={{
+            fontSize: '20px',
+            marginRight: '15px',
+            color: '#d4af37',
+            width: '24px',
+            textAlign: 'center'
+          }}>
+            {selectedType === 'sadaqah' ? '☑' : '○'}
+          </span>
+          <div>
+            <div style={{
+              fontWeight: '500',
+              color: '#d4af37'
+            }}>
+              Sadaqah
+            </div>
+          </div>
+        </div>
+
+        {/* Other */}
+        <div
+          onClick={() => setSelectedType('')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            cursor: 'pointer',
+            padding: '10px',
+            borderRadius: '8px',
+            background: selectedType === '' ? '#f0f9f4' : 'transparent',
+            border: selectedType === '' ? '1px solid #6c757d' : '1px solid transparent'
+          }}
+        >
+          <span style={{
+            fontSize: '20px',
+            marginRight: '15px',
+            color: '#6c757d',
+            width: '24px',
+            textAlign: 'center'
+          }}>
+            {selectedType === '' ? '☑' : '○'}
+          </span>
+          <div>
+            <div style={{
+              fontWeight: '500',
+              color: '#6c757d'
+            }}>
+              Other
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Custom Type Input */}
+      {selectedType === '' && (
+        <div style={{ marginBottom: '20px' }}>
+          <input
+            type="text"
+            placeholder="Enter donation type (e.g., Aqiqah, Charity, etc.)"
+            value={selectedType}
+            onChange={(e) => setSelectedType(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '10px',
+              borderRadius: '8px',
+              border: '1px solid #ccc',
+              fontSize: '16px'
+            }}
+          />
+        </div>
+      )}
+      
+    </div>
+  );
+};
 
 function DonationPage() {
   const location = useLocation();
   const [step, setStep] = useState(1);
+  const [selectedType, setSelectedType] = useState('zakat');
   const [selectedAmount, setSelectedAmount] = useState(500);
   const [customAmount, setCustomAmount] = useState("");
   const [donorInfo, setDonorInfo] = useState({
@@ -18,10 +191,90 @@ function DonationPage() {
     anonymous: false
   });
   const [isProcessing, setIsProcessing] = useState(false);
-  const [transactionId] = useState(`DON-${Date.now().toString().slice(-8)}`);
+  const [transactionId, setTransactionId] = useState(null);
   const [receiptData, setReceiptData] = useState(null);
   const [copiedField, setCopiedField] = useState("");
+  const [nextReference, setNextReference] = useState('');
 
+  // State variables
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [filePreview, setFilePreview] = useState(null);
+  const [verificationError, setVerificationError] = useState('');
+  const [verificationStatus, setVerificationStatus] = useState('not_verified');
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  // FIXED: Generate next reference properly
+  const generateNextReference = async () => {
+    // Get donation type in proper format
+    let type = '';
+    if (selectedType === 'zakat') {
+      type = 'ZAKAT';
+    } else if (selectedType === 'khairat') {
+      type = 'KHAIRAT';
+    } else if (selectedType === 'sadaqah') {
+      type = 'SADAQAH';
+    } else if (selectedType) {
+      type = selectedType.toUpperCase();
+    } else {
+      type = 'DONATION';
+    }
+    
+    let nextNumber = 1;
+    
+    try {
+      // Try to get counter from Firebase first
+      const counterRef = databaseRef(db, 'counters/donationId');
+      const counterSnapshot = await get(counterRef);
+      
+      if (counterSnapshot.exists()) {
+        const counterValue = counterSnapshot.val();
+        nextNumber = typeof counterValue === 'number' ? counterValue + 1 : 1;
+      } else {
+        // If no counter, count existing donations
+        const donationsRef = databaseRef(db, 'donations');
+        const donationsSnapshot = await get(donationsRef);
+        
+        if (donationsSnapshot.exists()) {
+          const donations = donationsSnapshot.val();
+          const donationCount = Object.keys(donations).length;
+          nextNumber = donationCount + 1;
+        }
+      }
+    } catch (error) {
+      console.log('Using localStorage for reference generation');
+      // Fallback to localStorage
+      const lastReference = localStorage.getItem('lastDonationReference');
+      if (lastReference) {
+        const match = lastReference.match(/-AZOH-(\d+)$/);
+        if (match) {
+          nextNumber = parseInt(match[1]) + 1;
+        }
+      }
+    }
+    
+    const reference = `${type}-AZOH-${nextNumber}`;
+    const transactionId = `AZOH-${nextNumber}`;
+    
+    console.log('Generated reference:', reference);
+    console.log('Generated transactionId:', transactionId);
+    
+    setNextReference(reference);
+    
+    return { 
+      reference, 
+      transactionId,
+      nextNumber 
+    };
+  };
+
+  // Fetch next reference when type changes
+  useEffect(() => {
+    const fetchReference = async () => {
+      const { reference } = await generateNextReference();
+      setNextReference(reference);
+    };
+    fetchReference();
+  }, [selectedType]);
 
   // Set initial step based on navigation state
   useEffect(() => {
@@ -34,7 +287,8 @@ function DonationPage() {
     if (location.state?.zakatAmount) {
       setSelectedAmount(location.state.zakatAmount);
       setCustomAmount(location.state.zakatAmount.toString());
-      // Scroll to custom amount section after a short delay to ensure DOM is rendered
+      setSelectedType('zakat');
+      // Scroll to custom amount section
       setTimeout(() => {
         const customAmountInput = document.getElementById('custom-amount-input');
         if (customAmountInput) {
@@ -46,7 +300,23 @@ function DonationPage() {
     if (location.state?.aqiqaAmount) {
       setSelectedAmount(location.state.aqiqaAmount);
       setCustomAmount(location.state.aqiqaAmount.toString());
-      // Scroll to custom amount section after a short delay to ensure DOM is rendered
+      setSelectedType('sadaqah');
+      // Scroll to custom amount section
+      setTimeout(() => {
+        const customAmountInput = document.getElementById('custom-amount-input');
+        if (customAmountInput) {
+          customAmountInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          customAmountInput.focus();
+        }
+      }, 100);
+    }
+    if (location.state?.sponsorAmount) {
+      setSelectedAmount(location.state.sponsorAmount);
+      setCustomAmount(location.state.sponsorAmount.toString());
+      setSelectedType(''); // Empty string for 'Other' type
+      // Scroll to top of page
+      window.scrollTo(0, 0);
+      // Scroll to custom amount section
       setTimeout(() => {
         const customAmountInput = document.getElementById('custom-amount-input');
         if (customAmountInput) {
@@ -56,6 +326,7 @@ function DonationPage() {
       }, 100);
     }
   }, [location.state]);
+
 
   const presetAmounts = [100, 250, 500, 1000, 2500, 5000];
 
@@ -100,7 +371,7 @@ function DonationPage() {
 
   // Generate WhatsApp message
   const generateWhatsAppMessage = () => {
-    const reference = `DON-${donorInfo.name?.slice(0, 3).toUpperCase() || "DON"}-${Date.now().toString().slice(-6)}`;
+    const reference = nextReference || `${selectedType.toUpperCase()}-AZOH-1`;
     const message = `Assalam-o-Alaikum! I want to donate ${formatCurrency(selectedAmount)} to Ali Zaib Orphan Home.
 
 Reference: ${reference}
@@ -113,38 +384,88 @@ Please guide me for the next steps.`;
     return encodeURIComponent(message);
   };
 
-  const handleDonationSubmit = () => {
+  // FIXED: Handle donation submission
+  const handleDonationSubmit = async () => {
     setIsProcessing(true);
+    console.log('Starting donation submission...');
 
-    // Generate reference number
-    const referenceNumber = `DON-${donorInfo.name?.slice(0, 3).toUpperCase() || "DON"}-${Date.now().toString().slice(-6)}`;
+    try {
+      // Generate reference and IDs
+      const { reference: referenceNumber, transactionId: donationId, nextNumber } = await generateNextReference();
+      
+      // Save to localStorage for next time
+      localStorage.setItem('lastDonationReference', referenceNumber);
+      
+      console.log('Generated IDs - Transaction ID:', donationId, 'Reference:', referenceNumber);
 
-    // Prepare donation data
-    const donationData = {
-      amount: selectedAmount,
-      donorInfo,
-      paymentMethod: 'bank_transfer',
-      status: 'pending',
-      transactionId,
-      reference: referenceNumber,
-      submittedAt: serverTimestamp(),
-      date: new Date().toISOString()
-    };
+      setTransactionId(donationId);
 
-    // Save to Firebase
-    const newRef = push(databaseRef(db, 'donations'));
-    set(newRef, donationData).then(() => {
-      console.log('Donation saved with ID: ', newRef.key);
+      // Prepare donation data
+      const donationData = {
+        amount: selectedAmount,
+        selectedType: selectedType || 'donation',
+        donorInfo: {
+          name: donorInfo.name || '',
+          email: donorInfo.email || '',
+          phone: donorInfo.phone || '',
+          message: donorInfo.message || '',
+          anonymous: donorInfo.anonymous || false
+        },
+        paymentMethod: 'bank_transfer',
+        status: 'pending',
+        transactionId: donationId,
+        reference: referenceNumber,
+        submittedAt: serverTimestamp(),
+        date: new Date().toISOString(),
+        sequenceNumber: nextNumber
+      };
 
-      // Set receipt data
+      console.log('Saving to Firebase:', donationData);
+
+      // Save to Firebase
+      const newRef = push(databaseRef(db, 'donations'));
+      await set(newRef, donationData);
+      console.log('Donation saved with Firebase key: ', newRef.key);
+
+      // Get the Firebase key/id
+      const firebaseId = newRef.key;
+
+      // Update counter in Firebase
+      try {
+        const counterRef = databaseRef(db, 'counters/donationId');
+        await set(counterRef, nextNumber);
+        console.log('Counter updated in Firebase:', nextNumber);
+      } catch (counterError) {
+        console.log('Note: Could not update counter in Firebase');
+      }
+
+      // Set receipt data with proper string values
       setReceiptData({
         ...donationData,
-        id: newRef.key,
+        id: firebaseId,
         date: new Date().toLocaleDateString('en-PK', {
           year: 'numeric',
           month: 'long',
           day: 'numeric'
-        })
+        }),
+        amount: selectedAmount,
+        selectedType: selectedType || 'donation',
+        donorInfo: {
+          ...donorInfo,
+          name: donorInfo.name || '',
+          email: donorInfo.email || '',
+          phone: donorInfo.phone || '',
+          message: donorInfo.message || '',
+          anonymous: donorInfo.anonymous || false
+        },
+        transactionId: donationId,
+        reference: referenceNumber
+      });
+
+      console.log('Receipt data set:', {
+        transactionId: donationId,
+        reference: referenceNumber,
+        date: new Date().toLocaleDateString('en-PK')
       });
 
       toast.success('Donation record saved successfully!');
@@ -154,6 +475,7 @@ Please guide me for the next steps.`;
       const whatsappMessage = `Assalam-o-Alaikum! I have made a donation of ${formatCurrency(selectedAmount)} to Ali Zaib Orphan Home.
 
 Reference: ${referenceNumber}
+Transaction ID: ${donationId}
 Name: ${donorInfo.anonymous ? 'Anonymous' : donorInfo.name}
 Phone: ${donorInfo.phone || 'Not provided'}
 Email: ${donorInfo.email || 'Not provided'}
@@ -162,13 +484,13 @@ Please find the payment screenshot attached.`;
       const whatsappUrl = `https://wa.me/923219920015?text=${encodeURIComponent(whatsappMessage)}`;
       window.open(whatsappUrl, '_blank');
 
-      // Go directly to receipt step (step 5) to show successful payment notification
+      // Go directly to receipt step (step 5)
       setStep(5);
-    }).catch(error => {
+    } catch (error) {
       console.error('Error saving donation: ', error);
       toast.error('Failed to save donation. Please try again.');
       setIsProcessing(false);
-    });
+    }
   };
 
   // Generate receipt as text file
@@ -189,13 +511,14 @@ Date: ${receiptData.date}
 Donor Name: ${receiptData.donorInfo.anonymous ? 'Anonymous Donor' : receiptData.donorInfo.name}
 Phone: ${receiptData.donorInfo.phone || 'Not provided'}
 Email: ${receiptData.donorInfo.email || 'Not provided'}
+Donation Type: ${receiptData.selectedType.charAt(0).toUpperCase() + receiptData.selectedType.slice(1)}
+Reference Number: ${receiptData.reference}
 
 ------------------------------------------
 Amount: ${formatCurrency(receiptData.amount)}
 ------------------------------------------
 
 Payment Method: Bank Transfer
-Reference Number: ${receiptData.reference}
 
 Bank Transfer Details:
 - JazzCash: 0321 9920015
@@ -242,6 +565,8 @@ Thank you for supporting orphan children!`;
 
   // Print receipt
   const printReceipt = () => {
+    if (!receiptData) return;
+    
     const printContent = `
       <html>
         <head>
@@ -279,9 +604,11 @@ Thank you for supporting orphan children!`;
           <div class="section">
             <strong>Receipt No:</strong> ${receiptData.transactionId}<br>
             <strong>Date:</strong> ${receiptData.date}<br>
+            <strong>Donation Type:</strong> ${receiptData.selectedType.charAt(0).toUpperCase() + receiptData.selectedType.slice(1)}<br>
             <strong>Donor Name:</strong> ${receiptData.donorInfo.anonymous ? 'Anonymous Donor' : receiptData.donorInfo.name}<br>
             <strong>Phone:</strong> ${receiptData.donorInfo.phone || 'Not provided'}<br>
-            <strong>Email:</strong> ${receiptData.donorInfo.email || 'Not provided'}
+            <strong>Email:</strong> ${receiptData.donorInfo.email || 'Not provided'}<br>
+            <strong>Reference:</strong> ${receiptData.reference}
           </div>
 
           <div class="amount">
@@ -301,7 +628,7 @@ Thank you for supporting orphan children!`;
           </div>
 
           <div class="footer">
-            This is an official receipt for your donation to Ali Zaib Orphan Home.<br>
+            This is an official receipt (But not verified) for your donation to Ali Zaib Orphan Home.<br>
             For any queries, contact: 0321-9920015 | 0300-8666468<br><br>
             Thank you for your generous contribution!
           </div>
@@ -382,7 +709,7 @@ Thank you for supporting orphan children!`;
           console.log('File available at', downloadURL);
           setVerificationStatus('verifying');
 
-          // Simulate verification process (in real app, this would be server-side)
+          // Simulate verification process
           setTimeout(() => {
             setVerificationStatus('verified');
             toast.success('Payment proof uploaded and verified successfully!');
@@ -404,9 +731,7 @@ Thank you for supporting orphan children!`;
   };
 
   const proceedToReceipt = () => {
-    if (verificationStatus === 'verified') {
-      setStep(5);
-    }
+    setStep(5);
   };
 
   return (
@@ -422,9 +747,9 @@ Thank you for supporting orphan children!`;
           className="text-center mb-5"
         >
           <h1 className="display-4 fw-bold text-white mb-3">
-            Support Our Children
+            Support Ali Zaib Orphanage Now — Turn Tears into Smiles
           </h1>
-          <p className="lead text-white-75 text-center mb-0">
+          <p className="lead text-warning text-center mb-0">
             Your donation creates lasting impact on young lives
           </p>
         </motion.div>
@@ -467,8 +792,13 @@ Thank you for supporting orphan children!`;
               {/* Step 1: Amount Selection */}
               {step === 1 && (
                 <div className="card-body p-5">
+                  <h3 className="fw-bold mb-4 text-primary">Select Donation Type</h3>
+
+                  {/* Donation Type Selector */}
+                  <SimpleDonationTypeSelector selectedType={selectedType} setSelectedType={setSelectedType} />
+
                   <h3 className="fw-bold mb-4 text-primary">Select Donation Amount</h3>
-                  
+
                   {/* Preset Amounts */}
                   <div className="row g-3 mb-4">
                     {presetAmounts.map((amount) => (
@@ -689,34 +1019,141 @@ Thank you for supporting orphan children!`;
                   <h3 className="fw-bold mb-4 text-primary">Bank Transfer Details</h3>
                   
                   {/* Donation Summary */}
-                  <div className="p-4 rounded-3 mb-4" style={{ backgroundColor: '#f8f9fa' }}>
-                    <h5 className="fw-bold mb-3">Donation Summary</h5>
+                  <div className="p-4 rounded-3 mb-4" style={{ 
+                    backgroundColor: '#f8f9fa',
+                    border: '1px solid #e0e0e0'
+                  }}>
+                    <h5 className="fw-bold mb-3 text-center" style={{ 
+                      color: '#0a5c36',
+                      borderBottom: '2px solid #0a5c36',
+                      paddingBottom: '10px'
+                    }}>
+                      Donation Summary
+                    </h5>
+                    
                     <div className="row">
+                      {/* Left Column */}
                       <div className="col-md-6">
-                        <div className="mb-2">
-                          <small className="text-muted">Amount</small>
-                          <div className="fw-bold">{formatCurrency(selectedAmount)}</div>
+                        {/* Type */}
+                        <div className="mb-3">
+                          <div className="d-flex justify-content-between align-items-center">
+                            <small className="text-muted" style={{ fontSize: '14px' }}>Type</small>
+                            <div className="fw-bold" style={{ 
+                              color: '#0a5c36',
+                              fontSize: '16px',
+                              fontWeight: '600'
+                            }}>
+                              {selectedType === 'zakat' ? 'Zakat' : 
+                               selectedType === 'khairat' ? 'Khairat' : 
+                               'Sadaqah'}
+                            </div>
+                          </div>
                         </div>
-                        <div className="mb-2">
-                          <small className="text-muted">Donor</small>
-                          <div className="fw-bold">{donorInfo.anonymous ? 'Anonymous Donor' : donorInfo.name}</div>
+                        
+                        {/* Amount */}
+                        <div className="mb-3">
+                          <div className="d-flex justify-content-between align-items-center">
+                            <small className="text-muted" style={{ fontSize: '14px' }}>Amount</small>
+                            <div className="fw-bold" style={{ 
+                              color: '#0a5c36',
+                              fontSize: '18px',
+                              fontWeight: '700'
+                            }}>
+                              Rs {selectedAmount.toLocaleString()}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Donor */}
+                        <div className="mb-3">
+                          <div className="d-flex justify-content-between align-items-center">
+                            <small className="text-muted" style={{ fontSize: '14px' }}>Donor</small>
+                            <div className="fw-bold" style={{ 
+                              color: '#666',
+                              fontSize: '16px'
+                            }}>
+                              {donorInfo.anonymous ? 'Anonymous Donor' : donorInfo.name}
+                            </div>
+                          </div>
                         </div>
                       </div>
+                      
+                      {/* Right Column */}
                       <div className="col-md-6">
-                        <div className="mb-2">
-                          <small className="text-muted">Contact</small>
-                          <div className="fw-bold">{donorInfo.anonymous ? 'Anonymous' : donorInfo.email}</div>
+                        {/* Reference */}
+                        <div className="mb-3">
+                          <div className="d-flex justify-content-between align-items-center">
+                            <small className="text-muted" style={{ fontSize: '14px' }}>Reference</small>
+                            <div className="d-flex align-items-center gap-2">
+                              <div className="fw-bold" style={{ 
+                                color: '#2a9d8f',
+                                fontSize: '14px',
+                                fontWeight: '600',
+                                backgroundColor: '#e8f4f3',
+                                padding: '4px 10px',
+                                borderRadius: '4px',
+                                minWidth: '120px',
+                                textAlign: 'center'
+                              }}>
+                                {nextReference || `${selectedType.toUpperCase()}-AZOH-1`}
+                              </div>
+                              {nextReference && (
+                                <motion.button
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.9 }}
+                                  className="btn btn-sm btn-outline-success"
+                                  style={{ padding: '2px 8px' }}
+                                  onClick={() => copyToClipboard(nextReference, 'Reference Number')}
+                                  title="Copy Reference"
+                                >
+                                  <i className={`bi ${copiedField === 'Reference Number' ? 'bi-check' : 'bi-copy'}`}></i>
+                                </motion.button>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <div className="mb-2">
-                          <small className="text-muted">Phone</small>
-                          <div className="fw-bold">{donorInfo.anonymous ? 'Anonymous' : donorInfo.phone}</div>
+                        
+                        {/* Contact */}
+                        <div className="mb-3">
+                          <div className="d-flex justify-content-between align-items-center">
+                            <small className="text-muted" style={{ fontSize: '14px' }}>Contact</small>
+                            <div className="fw-bold" style={{ 
+                              color: donorInfo.anonymous ? '#999' : '#666',
+                              fontSize: '16px',
+                              fontStyle: donorInfo.anonymous ? 'italic' : 'normal'
+                            }}>
+                              {donorInfo.anonymous ? 'Anonymous' : donorInfo.email}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Phone */}
+                        <div className="mb-3">
+                          <div className="d-flex justify-content-between align-items-center">
+                            <small className="text-muted" style={{ fontSize: '14px' }}>Phone</small>
+                            <div className="fw-bold" style={{ 
+                              color: donorInfo.anonymous ? '#999' : '#666',
+                              fontSize: '16px',
+                              fontStyle: donorInfo.anonymous ? 'italic' : 'normal'
+                            }}>
+                              {donorInfo.anonymous ? 'Anonymous' : donorInfo.phone}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                    <div className="border-top pt-3 mt-3">
-                      <div className="d-flex justify-content-between">
-                        <span className="fw-bold">Total Amount</span>
-                        <span className="fw-bold fs-4 text-primary">{formatCurrency(totalAmount)}</span>
+                    
+                    {/* Total Amount Separator */}
+                    <div className="border-top pt-3 mt-3" style={{ borderColor: '#0a5c36' }}>
+                      <div className="d-flex justify-content-between align-items-center">
+                        <span className="fw-bold" style={{ 
+                          fontSize: '18px',
+                          color: '#0a5c36'
+                        }}>Total Amount</span>
+                        <span className="fw-bold" style={{ 
+                          fontSize: '22px',
+                          color: '#0a5c36'
+                        }}>Rs {selectedAmount.toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
@@ -809,28 +1246,6 @@ Thank you for supporting orphan children!`;
                       <div className="mb-2">
                         <small className="text-muted">Account Title:</small>
                         <div className="fw-bold">Ali Zaib Foundation (Orphan Home)</div>
-                      </div>
-                    </div>
-
-                    {/* Reference Number */}
-                    <div className="mb-4 p-4 rounded-3 border bg-light">
-                      <div className="d-flex justify-content-between align-items-center">
-                        <div>
-                          <small className="text-muted d-block">Your Reference Number:</small>
-                          <h6 className="fw-bold mb-0">
-                            DON-{donorInfo.name?.slice(0, 3).toUpperCase() || "DON"}-{Date.now().toString().slice(-6)}
-                          </h6>
-                          <small className="text-muted">Mention this reference when transferring</small>
-                        </div>
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="btn btn-sm btn-outline-secondary"
-                          onClick={() => copyToClipboard(`DON-${donorInfo.name?.slice(0, 3).toUpperCase() || "DON"}-${Date.now().toString().slice(-6)}`, 'Reference Number')}
-                        >
-                          <i className={`bi ${copiedField === 'Reference Number' ? 'bi-check' : 'bi-copy'} me-1`}></i>
-                          Copy
-                        </motion.button>
                       </div>
                     </div>
 
@@ -929,6 +1344,10 @@ Thank you for supporting orphan children!`;
                     <h5 className="fw-bold mb-3">Donation Summary</h5>
                     <div className="row">
                       <div className="col-md-6">
+                        <div className="mb-2">
+                          <small className="text-muted">Type</small>
+                          <div className="fw-bold">{receiptData.selectedType.charAt(0).toUpperCase() + receiptData.selectedType.slice(1)}</div>
+                        </div>
                         <div className="mb-2">
                           <small className="text-muted">Amount</small>
                           <div className="fw-bold">{formatCurrency(receiptData.amount)}</div>
@@ -1129,25 +1548,66 @@ Thank you for supporting orphan children!`;
                       <div className="p-4 rounded-3 border">
                         <h6 className="fw-bold mb-3">Donation Details</h6>
                         <div className="text-start">
+                          {/* Receipt No */}
                           <div className="mb-2">
                             <small className="text-muted">Receipt No:</small>
-                            <div className="fw-bold">{receiptData.transactionId}</div>
+                            <div className="fw-bold" style={{ 
+                              color: '#0a5c36',
+                              fontSize: '16px',
+                              backgroundColor: '#f0f9f4',
+                              padding: '4px 8px',
+                              borderRadius: '4px',
+                              marginTop: '2px'
+                            }}>
+                              {receiptData?.transactionId || 'AZOH-1'}
+                            </div>
                           </div>
+                          
                           <div className="mb-2">
                             <small className="text-muted">Date:</small>
-                            <div className="fw-bold">{receiptData.date}</div>
+                            <div className="fw-bold">{receiptData?.date || new Date().toLocaleDateString('en-PK')}</div>
                           </div>
+                          
+                          <div className="mb-2">
+                            <small className="text-muted">Type:</small>
+                            <div className="fw-bold">
+                              {receiptData?.selectedType ? 
+                                receiptData.selectedType.charAt(0).toUpperCase() + receiptData.selectedType.slice(1) 
+                                : 'Donation'}
+                            </div>
+                          </div>
+                          
                           <div className="mb-2">
                             <small className="text-muted">Amount:</small>
-                            <div className="fw-bold">{formatCurrency(receiptData.amount)}</div>
+                            <div className="fw-bold" style={{ 
+                              color: '#0a5c36',
+                              fontSize: '18px'
+                            }}>
+                              {receiptData?.amount ? formatCurrency(receiptData.amount) : formatCurrency(selectedAmount)}
+                            </div>
                           </div>
+                          
                           <div className="mb-2">
                             <small className="text-muted">Donor:</small>
-                            <div className="fw-bold">{receiptData.donorInfo.anonymous ? 'Anonymous Donor' : receiptData.donorInfo.name}</div>
+                            <div className="fw-bold">
+                              {receiptData?.donorInfo?.anonymous ? 
+                                'Anonymous Donor' : 
+                                receiptData?.donorInfo?.name || donorInfo.name || 'Donor'}
+                            </div>
                           </div>
+                          
                           <div className="mb-2">
                             <small className="text-muted">Reference:</small>
-                            <div className="fw-bold">{receiptData.reference}</div>
+                            <div className="fw-bold" style={{ 
+                              color: '#2a9d8f',
+                              fontSize: '14px',
+                              backgroundColor: '#e8f4f3',
+                              padding: '3px 8px',
+                              borderRadius: '4px',
+                              marginTop: '2px'
+                            }}>
+                              {receiptData?.reference || nextReference || `${selectedType.toUpperCase()}-AZOH-1`}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1171,7 +1631,7 @@ Thank you for supporting orphan children!`;
                           </div>
                           <div>
                             <i className="bi bi-envelope text-warning me-2"></i>
-                            <strong>Email Receipt</strong> sent to {receiptData.donorInfo.email}
+                            <strong>Email Receipt</strong> sent to {receiptData?.donorInfo?.email || donorInfo.email}
                           </div>
                         </div>
                       </div>
@@ -1221,6 +1681,10 @@ Thank you for supporting orphan children!`;
                         setSelectedAmount(500);
                         setDonorInfo({ name: '', email: '', phone: '', message: '', anonymous: false });
                         setReceiptData(null);
+                        setUploadedFile(null);
+                        setFilePreview(null);
+                        setVerificationError('');
+                        setVerificationStatus('not_verified');
                       }}
                     >
                       <i className="bi bi-heart-fill me-2"></i>

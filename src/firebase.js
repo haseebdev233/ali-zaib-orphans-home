@@ -1,12 +1,6 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getDatabase } from "firebase/database";
-import { getStorage } from "firebase/storage";
+import { getDatabase, ref, set, get } from "firebase/database";
 
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAi6OpIfUgdS0sy3JYMjPsY6_HiPAXOvdE",
   authDomain: "ali-zaib-orphans-home.firebaseapp.com",
@@ -17,11 +11,34 @@ const firebaseConfig = {
   databaseURL: "https://ali-zaib-orphans-home-default-rtdb.asia-southeast1.firebasedatabase.app"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-// Initialize Realtime Database and get a reference to the service
-export const db = getDatabase(app);
+const initializeCounter = async () => {
+  try {
+    // Count existing donations
+    const donationsRef = ref(db, 'donations');
+    const snapshot = await get(donationsRef);
 
-// Initialize Cloud Storage and get a reference to the service
-export const storage = getStorage(app);
+    let donationCount = 0;
+    if (snapshot.exists()) {
+      donationCount = Object.keys(snapshot.val()).length;
+    }
+
+    // Set counter to donation count + 1
+    const counterRef = ref(db, 'counters/donationId');
+    await set(counterRef, donationCount + 1);
+
+    console.log(`✅ Database initialized!`);
+    console.log(`Existing donations: ${donationCount}`);
+    console.log(`Counter set to: ${donationCount + 1}`);
+    console.log(`Next donation will be: AZOH-${donationCount + 1}`);
+
+  } catch (error) {
+    console.error('❌ Error:', error);
+  }
+};
+
+initializeCounter();
+
+export { db };

@@ -6,7 +6,7 @@ import logo from '../assets/images/Ali-zaib-Logo.webp';
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -28,18 +28,12 @@ function Navbar() {
   }, []);
 
   const navItems = [
-    { path: "/", text: "HOME" },
-    { path: "/about", text: "ABOUT US" },
-    { path: "/programs", text: "SERVICES" },
-    { path: "/gallery", text: "GALLERY" },
-    { path: "/contact", text: "CONTACT" },
-    {
-      text: "SUPPORT AN ORPHAN",
-      dropdown: [
-        { text: "Sponsor an Orphan", path: "/sponsor-an-orphan", icon: "bi bi-person-heart me-2" },
-        { text: "Zakat for Orphans", path: "/zakat", icon: "bi bi-currency-exchange me-2" }
-      ]
-    }
+    { path: "/", text: "Home" },
+    { path: "/about", text: "About Us" },
+    { path: "/programs", text: "Services" },
+    { path: "/gallery", text: "Gallery" },
+    { path: "/contact", text: "Contact" },
+    { path: "/support-us", text: "Support Us" }
   ];
 
   return (
@@ -62,7 +56,7 @@ function Navbar() {
           onClick={() => setIsOpen(false)}
         >
           <img src={logo} alt="Ali Zaib Orphan Home Logo" style={{ height: '40px', marginRight: '10px' }} />
-          <span className="d-none d-lg-inline">Ali ZAIB ORPHAN HOME</span>
+          <span className="d-none d-lg-inline">ALI ZAIB ORPHAN HOME (Aashiana)</span>
         </Link>
 
         <button
@@ -77,61 +71,14 @@ function Navbar() {
           <div className="d-flex flex-column align-items-center">
             <ul className="navbar-nav">
               {navItems.map((item, index) => (
-                <li key={index} className={`nav-item ${item.dropdown ? 'dropdown' : ''}`}>
-                  {item.dropdown ? (
-                    <div className="dropdown">
-                      <button
-                        className="nav-link fw-bold dropdown-toggle border-0 bg-transparent"
-                        type="button"
-                        onClick={() => setDropdownOpen(!dropdownOpen)}
-                        aria-expanded={dropdownOpen}
-                      >
-                        {item.text}
-                      </button>
-                      <AnimatePresence>
-                        {dropdownOpen && (
-                          <motion.ul
-                            className="dropdown-menu show"
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.3, ease: "easeOut" }}
-                          >
-                            {item.dropdown.map((subItem, subIndex) => (
-                              <motion.li
-                                key={subIndex}
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: subIndex * 0.1, duration: 0.3 }}
-                                whileHover={{ scale: 1.05, x: 5 }}
-                                whileTap={{ scale: 0.95 }}
-                              >
-                                <Link
-                                  className="dropdown-item"
-                                  to={subItem.path}
-                                  onClick={() => {
-                                    setIsOpen(false);
-                                    setDropdownOpen(false);
-                                  }}
-                                >
-                                  <i className={subItem.icon}></i>
-                                  {subItem.text}
-                                </Link>
-                              </motion.li>
-                            ))}
-                          </motion.ul>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  ) : (
-                    <Link
-                      className="nav-link fw-bold"
-                      to={item.path}
-                      onClick={() => setIsOpen(false)}
-                    >
-                      {item.text}
-                    </Link>
-                  )}
+                <li key={index} className="nav-item">
+                  <Link
+                    className="nav-link fw-bold"
+                    to={item.path}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {item.text}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -164,11 +111,6 @@ const style = `
   .navbar .nav-link:hover {
     color: #198754 !important;
     text-decoration: underline !important;
-    transition: all 0.3s ease;
-  }
-  .navbar .dropdown-item:hover {
-    background-color: #f8f9fa !important;
-    color: #198754 !important;
     transition: all 0.3s ease;
   }
 `;

@@ -21,6 +21,7 @@ function ButtonsSection() {
   return (
     <section className="buttons-section py-5 bg-white">
       <div className="container">
+        <h2 className="text-center mb-4">Join us, make a difference!</h2>
         <motion.div
           className="d-flex justify-content-center flex-wrap gap-3"
           variants={containerVariants}

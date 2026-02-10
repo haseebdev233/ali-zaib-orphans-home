@@ -61,7 +61,7 @@ function TopBar() {
                 onMouseLeave={(e) => e.target.style.color = 'white'}
               >
                 <i className="bi bi-telephone me-2 text-success"></i>
-                +92 321 99 200 15
+                +92 321 9920015
               </a>
               <span className="mx-3">|</span>
               <a

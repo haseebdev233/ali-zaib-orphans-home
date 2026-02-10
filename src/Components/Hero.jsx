@@ -151,21 +151,22 @@ function Hero() {
       <div className="container text-center" style={{ position: 'relative', zIndex: 1 }}>
         <motion.h1
           className="fw-bold text-danger display-5"
-          style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}
+          style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5), 0 0 10px rgba(255,255,0,0.8), 0 0 20px rgba(255,255,0,0.6)' }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          ALi Zaib Orphan Home
+          Ali Zaib Orphan Home
+          (Aashiana)
         </motion.h1>
         <motion.p
-          className="mt-3 text-center"
-          style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}
+          className="mt-3 text-center fs-3 fw-semibold"
+          style={{ textShadow: '2px 2px 4px yellow'}}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          Ali-Zaib Orphan Home provides care, education and support for orphan children.
+          Caring Orphans, Building Futures
         </motion.p>
         <motion.div
           className="mt-4"

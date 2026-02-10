@@ -115,7 +115,7 @@ const Footer = () => {
               <li className="mb-3 d-flex">
                 <i className="bi bi-telephone-fill text-success me-3 fs-5"></i>
                 <div>
-                  <p className="mb-0 hover-green" onClick={() => handleWhatsAppClick('923219920015')} style={{ cursor: 'pointer' }}>+92 (321) 992-0015</p>
+                  <p className="mb-0 hover-green" onClick={() => handleWhatsAppClick('923219920015')} style={{ cursor: 'pointer' }}>+92 (321) 9920015</p>
                   <p className="mb-0 hover-green" onClick={() => handlePhoneCall('+92418847000')} style={{ cursor: 'pointer' }}>(041) 8847000</p>
                 </div>
               </li>

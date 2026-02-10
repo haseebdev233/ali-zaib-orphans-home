@@ -1,152 +1,126 @@
-﻿import { useState, useRef, useEffect } from 'react';
+﻿﻿import { useState } from "react";
 
-const MEDIA = [
-  // Hero images (prefer WebP variants)
-  { src: '/assets/images-webp/1.webp', alt: 'Hero Image 1', type: 'image' },
-  { src: '/assets/images-webp/2.webp', alt: 'Hero Image 2', type: 'image' },
-  { src: '/assets/images-webp/3.webp', alt: 'Hero Image 3', type: 'image' },
-  { src: '/assets/images-webp/4.webp', alt: 'Hero Image 4', type: 'image' },
-  { src: '/assets/images-webp/5.webp', alt: 'Hero Image 5', type: 'image' },
-  { src: '/assets/images-webp/6.webp', alt: 'Hero Image 6', type: 'image' },
-  { src: '/assets/images-webp/7.webp', alt: 'Hero Image 7', type: 'image' },
-  { src: '/assets/images-webp/hadees.webp', alt: 'Hadees Image', type: 'image' },
-  // Gallery images
-  { src: '/assets/images/1.jpeg', alt: 'Gallery Image 1', type: 'image' },
-  { src: '/assets/images/2.jpeg', alt: 'Gallery Image 2', type: 'image' },
-  { src: '/assets/images/3.jpeg', alt: 'Gallery Image 3', type: 'image' },
-  { src: '/assets/images/5.jpeg', alt: 'Gallery Image 5', type: 'image' },
-  { src: '/assets/images/6.jpeg', alt: 'Gallery Image 6', type: 'image' },
-  { src: '/assets/images/7.jpeg', alt: 'Gallery Image 7', type: 'image' },
-  // CEO image (prefer WebP)
-  { src: '/assets/images-webp/ceo.webp', alt: 'CEO Image', type: 'image' },
-  // Logo
-  { src: '/assets/images/Ali-zaib-Logo.webp', alt: 'Ali Zaib Logo', type: 'image' },
-  // Videos
-  { src: '/assets/videos/city-41.mp4', alt: 'City Video 41', type: 'video' },
-  { src: '/assets/videos/wats-1.mp4', alt: 'Wats Video 1', type: 'video' },
-  { src: '/assets/videos/wats-2.mp4', alt: 'Wats Video 2', type: 'video' },
-  { src: '/assets/videos/wats-3.mp4', alt: 'Wats Video 3', type: 'video' },
-  { src: '/assets/videos/wats-4.mp4', alt: 'Wats Video 4', type: 'video' },
-  { src: '/assets/videos/wats-5.mp4', alt: 'Wats Video 5', type: 'video' },
-  { src: '/assets/videos/wats-6.mp4', alt: 'Wats Video 6', type: 'video' },
-  { src: '/assets/videos/wats-7.mp4', alt: 'Wats Video 7', type: 'video' },
-];
+/* 
+   ✅ IMPORTANT:
+   Paste your FULL SECTIONS array here.
+   (The big one you already provided with all videos & images)
+*/
+const SECTIONS = [{ title: 'Birthdays of Orphans', media: [{ src: '/assets/Gallary/Birthdays of Orphans/1.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Birthdays of Orphans/2.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Birthdays of Orphans/3.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Birthdays of Orphans/4.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Birthdays of Orphans/5.mp4', alt: 'Video', type: 'video' },] }, { title: 'Events', media: [{ src: '/assets/Gallary/Events/Inauguration of computer lab.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Events/WhatsApp Image 2026-02-10 at 2.03.23 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Events/WhatsApp Image 2026-02-10 at 2.03.23 PM (2).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Events/WhatsApp Image 2026-02-10 at 2.03.23 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Events/WhatsApp Image 2026-02-10 at 2.03.24 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Events/WhatsApp Image 2026-02-10 at 2.03.24 PM (2).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Events/WhatsApp Image 2026-02-10 at 2.03.24 PM (3).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Events/WhatsApp Image 2026-02-10 at 2.03.24 PM.jpeg', alt: 'Image', type: 'image' },] }, { title: 'Life at Ali Zaib Orphan Home', media: [{ src: '/assets/Gallary/Life at Ali Zaib Orphan Home/AQM-OwLMfn6_eH9h6Tabmw5SiQ5RTMlRr6ZFfNXo9o5vE83nVb-cfx4VOVTdn-GNbVMtgG_KdrcSw2bcGGuKII5GjYIfPYzq_Edj_3NmDkM25Q.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/AQMCZMj74pvRIRanYxtFZWlyj_J_Tet9WSR5JDWN8N8IVkx6jOW_lqpg5H5eBS-vceJw3vRMmwCLwYKxZwigXnU79_YMykRPjGNZw8EqhXqVxA.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/AQMwauWUCAAQNnQjnkzEAtZ6HplGGSB0pewYOUsT0idu4eeo7X4ARfyR3kDBBy34jFbGVmapBbDtpuwt8MXXFvmN10vv-k10KjlLUGG5Ww5_JQ.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/AQOU_0-niv1Jp3bdq7VruZ_8tYIYqHkFdTsRU7-HXrrL1QuuMDBV2t9YQXXY27tq4DDvWZceDcPTgxFMDPChvNpqwIMn1tnC5NlEZzCXkx0ETQ.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/AQOytVcDNXyxNBalUSeRSOXUsLdsKBcb0SOptjDuQRZkiVLnWyKewsLL9x9oD0cy7E2yNKxQ_HMes1PAYaeCndfVoAIF-70TYdFdCokQdGlIrg.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/Donation of Fruits for orphans.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/Shab E barat Iftaari by orphans at ali zaib orphan home.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-01-19 at 10.18.15 AM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-01-19 at 10.18.16 AM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.03 PM (2).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.03 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.04 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.04 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.05 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.05 PM (2).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.05 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.06 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.06 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.07 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.07 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.09 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.09 PM (2).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.09 PM (3).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.09 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.10 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.10 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.11 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.11 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.12 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.12 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.13 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.13 PM (2).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.13 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.14 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.14 PM (2).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.14 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.15 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.15 PM (2).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.15 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.16 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.16 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.17 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.17 PM (2).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.17 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.20 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.20 PM (2).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.20 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Image 2026-02-10 at 2.03.21 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Video 2026-01-24 at 1.52.41 PM (1).mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Video 2026-01-24 at 1.52.41 PM.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Video 2026-01-28 at 12.24.00 PM.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Video 2026-01-30 at 10.36.22 AM.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Video 2026-01-30 at 10.39.47 AM.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Life at Ali Zaib Orphan Home/WhatsApp Video 2026-01-30 at 10.40.06 AM.mp4', alt: 'Video', type: 'video' },] }, { title: 'News and media', media: [{ src: '/assets/Gallary/News and media/WhatsApp Video 2026-01-30 at 11.39.59 AM.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/News and media/WhatsApp Video 2026-01-30 at 11.39.59 AM1.mp4', alt: 'Video', type: 'video' },] }, { title: 'Recreational Visits', media: [{ src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.22 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.22 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.25 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.25 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.26 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.26 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.27 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.27 PM (2).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.27 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.28 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.28 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.29 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.30 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.30 PM (2).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.30 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.31 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.31 PM (2).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.31 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.32 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.32 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.33 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.33 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.34 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.34 PM (2).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.34 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.35 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.35 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.36 PM (1).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.36 PM (2).jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Image 2026-02-10 at 2.03.36 PM.jpeg', alt: 'Image', type: 'image' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Video 2026-02-10 at 2.03.17 PM.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Video 2026-02-10 at 2.03.20 PM.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Video 2026-02-10 at 2.03.22 PM.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Video 2026-02-10 at 2.03.25 PM.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Video 2026-02-10 at 2.03.26 PM.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Video 2026-02-10 at 2.03.28 PM.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Video 2026-02-10 at 2.03.29 PM.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Video 2026-02-10 at 2.03.31 PM.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Video 2026-02-10 at 2.03.33 PM.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Video 2026-02-10 at 2.03.34 PM.mp4', alt: 'Video', type: 'video' }, { src: '/assets/Gallary/Recreational Visits/WhatsApp Video 2026-02-10 at 2.04.21 PM.mp4', alt: 'Video', type: 'video' },] }];
 
 function Gallery() {
   const [selectedMedia, setSelectedMedia] = useState(null);
-  const [loadedImages, setLoadedImages] = useState(new Set());
-  const [loadedVideos, setLoadedVideos] = useState(new Set());
-  const videoRefs = useRef([]);
-
-
-  const openModal = (mediaItem) => {
-    setSelectedMedia(mediaItem);
-  };
-
-  const closeModal = () => {
-    setSelectedMedia(null);
-  };
-
-  const handleImageLoad = (index) => {
-    setLoadedImages(prev => new Set(prev).add(index));
-  };
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const index = parseInt(entry.target.getAttribute('data-index'));
-            if (MEDIA[index] && MEDIA[index].type === 'video') {
-              setLoadedVideos(prev => new Set(prev).add(index));
-              observer.unobserve(entry.target);
-            }
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    videoRefs.current.forEach((ref) => {
-      if (ref) observer.observe(ref);
-    });
-
-    return () => observer.disconnect();
-  }, []);
 
   return (
     <>
       <div className="container py-5">
-        <h2 className="text-center text-bold text-success mb-4">GALLERY</h2>
-        <div className="row">
-          {MEDIA.map((item, index) => (
-            <div key={index} className="col-12 col-sm-6 col-md-4 mb-4">
-              <div className="card">
-                {item.type === 'image' ? (
-                  <img
-                    src={item.src}
-                    alt={item.alt}
-                    className={`card-img-top img-fluid gallery-image ${loadedImages.has(index) ? 'loaded' : ''}`}
-                    style={{ height: '200px', objectFit: 'cover', cursor: 'pointer' }}
-                    onClick={() => openModal(item)}
-                    onLoad={() => handleImageLoad(index)}
-                    loading="lazy"
-                    width="300"
-                    height="200"
-                  />
-                ) : (
-                  <div style={{ position: 'relative' }} ref={(el) => (videoRefs.current[index] = el)} data-index={index}>
-                    {loadedVideos.has(index) ? (
-                      <video
+        <h2 className="text-center text-success fw-bold mb-5">
+          Our Gallery
+        </h2>
+
+        {SECTIONS.map((section, sectionIndex) => (
+          <div key={sectionIndex} className="mb-5">
+            <h3 className="text-center text-success mb-4">
+              {section.title}
+            </h3>
+
+            <div className="row">
+              {section.media.map((item, index) => (
+                <div
+                  key={`${sectionIndex}-${index}`}
+                  className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4"
+                >
+                  <div className="card shadow-sm border-0 h-100">
+
+                    {/* IMAGE */}
+                    {item.type === "image" && (
+                      <img
                         src={item.src}
+                        alt={item.alt}
                         className="card-img-top"
-                        style={{ height: '200px', objectFit: 'cover', cursor: 'pointer' }}
-                        onClick={() => openModal(item)}
-                        muted
-                        preload="metadata"
+                        style={{
+                          height: "220px",
+                          objectFit: "cover",
+                          cursor: "pointer",
+                        }}
+                        loading="lazy"
+                        onClick={() => setSelectedMedia(item)}
                       />
-                    ) : (
-                      <div style={{ height: '200px', backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <span>Loading...</span>
+                    )}
+
+                    {/* VIDEO */}
+                    {item.type === "video" && (
+                      <div style={{ position: "relative" }}>
+                        <video
+                          src={item.src}
+                          className="card-img-top"
+                          style={{
+                            height: "220px",
+                            objectFit: "cover",
+                            cursor: "pointer",
+                          }}
+                          muted
+                          preload="metadata"
+                          onClick={() => setSelectedMedia(item)}
+                        />
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "50%",
+                            left: "50%",
+                            transform: "translate(-50%, -50%)",
+                            fontSize: "38px",
+                            color: "#fff",
+                            pointerEvents: "none",
+                          }}
+                        >
+                          ▶
+                        </div>
                       </div>
                     )}
-                    <div
-                      style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        color: 'white',
-                        fontSize: '48px',
-                        opacity: 0.8,
-                        pointerEvents: 'none',
-                      }}
-                    >
-                      ▶
-                    </div>
+
                   </div>
-                )}
-              </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
 
+      {/* MODAL */}
       {selectedMedia && (
-        <div className="modal show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}>
-          <div className="modal-dialog modal-lg">
+        <div
+          className="modal show d-block"
+          style={{ backgroundColor: "rgba(0,0,0,0.85)" }}
+        >
+          <div className="modal-dialog modal-xl modal-dialog-centered">
             <div className="modal-content">
+
               <div className="modal-header">
                 <h5 className="modal-title">{selectedMedia.alt}</h5>
-                <button type="button" className="btn-close" onClick={closeModal}></button>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setSelectedMedia(null)}
+                ></button>
               </div>
+
               <div className="modal-body text-center">
-                {selectedMedia.type === 'image' ? (
-                  <img src={selectedMedia.src} alt={selectedMedia.alt} className="img-fluid" />
+                {selectedMedia.type === "image" ? (
+                  <img
+                    src={selectedMedia.src}
+                    alt={selectedMedia.alt}
+                    className="img-fluid"
+                  />
                 ) : (
-                  <video src={selectedMedia.src} controls className="img-fluid" />
+                  <video
+                    src={selectedMedia.src}
+                    controls
+                    autoPlay
+                    className="img-fluid"
+                  />
                 )}
               </div>
+
             </div>
           </div>
         </div>
@@ -156,4 +130,3 @@ function Gallery() {
 }
 
 export default Gallery;
-

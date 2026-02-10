@@ -2,6 +2,14 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 function About() {
+  const certificates = [
+    '/assets/Certificates/Details of Ali Zaib Orphan Home-1-7_page-0003.jpg',
+    '/assets/Certificates/Details of Ali Zaib Orphan Home-1-7_page-0004.jpg',
+    '/assets/Certificates/Details of Ali Zaib Orphan Home-1-7_page-0005.jpg',
+    '/assets/Certificates/Details of Ali Zaib Orphan Home-1-7_page-0006.jpg',
+    '/assets/Certificates/Details of Ali Zaib Orphan Home-1-7_page-0007.jpg',
+  ];
+
   return (
     <>
       {/* Hero Section */}
@@ -183,6 +191,33 @@ function About() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </motion.section>
+
+      {/* Recognition Section */}
+      <motion.section
+        className="py-5 bg-light"
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.4 }}
+        viewport={{ once: true }}
+      >
+        <div className="container">
+          <div className="row">
+            <div className="col-12 text-center mb-5">
+              <h2 className="text-success">Recognition</h2>
+              <p className="lead text-center">Our achievements and certifications.</p>
+            </div>
+          </div>
+          <div className="row g-4">
+            {certificates.map((cert, index) => (
+              <div key={index} className="col-md-6 col-lg-4">
+                <div className="card h-100 border-0 shadow-sm">
+                  <img src={cert} alt={`Certificate ${index + 1}`} className="card-img-top" />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </motion.section>

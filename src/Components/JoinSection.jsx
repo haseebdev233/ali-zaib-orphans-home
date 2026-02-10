@@ -55,7 +55,7 @@ function JoinSection() {
                     Building Brighter Futures
                   </h4>
                   <p className="mb-0" style={{ fontSize: '0.9rem', opacity: '0.9' }}>
-                    Join us in creating lasting impact
+                    Support us in creating lasting impact
                   </p>
                 </div>
               </div>
@@ -103,8 +103,9 @@ function JoinSection() {
 
               {/* Description Text */}
               <p className="lead mb-4" style={{
-                color: '#555',
+                color: 'black',
                 fontSize: '1.1rem',
+                fontWeight: '400',
                 lineHeight: '1.8'
               }}>
                 Ali Zaib Orphan Home believes that every child deserves a secure childhood and a hopeful future. Our foster care system ensures emotional stability while our educational and spiritual guidance builds confidence and discipline.
