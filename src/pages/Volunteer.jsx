@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ref as databaseRef, push, set, serverTimestamp } from 'firebase/database';
 import { db } from '../firebase';
 import { toast } from 'react-toastify';
+import ToastHost from "../Components/ToastHost";
 
 function Volunteer() {
   const [formData, setFormData] = useState({
@@ -71,7 +72,9 @@ function Volunteer() {
   };
 
   return (
-    <div className="container py-5">
+    <>
+      <ToastHost />
+      <div className="container py-5">
       <div className="row justify-content-center">
         <div className="col-12 col-md-8 col-lg-6">
           <div className="card shadow">
@@ -194,7 +197,8 @@ function Volunteer() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 

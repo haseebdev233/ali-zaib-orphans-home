@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Container, Row, Col, Card, Button, Alert, Badge } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import ToastHost from "../Components/ToastHost";
 
 // Child profiles data (cleaned and removed IDs 18,19,20)
 const childrenProfiles = [
@@ -578,6 +579,7 @@ function SponsorAnOrphan() {
 
   return (
     <div className="sponsor-orphan-page pt-5">
+      <ToastHost />
       {/* Hero Section */}
       <motion.section
         className="hero-section text-white d-flex align-items-center"

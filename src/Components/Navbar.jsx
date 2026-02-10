@@ -1,13 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import logo from '../assets/images/Ali-zaib-Logo.webp';
 
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-
-  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -16,15 +13,6 @@ function Navbar() {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
   const navItems = [
@@ -37,7 +25,7 @@ function Navbar() {
   ];
 
   return (
-    <motion.nav
+    <nav
       className="navbar navbar-expand-lg fixed-top bg-white"
       style={{
         top: scrolled ? "40px" : "90px", // top is 40px when scrolled, 90px when at top
@@ -110,7 +98,7 @@ function Navbar() {
         </Link>
 
       </div>
-    </motion.nav>
+    </nav>
   );
 }
 

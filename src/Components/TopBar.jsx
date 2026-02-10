@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 
 function TopBar() {
   const [visible, setVisible] = useState(true);
@@ -32,70 +31,64 @@ function TopBar() {
   ];
 
   return (
-    <AnimatePresence>
-      {visible && (
-        <motion.div
-          initial={{ y: -80 }}
-          animate={{ y: 0 }}
-          exit={{ y: -80 }}
-          transition={{ duration: 0.3 }}
-          className="bg-dark text-white"
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 1060,
-            height: "50px"
-          }}
-        >
-          <div className="container h-100 d-flex flex-column flex-md-row justify-content-between align-items-center">
-            <div className="small d-none d-sm-block">
-              <a
-                href="https://wa.me/923219920015"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white text-decoration-none"
-                style={{ transition: 'color 0.3s' }}
-                onMouseEnter={(e) => e.target.style.color = '#28a745'}
-                onMouseLeave={(e) => e.target.style.color = 'white'}
-              >
-                <i className="bi bi-telephone me-2 text-success"></i>
-                +92 321 9920015
-              </a>
-              <span className="mx-3">|</span>
-              <a
-                href="mailto:pmalizaib@gmail.com"
-                className="text-white text-decoration-none"
-                style={{ transition: 'color 0.3s' }}
-                onMouseEnter={(e) => e.target.style.color = '#28a745'}
-                onMouseLeave={(e) => e.target.style.color = 'white'}
-              >
-                <i className="bi bi-envelope me-2 text-success"></i>
-                pmalizaib@gmail.com
-              </a>
-            </div>
+    <div
+      className="bg-dark text-white"
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1060,
+        height: "50px",
+        transform: visible ? "translateY(0)" : "translateY(-100%)",
+        transition: "transform 0.3s ease",
+      }}
+    >
+      <div className="container h-100 d-flex flex-column flex-md-row justify-content-between align-items-center">
+        <div className="small d-none d-sm-block">
+          <a
+            href="https://wa.me/923219920015"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-white text-decoration-none"
+            style={{ transition: 'color 0.3s' }}
+            onMouseEnter={(e) => e.target.style.color = '#28a745'}
+            onMouseLeave={(e) => e.target.style.color = 'white'}
+          >
+            <i className="bi bi-telephone me-2 text-success"></i>
+            +92 321 9920015
+          </a>
+          <span className="mx-3">|</span>
+          <a
+            href="mailto:pmalizaib@gmail.com"
+            className="text-white text-decoration-none"
+            style={{ transition: 'color 0.3s' }}
+            onMouseEnter={(e) => e.target.style.color = '#28a745'}
+            onMouseLeave={(e) => e.target.style.color = 'white'}
+          >
+            <i className="bi bi-envelope me-2 text-success"></i>
+            pmalizaib@gmail.com
+          </a>
+        </div>
 
-            <div className="d-flex gap-2 gap-md-3">
-              {socialIcons.map((social, index) => (
-                <a
-                  key={index}
-                  href={social.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white text-decoration-none"
-                  style={{ transition: 'color 0.3s' }}
-                  onMouseEnter={(e) => e.target.style.color = '#28a745'}
-                  onMouseLeave={(e) => e.target.style.color = 'white'}
-                >
-                  <i className={social.icon}></i>
-                </a>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        <div className="d-flex gap-2 gap-md-3">
+          {socialIcons.map((social, index) => (
+            <a
+              key={index}
+              href={social.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white text-decoration-none"
+              style={{ transition: 'color 0.3s' }}
+              onMouseEnter={(e) => e.target.style.color = '#28a745'}
+              onMouseLeave={(e) => e.target.style.color = 'white'}
+            >
+              <i className={social.icon}></i>
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 

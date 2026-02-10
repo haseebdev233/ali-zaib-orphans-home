@@ -5,6 +5,7 @@ import { ref as databaseRef, push, set, get, serverTimestamp, runTransaction } f
 import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { db } from '../firebase';
 import { toast } from 'react-toastify';
+import ToastHost from "../Components/ToastHost";
 
 const SimpleDonationTypeSelector = ({ selectedType, setSelectedType }) => {
   return (
@@ -1837,6 +1838,7 @@ const DonationPageStyles = () => (
 export default function PremiumDonationPage() {
   return (
     <>
+      <ToastHost />
       <DonationPageStyles />
       <DonationPage />
     </>

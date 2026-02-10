@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 
 const HERO_IMAGES = [
   "/assets/images-webp/1.webp",
@@ -15,7 +14,6 @@ const HERO_IMAGES = [
 function Hero() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  const [isTouch, setIsTouch] = useState(false);
   const [isSlowConnection, setIsSlowConnection] = useState(false);
   const [isStatic, setIsStatic] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -32,11 +30,6 @@ function Hero() {
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
     return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
-
-  // Detect touch devices
-  useEffect(() => {
-    setIsTouch('ontouchstart' in window || navigator.maxTouchPoints > 0);
   }, []);
 
   // Detect slow connection
@@ -101,7 +94,7 @@ function Hero() {
 
   // CSS custom properties for responsive values
   const parallaxIntensity = isMobile ? 0.5 : 1;
-  const animationDuration = isMobile ? 1 : 2;
+  const fadeClass = prefersReducedMotion ? "" : "fade-in";
 
   return (
     <section
@@ -132,53 +125,46 @@ function Hero() {
         />
       )}
       {shouldAnimate ? (
-        <AnimatePresence>
-          <motion.div
-            key={currentImageIndex}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: animationDuration, ease: 'easeOut' }}
-            style={{
-              position: 'absolute',
-              top: '0',
-              left: 0,
-              width: '100%',
-              height: '100%',
-              zIndex: -1,
-              willChange: 'transform',
-            }}
-          >
-            <picture>
-              <source
-                media="(max-width: 768px)"
-                srcSet={HERO_IMAGES[currentImageIndex]}
-              />
-              <source
-                media="(max-width: 480px)"
-                srcSet={HERO_IMAGES[currentImageIndex]}
-              />
-              <img
-                src={HERO_IMAGES[currentImageIndex]}
-                alt="Hero background"
-                aria-hidden="true"
-                decoding="async"
-                fetchPriority={currentImageIndex === 0 ? "high" : "auto"}
-                loading={currentImageIndex === 0 ? "eager" : "lazy"}
-                width="1920"
-                height="1080"
-                sizes="100vw"
-                className="hero-bg-img"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: isMobile ? 'cover' : 'cover',
-                  willChange: 'transform',
-                }}
-              />
-            </picture>
-          </motion.div>
-        </AnimatePresence>
+        <div
+          key={currentImageIndex}
+          className="hero-bg-fade"
+          style={{
+            position: 'absolute',
+            top: '0',
+            left: 0,
+            width: '100%',
+            height: '100%',
+            zIndex: -1,
+          }}
+        >
+          <picture>
+            <source
+              media="(max-width: 768px)"
+              srcSet={HERO_IMAGES[currentImageIndex]}
+            />
+            <source
+              media="(max-width: 480px)"
+              srcSet={HERO_IMAGES[currentImageIndex]}
+            />
+            <img
+              src={HERO_IMAGES[currentImageIndex]}
+              alt="Hero background"
+              aria-hidden="true"
+              decoding="async"
+              fetchPriority={currentImageIndex === 0 ? "high" : "auto"}
+              loading={currentImageIndex === 0 ? "eager" : "lazy"}
+              width="1920"
+              height="1080"
+              sizes="100vw"
+              className="hero-bg-img"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: isMobile ? 'cover' : 'cover',
+              }}
+            />
+          </picture>
+        </div>
       ) : (
         <div
           style={{
@@ -214,35 +200,24 @@ function Hero() {
         </div>
       )}
       <div className="container text-center" style={{ position: 'relative', zIndex: 1 }}>
-        <motion.h1
-          className="fw-bold text-danger display-5"
+        <h1
+          className={`fw-bold text-danger display-5 ${fadeClass}`}
           style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5), 0 0 10px rgba(255,255,0,0.8), 0 0 20px rgba(255,255,0,0.6)' }}
-          initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
-          animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
         >
           Ali Zaib Orphan Home
           (Aashiana)
-        </motion.h1>
-        <motion.p
-          className="mt-3 text-center fs-3 fw-semibold"
+        </h1>
+        <p
+          className={`mt-3 text-center fs-3 fw-semibold ${fadeClass}`}
           style={{ textShadow: '2px 2px 4px yellow'}}
-          initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
-          animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
         >
           Caring Orphans, Building Futures
-        </motion.p>
-        <motion.div
-          className="mt-4"
-          initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
-          animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-        >
+        </p>
+        <div className={`mt-4 ${fadeClass}`}>
           <Link to="/donate" className="btn btn-success px-4 me-3 mb-2 rounded-pill fw-bold">
             <i className="bi bi-heart-fill me-2"></i>DONATE NOW
           </Link>
-        </motion.div>
+        </div>
       </div>
       <style jsx>{`
         @keyframes loading {

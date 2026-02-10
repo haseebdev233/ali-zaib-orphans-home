@@ -3,6 +3,7 @@ import { ref as databaseRef, push, set, serverTimestamp } from 'firebase/databas
 import { db } from '../firebase';
 import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
+import ToastHost from "../Components/ToastHost";
 
 function CampusAmbassador() {
   const [formData, setFormData] = useState({
@@ -82,12 +83,14 @@ function CampusAmbassador() {
   };
 
   return (
-    <motion.div
-      className="container py-5"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.8 }}
-    >
+    <>
+      <ToastHost />
+      <motion.div
+        className="container py-5"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+      >
       <div className="row justify-content-center">
         <div className="col-12 col-md-10 col-lg-8">
           {/* Header Section */}
@@ -399,7 +402,8 @@ function CampusAmbassador() {
           </div>
         </div>
       </div>
-    </motion.div>
+      </motion.div>
+    </>
   );
 }
 
