@@ -47,8 +47,8 @@ function Navbar() {
             src={logo}
             alt="Ali Zaib Orphan Home Logo"
             style={{ height: '40px', marginRight: '10px' }}
-            width="160"
-            height="40"
+            width="80"
+            height="30"
             decoding="async"
             loading="eager"
           />
