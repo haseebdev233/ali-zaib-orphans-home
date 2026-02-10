@@ -6,6 +6,7 @@ import Navbar from "./Components/Navbar";
 import HadithHeadline from "./Components/HadithHeadline";
 import Footer from "./Components/Footer";
 import Loader from "./Components/Loader";
+import ScrollToTop from "./Components/ScrollToTop";
 
 // Lazy load page components for code splitting
 const Home = lazy(() => import("./pages/Home"));
@@ -25,6 +26,8 @@ const SupportUs = lazy(() => import("./pages/SupportUs"));
 function App() {
   return (
     <Router>
+
+      <ScrollToTop />
 
       <TopBar />
       <HadithHeadline />
