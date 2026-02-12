@@ -20,7 +20,6 @@ const Contact = lazy(() => import("./pages/Contact"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const SponsorAnOrphan = lazy(() => import("./pages/SponsorAnOrphan"));
-const Zakat = lazy(() => import("./pages/Zakat"));
 const SupportUs = lazy(() => import("./pages/SupportUs"));
 
 function App() {
@@ -47,7 +46,6 @@ function App() {
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/sponsor-an-orphan" element={<SponsorAnOrphan />} />
-            <Route path="/zakat" element={<Zakat />} />
             <Route path="/support-us" element={<SupportUs />} />
           </Routes>
         </Suspense>
