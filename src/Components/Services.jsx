@@ -46,20 +46,6 @@ function Services() {
                   <div className="row g-4">
                     {[
                       { 
-                        icon: 'bi-book', 
-                        title: 'Education', 
-                        desc: 'School fees & supplies',
-                        color: '#3498db',
-                        bgColor: '#e3f2fd'
-                      },
-                      { 
-                        icon: 'bi-egg-fried', 
-                        title: 'Nutrition', 
-                        desc: 'Healthy meals daily',
-                        color: '#4CAF50',
-                        bgColor: '#e8f5e9'
-                      },
-                      { 
                         icon: 'bi-house-heart', 
                         title: 'Shelter', 
                         desc: 'Safe living space',
@@ -67,11 +53,11 @@ function Services() {
                         bgColor: '#fff3e0'
                       },
                       { 
-                        icon: 'bi-heart-pulse', 
-                        title: 'Healthcare', 
-                        desc: 'Medical checkups',
-                        color: '#E91E63',
-                        bgColor: '#fce4ec'
+                        icon: 'bi-egg-fried', 
+                        title: 'Food', 
+                        desc: 'Healthy meals daily',
+                        color: '#4CAF50',
+                        bgColor: '#e8f5e9'
                       },
                       { 
                         icon: 'bi-tags', 
@@ -81,8 +67,22 @@ function Services() {
                         bgColor: '#f3e5f5'
                       },
                       { 
+                        icon: 'bi-book', 
+                        title: 'Education & Character Building', 
+                        desc: 'School fees & supplies',
+                        color: '#3498db',
+                        bgColor: '#e3f2fd'
+                      },
+                      { 
+                        icon: 'bi-heart-pulse', 
+                        title: 'Healthcare', 
+                        desc: 'Medical checkups',
+                        color: '#E91E63',
+                        bgColor: '#fce4ec'
+                      },
+                      { 
                         icon: 'bi-emoji-smile', 
-                        title: 'Happiness', 
+                        title: 'Mentoring & Career Building', 
                         desc: 'Recreational activities',
                         color: '#00BCD4',
                         bgColor: '#e0f7fa'

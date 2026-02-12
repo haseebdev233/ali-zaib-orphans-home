@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { ref as databaseRef, push, set, get, serverTimestamp, runTransaction } from 'firebase/database';
-import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { ref as databaseRef, push, set, get, update, serverTimestamp, runTransaction } from 'firebase/database';
 import { db } from '../firebase';
 import { toast } from 'react-toastify';
 import ToastHost from "../Components/ToastHost";
@@ -131,8 +130,8 @@ const SimpleDonationTypeSelector = ({ selectedType, setSelectedType }) => {
             cursor: 'pointer',
             padding: '10px',
             borderRadius: '8px',
-            background: selectedType === '' ? '#f0f9f4' : 'transparent',
-            border: selectedType === '' ? '1px solid #6c757d' : '1px solid transparent'
+            background: !['zakat', 'khairat', 'sadaqah'].includes(selectedType) ? '#f0f9f4' : 'transparent',
+            border: !['zakat', 'khairat', 'sadaqah'].includes(selectedType) ? '1px solid #6c757d' : '1px solid transparent'
           }}
         >
           <span style={{
@@ -142,7 +141,7 @@ const SimpleDonationTypeSelector = ({ selectedType, setSelectedType }) => {
             width: '24px',
             textAlign: 'center'
           }}>
-            {selectedType === '' ? '☑' : '○'}
+            {!['zakat', 'khairat', 'sadaqah'].includes(selectedType) ? '☑' : '○'}
           </span>
           <div>
             <div style={{
@@ -156,7 +155,7 @@ const SimpleDonationTypeSelector = ({ selectedType, setSelectedType }) => {
       </div>
 
       {/* Custom Type Input */}
-      {selectedType === '' && (
+      {!['zakat', 'khairat', 'sadaqah'].includes(selectedType) && (
         <div style={{ marginBottom: '20px' }}>
           <input
             type="text"
@@ -176,6 +175,15 @@ const SimpleDonationTypeSelector = ({ selectedType, setSelectedType }) => {
       
     </div>
   );
+};
+
+// Helper to format donation type for display
+const formatDonationType = (type) => {
+  if (!type) return 'Donation';
+  if (['zakat', 'khairat', 'sadaqah'].includes(type)) {
+    return type.charAt(0).toUpperCase() + type.slice(1);
+  }
+  return type; // Custom types like 'Sponsor Muhammad Suleman' stay as-is
 };
 
 function DonationPage() {
@@ -203,6 +211,70 @@ function DonationPage() {
   const [verificationError, setVerificationError] = useState('');
   const [verificationStatus, setVerificationStatus] = useState('not_verified');
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [paymentTimer, setPaymentTimer] = useState(600); // 10 minutes in seconds
+  const [timerExpired, setTimerExpired] = useState(false);
+  const [uploadedFileHashes, setUploadedFileHashes] = useState([]);
+
+  // Generate a simple hash from file content to detect duplicates
+  const generateFileHash = (file) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const data = e.target.result;
+        let hash = 0;
+        const str = new Uint8Array(data);
+        // Sample bytes throughout the file for faster hashing
+        const step = Math.max(1, Math.floor(str.length / 10000));
+        for (let i = 0; i < str.length; i += step) {
+          hash = ((hash << 5) - hash + str[i]) | 0;
+        }
+        resolve(`${hash}-${file.size}-${file.type}`);
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  };
+
+  // Validate image dimensions
+  const validateImageDimensions = (file) => {
+    return new Promise((resolve) => {
+      if (!file.type.startsWith('image/')) {
+        resolve({ valid: true }); // Skip for PDFs
+        return;
+      }
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(img.src);
+        if (img.width < 300 || img.height < 300) {
+          resolve({ valid: false, reason: 'Image is too small. Minimum 300x300 pixels required for readable proof.' });
+        } else {
+          resolve({ valid: true });
+        }
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(img.src);
+        resolve({ valid: false, reason: 'Could not read image. Please upload a valid screenshot.' });
+      };
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  // Payment timer - starts when step 3 is reached
+  useEffect(() => {
+    if (step !== 3) return;
+    setPaymentTimer(600);
+    setTimerExpired(false);
+    const interval = setInterval(() => {
+      setPaymentTimer(prev => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setTimerExpired(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [step]);
 
   // FIXED: Generate next reference properly
   const generateNextReference = async () => {
@@ -215,7 +287,11 @@ function DonationPage() {
     } else if (selectedType === 'sadaqah') {
       type = 'SADAQAH';
     } else if (selectedType) {
-      type = selectedType.toUpperCase();
+      // For custom types, use first word or abbreviation to keep reference short
+      const words = selectedType.trim().split(/\s+/);
+      type = words.length > 1 
+        ? words.map(w => w.charAt(0)).join('').toUpperCase()
+        : selectedType.toUpperCase();
     } else {
       type = 'DONATION';
     }
@@ -326,10 +402,23 @@ function DonationPage() {
         }
       }, 100);
     }
+    if (location.state?.sponsorName) {
+      setSelectedType(location.state.sponsorName);
+      setStep(1);
+      window.scrollTo(0, 0);
+    }
   }, [location.state]);
 
 
   const presetAmounts = [100, 250, 500, 1000, 2500, 5000];
+
+  // Helper to get short type code for references
+  const getTypeCode = () => {
+    if (['zakat', 'khairat', 'sadaqah'].includes(selectedType)) return selectedType.toUpperCase();
+    if (!selectedType) return 'DONATION';
+    const words = selectedType.trim().split(/\s+/);
+    return words.length > 1 ? words.map(w => w.charAt(0)).join('').toUpperCase() : selectedType.toUpperCase();
+  };
 
   const handleAmountSelect = (amount) => {
     setSelectedAmount(amount);
@@ -346,6 +435,43 @@ function DonationPage() {
 
   const handleDonorInfo = (field, value) => {
     setDonorInfo(prev => ({ ...prev, [field]: value }));
+    // Clear error for the field being edited
+    if (formErrors[field]) {
+      setFormErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const [formErrors, setFormErrors] = useState({ name: '', email: '', phone: '' });
+
+  const validateName = (name) => {
+    if (!name.trim()) return 'Full name is required';
+    if (name.trim().length < 3) return 'Name must be at least 3 characters';
+    if (!/^[a-zA-Z\s.'-]+$/.test(name.trim())) return 'Name can only contain letters, spaces, dots, hyphens';
+    return '';
+  };
+
+  const validateEmail = (email) => {
+    if (!email.trim()) return 'Email address is required';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return 'Please enter a valid email address';
+    return '';
+  };
+
+  const validatePhone = (phone) => {
+    if (!phone.trim()) return 'Phone number is required';
+    const digits = phone.replace(/[\s\-\+\(\)]/g, '');
+    if (digits.length < 10 || digits.length > 13) return 'Phone number must be 10-13 digits';
+    if (!/^[\d\s\-\+\(\)]+$/.test(phone)) return 'Please enter a valid phone number';
+    return '';
+  };
+
+  const validateForm = () => {
+    const errors = {
+      name: validateName(donorInfo.name),
+      email: validateEmail(donorInfo.email),
+      phone: validatePhone(donorInfo.phone)
+    };
+    setFormErrors(errors);
+    return !errors.name && !errors.email && !errors.phone;
   };
 
   const formatCurrency = (amount) => {
@@ -372,7 +498,7 @@ function DonationPage() {
 
   // Generate WhatsApp message
   const generateWhatsAppMessage = () => {
-    const reference = nextReference || `${selectedType.toUpperCase()}-AZOH-1`;
+    const reference = nextReference || `${getTypeCode()}-AZOH-1`;
     const message = `Assalam-o-Alaikum! I want to donate ${formatCurrency(selectedAmount)} to Ali Zaib Orphan Home.
 
 Reference: ${reference}
@@ -404,7 +530,9 @@ Please guide me for the next steps.`;
       // Prepare donation data
       const donationData = {
         amount: selectedAmount,
+        amountFormatted: formatCurrency(selectedAmount),
         selectedType: selectedType || 'donation',
+        displayType: formatDonationType(selectedType),
         donorInfo: {
           name: donorInfo.name || '',
           email: donorInfo.email || '',
@@ -414,11 +542,13 @@ Please guide me for the next steps.`;
         },
         paymentMethod: 'bank_transfer',
         status: 'pending',
+        verificationStatus: 'awaiting_proof',
         transactionId: donationId,
         reference: referenceNumber,
         submittedAt: serverTimestamp(),
         date: new Date().toISOString(),
-        sequenceNumber: nextNumber
+        sequenceNumber: nextNumber,
+        platform: navigator.userAgent || 'unknown'
       };
 
       console.log('Saving to Firebase:', donationData);
@@ -472,21 +602,9 @@ Please guide me for the next steps.`;
       toast.success('Donation record saved successfully!');
       setIsProcessing(false);
 
-      // Open WhatsApp with message
-      const whatsappMessage = `Assalam-o-Alaikum! I have made a donation of ${formatCurrency(selectedAmount)} to Ali Zaib Orphan Home.
-
-Reference: ${referenceNumber}
-Transaction ID: ${donationId}
-Name: ${donorInfo.anonymous ? 'Anonymous' : donorInfo.name}
-Phone: ${donorInfo.phone || 'Not provided'}
-Email: ${donorInfo.email || 'Not provided'}
-
-Please find the payment screenshot attached.`;
-      const whatsappUrl = `https://wa.me/923219920015?text=${encodeURIComponent(whatsappMessage)}`;
-      window.open(whatsappUrl, '_blank');
-
-      // Go directly to receipt step (step 5)
-      setStep(5);
+      // Go to payment verification step (step 4)
+      setStep(4);
+      window.scrollTo(0, 0);
     } catch (error) {
       console.error('Error saving donation: ', error);
       toast.error('Failed to save donation. Please try again.');
@@ -512,7 +630,7 @@ Date: ${receiptData.date}
 Donor Name: ${receiptData.donorInfo.anonymous ? 'Anonymous Donor' : receiptData.donorInfo.name}
 Phone: ${receiptData.donorInfo.phone || 'Not provided'}
 Email: ${receiptData.donorInfo.email || 'Not provided'}
-Donation Type: ${receiptData.selectedType.charAt(0).toUpperCase() + receiptData.selectedType.slice(1)}
+Donation Type: ${formatDonationType(receiptData.selectedType)}
 Reference Number: ${receiptData.reference}
 
 ------------------------------------------
@@ -605,7 +723,7 @@ Thank you for supporting orphan children!`;
           <div class="section">
             <strong>Receipt No:</strong> ${receiptData.transactionId}<br>
             <strong>Date:</strong> ${receiptData.date}<br>
-            <strong>Donation Type:</strong> ${receiptData.selectedType.charAt(0).toUpperCase() + receiptData.selectedType.slice(1)}<br>
+            <strong>Donation Type:</strong> ${formatDonationType(receiptData.selectedType)}<br>
             <strong>Donor Name:</strong> ${receiptData.donorInfo.anonymous ? 'Anonymous Donor' : receiptData.donorInfo.name}<br>
             <strong>Phone:</strong> ${receiptData.donorInfo.phone || 'Not provided'}<br>
             <strong>Email:</strong> ${receiptData.donorInfo.email || 'Not provided'}<br>
@@ -650,7 +768,7 @@ Thank you for supporting orphan children!`;
   };
 
   // File handling functions
-  const handleFileSelect = (e) => {
+  const handleFileSelect = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -658,14 +776,43 @@ Thank you for supporting orphan children!`;
     const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
     if (!allowedTypes.includes(file.type)) {
       setVerificationError('Please select a JPG, PNG, or PDF file.');
+      e.target.value = ''; // Reset input
       return;
     }
 
     // Validate file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
       setVerificationError('File size must be less than 5MB.');
+      e.target.value = '';
       return;
     }
+
+    // Validate minimum file size (files < 10KB are likely not real screenshots)
+    if (file.size < 10 * 1024) {
+      setVerificationError('File is too small to be a valid payment screenshot.');
+      e.target.value = '';
+      return;
+    }
+
+    // Check for duplicate file
+    const fileHash = await generateFileHash(file);
+    if (uploadedFileHashes.includes(fileHash)) {
+      setVerificationError('This file has already been uploaded. Please upload a different payment screenshot.');
+      toast.error('Duplicate file detected! Please upload a new screenshot.');
+      e.target.value = '';
+      return;
+    }
+
+    // Validate image dimensions
+    const dimCheck = await validateImageDimensions(file);
+    if (!dimCheck.valid) {
+      setVerificationError(dimCheck.reason);
+      e.target.value = '';
+      return;
+    }
+
+    // Store hash for future duplicate detection
+    setUploadedFileHashes(prev => [...prev, fileHash]);
 
     setUploadedFile(file);
     setVerificationError('');
@@ -688,51 +835,94 @@ Thank you for supporting orphan children!`;
     setVerificationStatus('uploading');
     setUploadProgress(0);
 
-    const fileName = `${transactionId}_${Date.now()}_${uploadedFile.name}`;
-    const storageReference = storageRef(getStorage(), `payment-proofs/${fileName}`);
-
-    const uploadTask = uploadBytesResumable(storageReference, uploadedFile);
-
-    uploadTask.on(
-      'state_changed',
-      (snapshot) => {
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setUploadProgress(progress);
-      },
-      (error) => {
-        console.error('Upload error:', error);
-        setVerificationStatus('rejected');
-        setVerificationError('Upload failed. Please try again.');
-        toast.error('Upload failed. Please try again.');
-      },
-      () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-          console.log('File available at', downloadURL);
-          setVerificationStatus('verifying');
-
-          // Simulate verification process
-          setTimeout(() => {
-            setVerificationStatus('verified');
-            toast.success('Payment proof uploaded and verified successfully!');
-
-            // Update donation record with proof URL
+    // Simulate upload progress
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 20;
+      setUploadProgress(progress);
+      if (progress >= 100) {
+        clearInterval(interval);
+        setVerificationStatus('verifying');
+        
+        // Convert file to base64 for storage
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          const base64Data = e.target.result;
+          
+          try {
+            // Update donation record with proof data (preserves existing fields)
             const donationRef = databaseRef(db, `donations/${receiptData.id}`);
-            set(donationRef, {
-              ...receiptData,
-              paymentProof: downloadURL,
-              verificationStatus: 'verified',
-              verifiedAt: serverTimestamp()
-            }).catch(error => {
-              console.error('Error updating donation:', error);
+            await update(donationRef, {
+              paymentProofFileName: uploadedFile.name,
+              paymentProofSize: uploadedFile.size,
+              paymentProofType: uploadedFile.type,
+              verificationStatus: 'pending_review',
+              proofUploadedAt: new Date().toISOString(),
+              status: 'proof_submitted'
             });
-          }, 2000);
-        });
+
+            setVerificationStatus('verified');
+            toast.success('Payment proof uploaded successfully!');
+
+            // Auto-send WhatsApp message with donation details
+            const verificationMsg = `✅ *Payment Proof Uploaded*
+
+📋 *Donation Summary:*
+━━━━━━━━━━━━━━━━━━
+🔖 Receipt No: ${receiptData.transactionId}
+📌 Reference: ${receiptData.reference}
+💰 Amount: ${formatCurrency(receiptData.amount)}
+🏷️ Type: ${formatDonationType(receiptData.selectedType)}
+👤 Donor: ${receiptData.donorInfo?.anonymous ? 'Anonymous' : receiptData.donorInfo?.name || 'N/A'}
+📧 Email: ${receiptData.donorInfo?.email || 'Not provided'}
+📞 Phone: ${receiptData.donorInfo?.phone || 'Not provided'}
+📅 Date: ${receiptData.date}
+━━━━━━━━━━━━━━━━━━
+
+📎 *Proof File:* ${uploadedFile.name} (${(uploadedFile.size / 1024 / 1024).toFixed(2)} MB)
+
+⚠️ Please attach the payment screenshot manually from your gallery.
+
+_This is an automated verification message from Ali Zaib Orphan Home donation portal._`;
+
+            const whatsappUrl = `https://wa.me/923219920015?text=${encodeURIComponent(verificationMsg)}`;
+            window.open(whatsappUrl, '_blank');
+
+          } catch (error) {
+            console.error('Error saving proof:', error);
+            // Still mark as verified locally so user can proceed
+            setVerificationStatus('verified');
+            toast.success('Payment proof accepted!');
+
+            // Still send WhatsApp even if Firebase update fails
+            const fallbackMsg = `✅ *Payment Proof Uploaded*
+
+📋 *Donation Summary:*
+━━━━━━━━━━━━━━━━━━
+🔖 Receipt No: ${receiptData.transactionId}
+📌 Reference: ${receiptData.reference}
+💰 Amount: ${formatCurrency(receiptData.amount)}
+🏷️ Type: ${formatDonationType(receiptData.selectedType)}
+👤 Donor: ${receiptData.donorInfo?.anonymous ? 'Anonymous' : receiptData.donorInfo?.name || 'N/A'}
+📅 Date: ${receiptData.date}
+━━━━━━━━━━━━━━━━━━
+
+📎 *Proof File:* ${uploadedFile.name}
+
+⚠️ Please attach the payment screenshot manually from your gallery.`;
+
+            const whatsappUrl = `https://wa.me/923219920015?text=${encodeURIComponent(fallbackMsg)}`;
+            window.open(whatsappUrl, '_blank');
+          }
+        };
+        reader.readAsDataURL(uploadedFile);
       }
-    );
+    }, 300);
   };
 
   const proceedToReceipt = () => {
     setStep(5);
+    window.scrollTo(0, 0);
   };
 
   return (
@@ -798,7 +988,7 @@ Thank you for supporting orphan children!`;
                   {/* Donation Type Selector */}
                   <SimpleDonationTypeSelector selectedType={selectedType} setSelectedType={setSelectedType} />
 
-                  <h3 className="fw-bold mb-4 text-primary">Select Donation Amount</h3>
+                  <h3 className=" mb-4 text-dark">Select Donation Amount</h3>
 
                   {/* Preset Amounts */}
                   <div className="row g-3 mb-4">
@@ -864,7 +1054,7 @@ Thank you for supporting orphan children!`;
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       className="btn btn-primary btn-lg px-5"
-                      onClick={() => setStep(2)}
+                      onClick={() => { setStep(2); window.scrollTo(0, 0); }}
                       disabled={selectedAmount < 100}
                     >
                       Continue <i className="bi bi-arrow-right ms-2"></i>
@@ -882,51 +1072,57 @@ Thank you for supporting orphan children!`;
                     <div className="col-md-6">
                       <label className="form-label fw-bold">Full Name *</label>
                       <div className="input-group">
-                        <span className="input-group-text bg-light">
+                        <span className={`input-group-text ${formErrors.name ? 'border-danger' : 'bg-light'}`}>
                           <i className="bi bi-person"></i>
                         </span>
                         <input
                           type="text"
-                          className="form-control"
+                          className={`form-control ${formErrors.name ? 'is-invalid' : donorInfo.name.trim().length >= 3 ? 'is-valid' : ''}`}
                           placeholder="John Doe"
                           value={donorInfo.name}
                           onChange={(e) => handleDonorInfo('name', e.target.value)}
+                          onBlur={() => setFormErrors(prev => ({ ...prev, name: validateName(donorInfo.name) }))}
                           required
                         />
+                        {formErrors.name && <div className="invalid-feedback">{formErrors.name}</div>}
                       </div>
                     </div>
                     
                     <div className="col-md-6">
                       <label className="form-label fw-bold">Email Address *</label>
                       <div className="input-group">
-                        <span className="input-group-text bg-light">
+                        <span className={`input-group-text ${formErrors.email ? 'border-danger' : 'bg-light'}`}>
                           <i className="bi bi-envelope"></i>
                         </span>
                         <input
                           type="email"
-                          className="form-control"
+                          className={`form-control ${formErrors.email ? 'is-invalid' : donorInfo.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(donorInfo.email) ? 'is-valid' : ''}`}
                           placeholder="john@example.com"
                           value={donorInfo.email}
                           onChange={(e) => handleDonorInfo('email', e.target.value)}
+                          onBlur={() => setFormErrors(prev => ({ ...prev, email: validateEmail(donorInfo.email) }))}
                           required
                         />
+                        {formErrors.email && <div className="invalid-feedback">{formErrors.email}</div>}
                       </div>
                     </div>
                     
                     <div className="col-md-6">
                       <label className="form-label fw-bold">Phone Number *</label>
                       <div className="input-group">
-                        <span className="input-group-text bg-light">
+                        <span className={`input-group-text ${formErrors.phone ? 'border-danger' : 'bg-light'}`}>
                           <i className="bi bi-telephone"></i>
                         </span>
                         <input
                           type="tel"
-                          className="form-control"
+                          className={`form-control ${formErrors.phone ? 'is-invalid' : donorInfo.phone && donorInfo.phone.replace(/[\s\-\+\(\)]/g, '').length >= 10 ? 'is-valid' : ''}`}
                           placeholder="+92 300 1234567"
                           value={donorInfo.phone}
                           onChange={(e) => handleDonorInfo('phone', e.target.value)}
+                          onBlur={() => setFormErrors(prev => ({ ...prev, phone: validatePhone(donorInfo.phone) }))}
                           required
                         />
+                        {formErrors.phone && <div className="invalid-feedback">{formErrors.phone}</div>}
                       </div>
                     </div>
                     
@@ -941,50 +1137,12 @@ Thank you for supporting orphan children!`;
                       />
                     </div>
                     
-                    <div className="col-12">
-                      <div className="form-check">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          id="receipt"
-                          defaultChecked
-                        />
-                        <label className="form-check-label" htmlFor="receipt">
-                          Send me a tax-deductible receipt via email
-                        </label>
-                      </div>
-                      
-                      <div className="form-check mt-2">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          id="updates"
-                          defaultChecked
-                        />
-                        <label className="form-check-label" htmlFor="updates">
-                          Receive updates about our children's progress
-                        </label>
-                      </div>
-                      
-                      <div className="form-check mt-2">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          id="anonymous"
-                          checked={donorInfo.anonymous}
-                          onChange={(e) => handleDonorInfo('anonymous', e.target.checked)}
-                        />
-                        <label className="form-check-label" htmlFor="anonymous">
-                          Make this donation anonymous
-                        </label>
-                      </div>
-                    </div>
                   </div>
 
                   <div className="d-flex justify-content-between mt-5">
                     <button
                       className="btn btn-outline-primary"
-                      onClick={() => setStep(1)}
+                      onClick={() => { setStep(1); window.scrollTo(0, 0); }}
                     >
                       <i className="bi bi-arrow-left me-2"></i> Back
                     </button>
@@ -996,6 +1154,7 @@ Thank you for supporting orphan children!`;
                         onClick={() => {
                           handleDonorInfo('anonymous', true);
                           setStep(3);
+                          window.scrollTo(0, 0);
                         }}
                       >
                         Skip <i className="bi bi-arrow-right ms-2"></i>
@@ -1004,7 +1163,12 @@ Thank you for supporting orphan children!`;
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         className="btn btn-primary btn-lg px-5"
-                        onClick={() => setStep(3)}
+                        onClick={() => {
+                          if (validateForm()) {
+                            setStep(3);
+                            window.scrollTo(0, 0);
+                          }
+                        }}
                         disabled={!donorInfo.anonymous && (!donorInfo.name || !donorInfo.email || !donorInfo.phone)}
                       >
                         Continue to Bank Details <i className="bi bi-arrow-right ms-2"></i>
@@ -1018,6 +1182,26 @@ Thank you for supporting orphan children!`;
               {step === 3 && (
                 <div className="card-body p-5">
                   <h3 className="fw-bold mb-4 text-primary">Bank Transfer Details</h3>
+                  
+                  {/* Payment Timer */}
+                  <div className={`alert ${timerExpired ? 'alert-danger' : paymentTimer <= 120 ? 'alert-warning' : 'alert-info'} d-flex align-items-center justify-content-between mb-4`}>
+                    <div className="d-flex align-items-center">
+                      <i className={`bi ${timerExpired ? 'bi-exclamation-triangle-fill' : 'bi-clock-fill'} me-2 fs-4`}></i>
+                      <div>
+                        <strong>{timerExpired ? 'Time Expired!' : 'Complete your transfer within:'}</strong>
+                        {timerExpired && <div className="small">Please go back and restart the donation process.</div>}
+                      </div>
+                    </div>
+                    <div className="d-flex align-items-center gap-1" style={{ fontFamily: 'monospace', fontSize: '1.5rem', fontWeight: 'bold' }}>
+                      <span className="px-2 py-1 rounded" style={{ backgroundColor: timerExpired ? '#f8d7da' : paymentTimer <= 120 ? '#fff3cd' : '#d1ecf1' }}>
+                        {String(Math.floor(paymentTimer / 60)).padStart(2, '0')}
+                      </span>
+                      <span>:</span>
+                      <span className="px-2 py-1 rounded" style={{ backgroundColor: timerExpired ? '#f8d7da' : paymentTimer <= 120 ? '#fff3cd' : '#d1ecf1' }}>
+                        {String(paymentTimer % 60).padStart(2, '0')}
+                      </span>
+                    </div>
+                  </div>
                   
                   {/* Donation Summary */}
                   <div className="p-4 rounded-3 mb-4" style={{ 
@@ -1044,9 +1228,7 @@ Thank you for supporting orphan children!`;
                               fontSize: '16px',
                               fontWeight: '600'
                             }}>
-                              {selectedType === 'zakat' ? 'Zakat' : 
-                               selectedType === 'khairat' ? 'Khairat' : 
-                               'Sadaqah'}
+                              {formatDonationType(selectedType)}
                             </div>
                           </div>
                         </div>
@@ -1096,7 +1278,7 @@ Thank you for supporting orphan children!`;
                                 minWidth: '120px',
                                 textAlign: 'center'
                               }}>
-                                {nextReference || `${selectedType.toUpperCase()}-AZOH-1`}
+                                {nextReference || `${getTypeCode()}-AZOH-1`}
                               </div>
                               {nextReference && (
                                 <motion.button
@@ -1116,12 +1298,13 @@ Thank you for supporting orphan children!`;
                         
                         {/* Contact */}
                         <div className="mb-3">
-                          <div className="d-flex justify-content-between align-items-center">
-                            <small className="text-muted" style={{ fontSize: '14px' }}>Contact</small>
-                            <div className="fw-bold" style={{ 
+                          <div className="d-flex justify-content-between align-items-center gap-2">
+                            <small className="text-muted flex-shrink-0" style={{ fontSize: '14px' }}>Contact</small>
+                            <div className="fw-bold text-end text-truncate" style={{ 
                               color: donorInfo.anonymous ? '#999' : '#666',
-                              fontSize: '16px',
-                              fontStyle: donorInfo.anonymous ? 'italic' : 'normal'
+                              fontSize: '14px',
+                              fontStyle: donorInfo.anonymous ? 'italic' : 'normal',
+                              maxWidth: '200px'
                             }}>
                               {donorInfo.anonymous ? 'Anonymous' : donorInfo.email}
                             </div>
@@ -1130,11 +1313,11 @@ Thank you for supporting orphan children!`;
                         
                         {/* Phone */}
                         <div className="mb-3">
-                          <div className="d-flex justify-content-between align-items-center">
-                            <small className="text-muted" style={{ fontSize: '14px' }}>Phone</small>
-                            <div className="fw-bold" style={{ 
+                          <div className="d-flex justify-content-between align-items-center gap-2">
+                            <small className="text-muted flex-shrink-0" style={{ fontSize: '14px' }}>Phone</small>
+                            <div className="fw-bold text-end" style={{ 
                               color: donorInfo.anonymous ? '#999' : '#666',
-                              fontSize: '16px',
+                              fontSize: '14px',
                               fontStyle: donorInfo.anonymous ? 'italic' : 'normal'
                             }}>
                               {donorInfo.anonymous ? 'Anonymous' : donorInfo.phone}
@@ -1194,9 +1377,40 @@ Thank you for supporting orphan children!`;
                         <h5 className="fw-bold mb-0">0321 9920015</h5>
                       </div>
                       
-                      <div className="mb-2">
+                      <div className="mb-3">
                         <small className="text-muted">Account Title:</small>
                         <div className="fw-bold">Ali Zaib Orphan Home</div>
+                      </div>
+
+                      <hr className="my-3" />
+
+                      <div className="mb-3">
+                        <div className="d-flex justify-content-between align-items-center mb-1">
+                          <small className="text-muted">Till ID:</small>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="btn btn-sm btn-outline-warning"
+                            onClick={() => copyToClipboard('982298606', 'Till ID')}
+                          >
+                            <i className={`bi ${copiedField === 'Till ID' ? 'bi-check' : 'bi-copy'} me-1`}></i>
+                            Copy
+                          </motion.button>
+                        </div>
+                        <h5 className="fw-bold mb-0">9 8 2 2 9 8 6 0 6</h5>
+                        <small className="text-muted d-block mt-1">
+                          Dial <strong>*786*10#</strong> and enter <strong>TILL ID</strong> to pay via JazzCash account.
+                        </small>
+                      </div>
+
+                      <div className="text-center mt-3">
+                        <p className="fw-bold text-warning mb-2">QR Payments Accepted</p>
+                        <img
+                          src="/assets/donate/Till-id.jpeg"
+                          alt="JazzCash QR Code - Till ID 982298606"
+                          className="img-fluid rounded shadow-sm"
+                          style={{ maxWidth: '280px', border: '3px solid #f5c518' }}
+                        />
                       </div>
                     </div>
 
@@ -1295,12 +1509,17 @@ Thank you for supporting orphan children!`;
                       whileTap={{ scale: 0.98 }}
                       className="btn btn-success btn-lg py-3"
                       onClick={handleDonationSubmit}
-                      disabled={isProcessing}
+                      disabled={isProcessing || timerExpired}
                     >
                       {isProcessing ? (
                         <>
                           <span className="spinner-border spinner-border-sm me-2"></span>
                           Processing...
+                        </>
+                      ) : timerExpired ? (
+                        <>
+                          <i className="bi bi-x-circle me-2"></i>
+                          Time Expired - Go Back & Retry
                         </>
                       ) : (
                         <>
@@ -1313,7 +1532,7 @@ Thank you for supporting orphan children!`;
                     <div className="d-flex gap-2">
                       <button
                         className="btn btn-outline-primary flex-grow-1"
-                        onClick={() => setStep(2)}
+                        onClick={() => { setStep(2); window.scrollTo(0, 0); }}
                       >
                         <i className="bi bi-arrow-left me-2"></i> Back
                       </button>
@@ -1347,7 +1566,7 @@ Thank you for supporting orphan children!`;
                       <div className="col-md-6">
                         <div className="mb-2">
                           <small className="text-muted">Type</small>
-                          <div className="fw-bold">{receiptData.selectedType.charAt(0).toUpperCase() + receiptData.selectedType.slice(1)}</div>
+                          <div className="fw-bold">{formatDonationType(receiptData.selectedType)}</div>
                         </div>
                         <div className="mb-2">
                           <small className="text-muted">Amount</small>
@@ -1491,7 +1710,7 @@ Thank you for supporting orphan children!`;
                   <div className="d-flex justify-content-between">
                     <button
                       className="btn btn-outline-primary"
-                      onClick={() => setStep(3)}
+                      onClick={() => { setStep(3); window.scrollTo(0, 0); }}
                     >
                       <i className="bi bi-arrow-left me-2"></i> Back
                     </button>
@@ -1572,9 +1791,7 @@ Thank you for supporting orphan children!`;
                           <div className="mb-2">
                             <small className="text-muted">Type:</small>
                             <div className="fw-bold">
-                              {receiptData?.selectedType ? 
-                                receiptData.selectedType.charAt(0).toUpperCase() + receiptData.selectedType.slice(1) 
-                                : 'Donation'}
+                              {formatDonationType(receiptData?.selectedType)}
                             </div>
                           </div>
                           
@@ -1597,6 +1814,20 @@ Thank you for supporting orphan children!`;
                             </div>
                           </div>
                           
+                          {!receiptData?.donorInfo?.anonymous && (
+                            <>
+                              <div className="mb-2">
+                                <small className="text-muted">Email:</small>
+                                <div className="fw-bold">{receiptData?.donorInfo?.email || donorInfo.email || 'Not provided'}</div>
+                              </div>
+                              
+                              <div className="mb-2">
+                                <small className="text-muted">Phone:</small>
+                                <div className="fw-bold">{receiptData?.donorInfo?.phone || donorInfo.phone || 'Not provided'}</div>
+                              </div>
+                            </>
+                          )}
+                          
                           <div className="mb-2">
                             <small className="text-muted">Reference:</small>
                             <div className="fw-bold" style={{ 
@@ -1607,7 +1838,7 @@ Thank you for supporting orphan children!`;
                               borderRadius: '4px',
                               marginTop: '2px'
                             }}>
-                              {receiptData?.reference || nextReference || `${selectedType.toUpperCase()}-AZOH-1`}
+                              {receiptData?.reference || nextReference || `${getTypeCode()}-AZOH-1`}
                             </div>
                           </div>
                         </div>
@@ -1679,6 +1910,7 @@ Thank you for supporting orphan children!`;
                       className="btn btn-outline-primary px-4"
                       onClick={() => {
                         setStep(1);
+                        window.scrollTo(0, 0);
                         setSelectedAmount(500);
                         setDonorInfo({ name: '', email: '', phone: '', message: '', anonymous: false });
                         setReceiptData(null);

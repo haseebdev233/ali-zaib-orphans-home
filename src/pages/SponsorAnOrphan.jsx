@@ -294,7 +294,7 @@ const SponsorshipOptions = () => {
                         )}
                       </div>
                       <Card.Title className="h4 fw-bold text-dark mb-2">{option.title}</Card.Title>
-                      <Card.Subtitle className="h3 text-dark fw-bold">PKR 5,000<span className="fs-6">/month</span></Card.Subtitle>
+                      <Card.Subtitle className="h3 text-dark fw-bold">{option.price.replace(' / mo', '')}<span className="fs-6">/month</span></Card.Subtitle>
                     </div>
                     
                     <Card.Body className="d-flex flex-column p-4">
@@ -734,6 +734,7 @@ function SponsorAnOrphan() {
                     <div className="d-flex justify-content-center">
                       <Link
                         to="/donate"
+                        state={{ sponsorName: `Sponsor ${child.name}` }}
                         className="btn btn-success btn-sm"
                       >
                         Sponsor {child.name.split(' ')[1]}

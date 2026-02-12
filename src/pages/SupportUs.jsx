@@ -115,10 +115,10 @@ function SupportUs() {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.6, duration: 0.8 }}
               >
-                <Link to="/donate" className="btn btn-success btn-lg me-3">
+                <Link to="/donate" className="btn btn-danger btn-lg me-3">
                   Donate Now
                 </Link>
-                <Link to="/sponsor-an-orphan" className="btn btn-outline-light btn-lg">
+                <Link to="/sponsor-an-orphan" className="btn btn-success btn-lg">
                   Sponsor An Orphan
                 </Link>
               </motion.div>

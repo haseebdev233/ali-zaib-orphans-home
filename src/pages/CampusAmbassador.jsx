@@ -22,6 +22,52 @@ function CampusAmbassador() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [formErrors, setFormErrors] = useState({ name: '', email: '', phone: '', university: '', contribution: '' });
+
+  const validateName = (name) => {
+    if (!name.trim()) return 'Full name is required';
+    if (name.trim().length < 3) return 'Name must be at least 3 characters';
+    if (!/^[a-zA-Z\s.'-]+$/.test(name.trim())) return 'Name can only contain letters, spaces, dots, hyphens';
+    return '';
+  };
+
+  const validateEmail = (email) => {
+    if (!email.trim()) return 'Email address is required';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return 'Please enter a valid email address';
+    return '';
+  };
+
+  const validatePhone = (phone) => {
+    if (!phone.trim()) return 'Phone number is required';
+    const digits = phone.replace(/[\s\-\+\(\)]/g, '');
+    if (digits.length < 10 || digits.length > 13) return 'Phone number must be 10-13 digits';
+    if (!/^[\d\s\-\+\(\)]+$/.test(phone)) return 'Please enter a valid phone number';
+    return '';
+  };
+
+  const validateUniversity = (uni) => {
+    if (!uni.trim()) return 'Institute name is required';
+    if (uni.trim().length < 3) return 'Institute name must be at least 3 characters';
+    return '';
+  };
+
+  const validateContribution = (text) => {
+    if (!text.trim()) return 'This field is required';
+    if (text.trim().length < 20) return 'Please provide at least 20 characters';
+    return '';
+  };
+
+  const validateForm = () => {
+    const errors = {
+      name: validateName(formData.name),
+      email: validateEmail(formData.email),
+      phone: validatePhone(formData.phone),
+      university: validateUniversity(formData.university),
+      contribution: validateContribution(formData.contribution)
+    };
+    setFormErrors(errors);
+    return !Object.values(errors).some(e => e);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,6 +75,9 @@ function CampusAmbassador() {
       ...formData,
       [name]: value
     });
+    if (formErrors[name]) {
+      setFormErrors(prev => ({ ...prev, [name]: '' }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -37,10 +86,9 @@ function CampusAmbassador() {
     setSubmitError(null);
     setSubmitSuccess(false);
 
-    // Basic validation
-    if (!formData.name || !formData.email || !formData.phone || !formData.university || !formData.contribution) {
+    // Validation
+    if (!validateForm()) {
       console.log('Validation failed');
-      setSubmitError('Please fill in all required fields.');
       return;
     }
 
@@ -134,76 +182,84 @@ function CampusAmbassador() {
                   <div className="col-md-6">
                     <label htmlFor="name" className="form-label fw-bold">Full Name *</label>
                     <div className="input-group">
-                      <span className="input-group-text bg-light">
+                      <span className={`input-group-text ${formErrors.name ? 'border-danger' : 'bg-light'}`}>
                         <i className="bi bi-person"></i>
                       </span>
                       <input
                         type="text"
-                        className="form-control"
+                        className={`form-control ${formErrors.name ? 'is-invalid' : formData.name.trim().length >= 3 ? 'is-valid' : ''}`}
                         id="name"
                         name="name"
                         placeholder="Enter your full name"
                         value={formData.name}
                         onChange={handleChange}
+                        onBlur={() => setFormErrors(prev => ({ ...prev, name: validateName(formData.name) }))}
                         required
                       />
+                      {formErrors.name && <div className="invalid-feedback">{formErrors.name}</div>}
                     </div>
                   </div>
 
                   <div className="col-md-6">
                     <label htmlFor="email" className="form-label fw-bold">Email Address *</label>
                     <div className="input-group">
-                      <span className="input-group-text bg-light">
+                      <span className={`input-group-text ${formErrors.email ? 'border-danger' : 'bg-light'}`}>
                         <i className="bi bi-envelope"></i>
                       </span>
                       <input
                         type="email"
-                        className="form-control"
+                        className={`form-control ${formErrors.email ? 'is-invalid' : formData.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) ? 'is-valid' : ''}`}
                         id="email"
                         name="email"
                         placeholder="your.email@university.edu"
                         value={formData.email}
                         onChange={handleChange}
+                        onBlur={() => setFormErrors(prev => ({ ...prev, email: validateEmail(formData.email) }))}
                         required
                       />
+                      {formErrors.email && <div className="invalid-feedback">{formErrors.email}</div>}
                     </div>
                   </div>
 
                   <div className="col-md-6">
                     <label htmlFor="phone" className="form-label fw-bold">Phone Number *</label>
                     <div className="input-group">
-                      <span className="input-group-text bg-light">
+                      <span className={`input-group-text ${formErrors.phone ? 'border-danger' : 'bg-light'}`}>
                         <i className="bi bi-telephone"></i>
                       </span>
                       <input
                         type="tel"
-                        className="form-control"
+                        className={`form-control ${formErrors.phone ? 'is-invalid' : formData.phone && formData.phone.replace(/[\s\-\+\(\)]/g, '').length >= 10 ? 'is-valid' : ''}`}
                         id="phone"
                         name="phone"
                         placeholder="+92 300 1234567"
                         value={formData.phone}
                         onChange={handleChange}
+                        onBlur={() => setFormErrors(prev => ({ ...prev, phone: validatePhone(formData.phone) }))}
                         required
                       />
+                      {formErrors.phone && <div className="invalid-feedback">{formErrors.phone}</div>}
                     </div>
                   </div>
 
                   <div className="col-md-6">
-                    <label htmlFor="university" className="form-label fw-bold">Institute Name</label>
+                    <label htmlFor="university" className="form-label fw-bold">Institute Name *</label>
                     <div className="input-group">
-                      <span className="input-group-text bg-light">
+                      <span className={`input-group-text ${formErrors.university ? 'border-danger' : 'bg-light'}`}>
                         <i className="bi bi-building"></i>
                       </span>
                       <input
                         type="text"
-                        className="form-control"
+                        className={`form-control ${formErrors.university ? 'is-invalid' : formData.university.trim().length >= 3 ? 'is-valid' : ''}`}
                         id="university"
                         name="university"
                         placeholder="Institute Name"
                         value={formData.university}
                         onChange={handleChange}
+                        onBlur={() => setFormErrors(prev => ({ ...prev, university: validateUniversity(formData.university) }))}
                         required
                       />
+                      {formErrors.university && <div className="invalid-feedback">{formErrors.university}</div>}
                     </div>
                   </div>
 
@@ -309,15 +365,17 @@ function CampusAmbassador() {
                   <div className="col-12">
                     <label htmlFor="contribution" className="form-label fw-bold">When you become an ambassador, what will you do for this orphan home? *</label>
                     <textarea
-                      className="form-control"
+                      className={`form-control ${formErrors.contribution ? 'is-invalid' : formData.contribution.trim().length >= 20 ? 'is-valid' : ''}`}
                       id="contribution"
                       name="contribution"
                       rows="4"
                       placeholder="Describe your plans and contributions..."
                       value={formData.contribution}
                       onChange={handleChange}
+                      onBlur={() => setFormErrors(prev => ({ ...prev, contribution: validateContribution(formData.contribution) }))}
                       required
                     />
+                    {formErrors.contribution && <div className="invalid-feedback">{formErrors.contribution}</div>}
                   </div>
                 </div>
 

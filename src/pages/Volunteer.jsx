@@ -16,6 +16,38 @@ function Volunteer() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [formErrors, setFormErrors] = useState({ name: '', email: '', phone: '' });
+
+  const validateName = (name) => {
+    if (!name.trim()) return 'Full name is required';
+    if (name.trim().length < 3) return 'Name must be at least 3 characters';
+    if (!/^[a-zA-Z\s.'-]+$/.test(name.trim())) return 'Name can only contain letters, spaces, dots, hyphens';
+    return '';
+  };
+
+  const validateEmail = (email) => {
+    if (!email.trim()) return 'Email address is required';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return 'Please enter a valid email address';
+    return '';
+  };
+
+  const validatePhone = (phone) => {
+    if (!phone.trim()) return 'Phone number is required';
+    const digits = phone.replace(/[\s\-\+\(\)]/g, '');
+    if (digits.length < 10 || digits.length > 13) return 'Phone number must be 10-13 digits';
+    if (!/^[\d\s\-\+\(\)]+$/.test(phone)) return 'Please enter a valid phone number';
+    return '';
+  };
+
+  const validateForm = () => {
+    const errors = {
+      name: validateName(formData.name),
+      email: validateEmail(formData.email),
+      phone: validatePhone(formData.phone)
+    };
+    setFormErrors(errors);
+    return !errors.name && !errors.email && !errors.phone;
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -23,6 +55,9 @@ function Volunteer() {
       ...formData,
       [name]: value
     });
+    if (formErrors[name]) {
+      setFormErrors(prev => ({ ...prev, [name]: '' }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -31,10 +66,9 @@ function Volunteer() {
     setSubmitError(null);
     setSubmitSuccess(false);
 
-    // Basic validation
-    if (!formData.name || !formData.email || !formData.phone) {
+    // Validation
+    if (!validateForm()) {
       console.log('Validation failed');
-      setSubmitError('Please fill in all required fields.');
       return;
     }
 
@@ -89,42 +123,48 @@ function Volunteer() {
                   <label htmlFor="name" className="form-label">Full Name *</label>
                   <input
                     type="text"
-                    className="form-control"
+                    className={`form-control ${formErrors.name ? 'is-invalid' : formData.name.trim().length >= 3 ? 'is-valid' : ''}`}
                     id="name"
                     name="name"
                     placeholder="Enter your full name"
                     value={formData.name}
                     onChange={handleChange}
+                    onBlur={() => setFormErrors(prev => ({ ...prev, name: validateName(formData.name) }))}
                     required
                   />
+                  {formErrors.name && <div className="invalid-feedback">{formErrors.name}</div>}
                 </div>
 
                 <div className="mb-3">
                   <label htmlFor="email" className="form-label">Email Address *</label>
                   <input
                     type="email"
-                    className="form-control"
+                    className={`form-control ${formErrors.email ? 'is-invalid' : formData.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) ? 'is-valid' : ''}`}
                     id="email"
                     name="email"
                     placeholder="Enter your email"
                     value={formData.email}
                     onChange={handleChange}
+                    onBlur={() => setFormErrors(prev => ({ ...prev, email: validateEmail(formData.email) }))}
                     required
                   />
+                  {formErrors.email && <div className="invalid-feedback">{formErrors.email}</div>}
                 </div>
 
                 <div className="mb-3">
                   <label htmlFor="phone" className="form-label">Phone Number *</label>
                   <input
                     type="tel"
-                    className="form-control"
+                    className={`form-control ${formErrors.phone ? 'is-invalid' : formData.phone && formData.phone.replace(/[\s\-\+\(\)]/g, '').length >= 10 ? 'is-valid' : ''}`}
                     id="phone"
                     name="phone"
                     placeholder="Enter your phone number"
                     value={formData.phone}
                     onChange={handleChange}
+                    onBlur={() => setFormErrors(prev => ({ ...prev, phone: validatePhone(formData.phone) }))}
                     required
                   />
+                  {formErrors.phone && <div className="invalid-feedback">{formErrors.phone}</div>}
                 </div>
 
                 <div className="mb-3">

@@ -27,7 +27,7 @@ function ExecutiveDirectorMessage() {
                 <div className="position-relative">
                   <img
                     src="/assets/images-webp/ceo.webp"
-                    alt="Syed Shahid Ali Zaidi - Executive Director"
+                    alt="Syed Shahid Ali Zaidi - Chairman"
                     className="img-fluid shadow-lg rounded-circle"
                     style={{
                       width: '400px',
@@ -69,7 +69,7 @@ function ExecutiveDirectorMessage() {
                 transition={{ duration: 0.8, delay: 0.4 }}
               >
                 <h2 className="display-4 fw-bold mb-4" style={{ color: '#2c3e50' }}>
-                  Message from the <span style={{ color: '#28a745' }}>Executive Director</span>
+                  Message from the <span style={{ color: '#28a745' }}>Chairman</span>
                 </h2>
                 <div className="mb-4" style={{ fontSize: '1.2rem', lineHeight: '1.8', color: '#34495e' }}>
                   <p className="mb-4">
@@ -87,7 +87,7 @@ function ExecutiveDirectorMessage() {
                 </div>
                 <div className="border-start border-success border-4 ps-4">
                   <p className="mb-1 fw-bold text-success fs-4">Syed Shahid Ali Zaidi</p>
-                  <p className="mb-0 text-muted fs-6 fw-semibold">Executive Director, Ali Zaib Orphan Home</p>
+                  <p className="mb-0 text-muted fs-6 fw-semibold">Chairman, Ali Zaib Orphan Home</p>
                 </div>
               </motion.div>
             </div>
