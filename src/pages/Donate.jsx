@@ -214,6 +214,11 @@ function DonationPage() {
   const [paymentTimer, setPaymentTimer] = useState(600); // 10 minutes in seconds
   const [timerExpired, setTimerExpired] = useState(false);
   const [uploadedFileHashes, setUploadedFileHashes] = useState([]);
+  const [paymentWindowStart, setPaymentWindowStart] = useState(null); // tracks when step 3 started
+  const [confirmAmount, setConfirmAmount] = useState(''); // user must type the amount from their screenshot
+  const [confirmReference, setConfirmReference] = useState(''); // user must type the reference from their screenshot
+  const [amountMismatch, setAmountMismatch] = useState(false);
+  const [referenceMismatch, setReferenceMismatch] = useState(false);
 
   // Generate a simple hash from file content to detect duplicates
   const generateFileHash = (file) => {
@@ -234,7 +239,7 @@ function DonationPage() {
     });
   };
 
-  // Validate image dimensions
+  // Validate image dimensions and payment proof content
   const validateImageDimensions = (file) => {
     return new Promise((resolve) => {
       if (!file.type.startsWith('image/')) {
@@ -246,13 +251,171 @@ function DonationPage() {
         URL.revokeObjectURL(img.src);
         if (img.width < 300 || img.height < 300) {
           resolve({ valid: false, reason: 'Image is too small. Minimum 300x300 pixels required for readable proof.' });
-        } else {
-          resolve({ valid: true });
+          return;
         }
+        resolve({ valid: true, width: img.width, height: img.height });
       };
       img.onerror = () => {
         URL.revokeObjectURL(img.src);
         resolve({ valid: false, reason: 'Could not read image. Please upload a valid screenshot.' });
+      };
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  // Strict payment proof verification — analyzes the image content
+  const validatePaymentProof = (file) => {
+    return new Promise((resolve) => {
+      if (!file.type.startsWith('image/')) {
+        resolve({ valid: true }); // PDFs skip pixel analysis
+        return;
+      }
+
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        URL.revokeObjectURL(img.src);
+
+        const reasons = [];
+        let score = 0; // Needs to reach a threshold to pass
+
+        // --- CHECK 1: Aspect ratio (screenshots are usually tall/portrait or square) ---
+        const aspectRatio = img.width / img.height;
+        if (aspectRatio >= 0.4 && aspectRatio <= 1.2) {
+          score += 20; // Portrait or square — typical for mobile payment screenshots
+        } else if (aspectRatio > 1.2 && aspectRatio <= 1.8) {
+          score += 5;  // Landscape — unusual for payment screenshots but possible for desktop
+        } else {
+          reasons.push('Image aspect ratio is unusual for a payment screenshot.');
+        }
+
+        // --- CHECK 2: File freshness — HARD REQUIREMENT (not score-based) ---
+        // The file MUST be created/modified within the current payment session
+        if (paymentWindowStart) {
+          const fileLastModified = file.lastModified;
+          const windowStartMs = paymentWindowStart.getTime();
+          // Allow up to 2 minutes before the window start (user may take screenshot just before uploading)
+          const gracePeriod = 2 * 60 * 1000;
+          if (fileLastModified < (windowStartMs - gracePeriod)) {
+            const ageMinutes = Math.round((Date.now() - fileLastModified) / 60000);
+            resolve({ 
+              valid: false, 
+              reason: `This file is ${ageMinutes} minute${ageMinutes !== 1 ? 's' : ''} old. You must upload a fresh screenshot taken AFTER making the payment during this session. Old screenshots or saved images are not accepted.`,
+              hardFail: true 
+            });
+            return;
+          }
+          score += 30;
+        } else {
+          // No payment window tracked — require file from last 15 min max
+          const fifteenMinAgo = Date.now() - 15 * 60 * 1000;
+          if (file.lastModified < fifteenMinAgo) {
+            const ageMinutes = Math.round((Date.now() - file.lastModified) / 60000);
+            resolve({ 
+              valid: false, 
+              reason: `This file is ${ageMinutes} minute${ageMinutes !== 1 ? 's' : ''} old. Only screenshots taken within the last 15 minutes are accepted. Please take a fresh screenshot of your payment confirmation.`,
+              hardFail: true 
+            });
+            return;
+          }
+          score += 25;
+        }
+
+        // --- CHECK 3: Pixel color analysis — identify payment UI vs. photos ---
+        // Sample pixels across the image to detect UI-like content (large flat color regions)
+        const sampleSize = 2000;
+        const pixelData = [];
+        for (let i = 0; i < sampleSize; i++) {
+          const x = Math.floor(Math.random() * canvas.width);
+          const y = Math.floor(Math.random() * canvas.height);
+          const data = ctx.getImageData(x, y, 1, 1).data;
+          pixelData.push({ r: data[0], g: data[1], b: data[2] });
+        }
+
+        // Count "UI-like" pixels: white/light gray backgrounds, solid greens, blues
+        let uiPixels = 0;
+        let skinTonePixels = 0;
+        const colorBuckets = {};
+
+        pixelData.forEach(({ r, g, b }) => {
+          // White/very light backgrounds (common in payment UIs)
+          if (r > 230 && g > 230 && b > 230) uiPixels++;
+          // Green tones (payment success indicators)
+          else if (g > 150 && r < 150 && b < 150) uiPixels++;
+          // Blue tones (banking app headers)
+          else if (b > 150 && r < 120 && g < 150) uiPixels++;
+          // Dark text areas
+          else if (r < 60 && g < 60 && b < 60) uiPixels++;
+
+          // Skin tone detection (indicates a photo of a person, not a screenshot)
+          if (r > 140 && r < 240 && g > 80 && g < 180 && b > 50 && b < 150 
+              && r > g && g > b && (r - b) > 30) {
+            skinTonePixels++;
+          }
+
+          // Color bucketing — screenshots have fewer unique colors (flat UI)
+          const bucket = `${Math.floor(r / 32)}-${Math.floor(g / 32)}-${Math.floor(b / 32)}`;
+          colorBuckets[bucket] = (colorBuckets[bucket] || 0) + 1;
+        });
+
+        const uiRatio = uiPixels / sampleSize;
+        const skinRatio = skinTonePixels / sampleSize;
+        const uniqueColors = Object.keys(colorBuckets).length;
+        const maxBucketRatio = Math.max(...Object.values(colorBuckets)) / sampleSize;
+
+        // Screenshots typically have > 40% UI pixels
+        if (uiRatio > 0.4) {
+          score += 25;
+        } else if (uiRatio > 0.25) {
+          score += 10;
+        } else {
+          reasons.push('The image does not appear to be a payment screenshot. Payment screenshots typically show transaction confirmations with text and UI elements.');
+        }
+
+        // High skin-tone ratio suggests a photo of a person (ID card, selfie)
+        if (skinRatio > 0.15) {
+          score -= 20;
+          reasons.push('The image appears to contain a photo of a person. Please upload a screenshot of your payment confirmation, not an ID card or personal photo.');
+        }
+
+        // Screenshots have fewer unique color buckets than photographs
+        if (uniqueColors < 50) {
+          score += 15; // Very flat colors — likely a UI screenshot
+        } else if (uniqueColors > 120) {
+          score -= 10; // Very diverse — likely a photograph
+        }
+
+        // Large flat regions (UI buttons, backgrounds) show high max bucket ratio
+        if (maxBucketRatio > 0.15) {
+          score += 10;
+        }
+
+        // --- CHECK 4: Filename pattern hints ---
+        const fileName = file.name.toLowerCase();
+        const screenshotPatterns = /screenshot|screen.?shot|img_|photo_|pic_|capture|whatsapp|payment|receipt|transfer|jazzcash|easypaisa|bank|ubl|hbl|meezan|alfalah|naya.*pay/i;
+        if (screenshotPatterns.test(fileName)) {
+          score += 10;
+        }
+
+        // --- FINAL VERDICT ---
+        const passThreshold = 50;
+
+        if (score >= passThreshold) {
+          resolve({ valid: true, score, reasons: [] });
+        } else {
+          const mainReason = reasons.length > 0 
+            ? reasons[0]
+            : 'This image does not appear to be a valid payment screenshot. Please upload a clear screenshot of your payment confirmation from your banking app or wallet.';
+          resolve({ valid: false, reason: mainReason, score, allReasons: reasons });
+        }
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(img.src);
+        resolve({ valid: false, reason: 'Could not process image for verification.' });
       };
       img.src = URL.createObjectURL(file);
     });
@@ -263,6 +426,7 @@ function DonationPage() {
     if (step !== 3) return;
     setPaymentTimer(600);
     setTimerExpired(false);
+    setPaymentWindowStart(new Date()); // Track when payment window opened
     const interval = setInterval(() => {
       setPaymentTimer(prev => {
         if (prev <= 1) {
@@ -390,19 +554,11 @@ function DonationPage() {
     if (location.state?.sponsorAmount) {
       setSelectedAmount(location.state.sponsorAmount);
       setCustomAmount(location.state.sponsorAmount.toString());
-      setSelectedType(''); // Empty string for 'Other' type
-      // Scroll to top of page
+      // Set the donation type to 'Other' and fill with the selection label
+      setSelectedType(location.state.sponsorName || '');
+      setStep(1);
       window.scrollTo(0, 0);
-      // Scroll to custom amount section
-      setTimeout(() => {
-        const customAmountInput = document.getElementById('custom-amount-input');
-        if (customAmountInput) {
-          customAmountInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          customAmountInput.focus();
-        }
-      }, 100);
-    }
-    if (location.state?.sponsorName) {
+    } else if (location.state?.sponsorName) {
       setSelectedType(location.state.sponsorName);
       setStep(1);
       window.scrollTo(0, 0);
@@ -811,6 +967,15 @@ Thank you for supporting orphan children!`;
       return;
     }
 
+    // Strict payment proof content verification
+    const proofCheck = await validatePaymentProof(file);
+    if (!proofCheck.valid) {
+      setVerificationError(proofCheck.reason);
+      toast.error('Verification failed: ' + proofCheck.reason);
+      e.target.value = '';
+      return;
+    }
+
     // Store hash for future duplicate detection
     setUploadedFileHashes(prev => [...prev, fileHash]);
 
@@ -832,6 +997,43 @@ Thank you for supporting orphan children!`;
   const handleFileUpload = () => {
     if (!uploadedFile) return;
 
+    // Amount confirmation — user must type amount from their screenshot
+    const enteredAmount = parseInt(confirmAmount.replace(/[^0-9]/g, ''), 10);
+    const expectedAmount = receiptData?.amount || 0;
+    if (!enteredAmount || enteredAmount <= 0) {
+      setAmountMismatch(true);
+      setVerificationError('Please enter the amount shown in your payment screenshot.');
+      toast.error('Amount is required.');
+      return;
+    }
+    // Flag mismatch but DON'T reveal the expected amount — let admin verify
+    const amountMatches = enteredAmount === expectedAmount;
+    setAmountMismatch(!amountMatches);
+
+    // Reference confirmation — user must type reference from their screenshot
+    const enteredRef = confirmReference.trim();
+    if (!enteredRef) {
+      setReferenceMismatch(true);
+      setVerificationError('Please enter the reference number shown in your payment screenshot.');
+      toast.error('Reference is required.');
+      return;
+    }
+    const referenceMatches = enteredRef.toUpperCase() === (receiptData?.reference || '').toUpperCase();
+    setReferenceMismatch(!referenceMatches);
+
+    // If either mismatches, flag for admin but still allow submission
+    if (!amountMatches || !referenceMatches) {
+      setVerificationError(
+        !amountMatches && !referenceMatches
+          ? 'The amount and reference you entered do not match our records. Your proof will be flagged for manual admin review.'
+          : !amountMatches
+            ? 'The amount you entered does not match the expected donation amount. Your proof will be flagged for manual admin review.'
+            : 'The reference you entered does not match the expected reference. Your proof will be flagged for manual admin review.'
+      );
+    } else {
+      setVerificationError('');
+    }
+
     setVerificationStatus('uploading');
     setUploadProgress(0);
 
@@ -850,19 +1052,32 @@ Thank you for supporting orphan children!`;
           const base64Data = e.target.result;
           
           try {
-            // Update donation record with proof data (preserves existing fields)
+            // Determine if there are any mismatches to flag
+            const enteredAmt = parseInt(confirmAmount.replace(/[^0-9]/g, ''), 10);
+            const amtMatch = enteredAmt === receiptData.amount;
+            const refMatch = confirmReference.trim().toUpperCase() === (receiptData.reference || '').toUpperCase();
+
+            // Update donation record with proof data and mismatch flags
             const donationRef = databaseRef(db, `donations/${receiptData.id}`);
             await update(donationRef, {
               paymentProofFileName: uploadedFile.name,
               paymentProofSize: uploadedFile.size,
               paymentProofType: uploadedFile.type,
-              verificationStatus: 'pending_review',
+              verificationStatus: (amtMatch && refMatch) ? 'pending_review' : 'flagged_mismatch',
               proofUploadedAt: new Date().toISOString(),
-              status: 'proof_submitted'
+              status: 'proof_submitted',
+              userEnteredAmount: enteredAmt,
+              userEnteredReference: confirmReference.trim(),
+              amountMatches: amtMatch,
+              referenceMatches: refMatch,
+              paymentWindowStart: paymentWindowStart ? paymentWindowStart.toISOString() : null,
+              fileLastModified: new Date(uploadedFile.lastModified).toISOString()
             });
 
             setVerificationStatus('verified');
-            toast.success('Payment proof uploaded successfully!');
+            toast.success(amtMatch && refMatch 
+              ? 'Payment proof submitted for review!'
+              : 'Proof submitted — flagged for manual verification due to mismatches.');
 
             // Auto-send WhatsApp message with donation details
             const verificationMsg = `✅ *Payment Proof Uploaded*
@@ -1559,7 +1774,7 @@ _This is an automated verification message from Ali Zaib Orphan Home donation po
                 <div className="card-body p-5">
                   <h3 className="fw-bold mb-4 text-primary">Payment Verification</h3>
 
-                  {/* Donation Summary */}
+                  {/* Donation Summary — amount hidden to prevent copying */}
                   <div className="p-4 rounded-3 mb-4" style={{ backgroundColor: '#f8f9fa' }}>
                     <h5 className="fw-bold mb-3">Donation Summary</h5>
                     <div className="row">
@@ -1570,11 +1785,15 @@ _This is an automated verification message from Ali Zaib Orphan Home donation po
                         </div>
                         <div className="mb-2">
                           <small className="text-muted">Amount</small>
-                          <div className="fw-bold">{formatCurrency(receiptData.amount)}</div>
+                          <div className="fw-bold text-muted" style={{ userSelect: 'none' }}>
+                            <i className="bi bi-eye-slash me-1"></i>Hidden for verification
+                          </div>
                         </div>
                         <div className="mb-2">
                           <small className="text-muted">Reference</small>
-                          <div className="fw-bold">{receiptData.reference}</div>
+                          <div className="fw-bold text-muted" style={{ userSelect: 'none' }}>
+                            <i className="bi bi-eye-slash me-1"></i>Hidden for verification
+                          </div>
                         </div>
                       </div>
                       <div className="col-md-6">
@@ -1623,6 +1842,44 @@ _This is an automated verification message from Ali Zaib Orphan Home donation po
                     </div>
                   </div>
 
+                  {/* Amount & Reference Confirmation */}
+                  <div className="p-4 rounded-3 mb-4" style={{ backgroundColor: '#fff3cd', border: '1px solid #ffc107' }}>
+                    <h6 className="fw-bold mb-3">
+                      <i className="bi bi-shield-lock me-2 text-warning"></i>
+                      Verification Confirmation
+                    </h6>
+                    <p className="small text-muted mb-3">
+                      Look at your payment screenshot carefully and enter the <strong>exact amount</strong> and <strong>reference number</strong> shown in it.
+                      Do NOT copy from the summary above — type what your banking app/receipt shows.
+                    </p>
+                    <div className="row g-3">
+                      <div className="col-md-6">
+                        <label className="form-label fw-bold small">Amount Shown in Your Screenshot (PKR) <span className="text-danger">*</span></label>
+                        <input
+                          type="text"
+                          className={`form-control ${amountMismatch ? 'is-invalid' : ''}`}
+                          placeholder="Enter amount from your screenshot"
+                          value={confirmAmount}
+                          onChange={(e) => { setConfirmAmount(e.target.value); setAmountMismatch(false); setVerificationError(''); }}
+                          autoComplete="off"
+                        />
+                        {amountMismatch && <div className="invalid-feedback">Amount will be verified by admin against your screenshot.</div>}
+                      </div>
+                      <div className="col-md-6">
+                        <label className="form-label fw-bold small">Reference Number in Your Screenshot <span className="text-danger">*</span></label>
+                        <input
+                          type="text"
+                          className={`form-control ${referenceMismatch ? 'is-invalid' : ''}`}
+                          placeholder="Enter reference from your screenshot"
+                          value={confirmReference}
+                          onChange={(e) => { setConfirmReference(e.target.value); setReferenceMismatch(false); setVerificationError(''); }}
+                          autoComplete="off"
+                        />
+                        {referenceMismatch && <div className="invalid-feedback">Reference will be verified by admin against your screenshot.</div>}
+                      </div>
+                    </div>
+                  </div>
+
                   {/* File Upload Area */}
                   <div className="mb-4">
                     <label className="form-label fw-bold">Upload Payment Proof:</label>
@@ -1652,7 +1909,7 @@ _This is an automated verification message from Ali Zaib Orphan Home donation po
                       ) : (
                         <div>
                           <i className="bi bi-cloud-upload text-primary fs-1 mb-3"></i>
-                          <p className="mb-3">Drag and drop your payment screenshot here, or click to browse</p>
+                          <p className="mb-3 text-center">Drag and drop your payment screenshot here, or click to browse</p>
                           <input
                             type="file"
                             className="d-none"
@@ -1664,7 +1921,7 @@ _This is an automated verification message from Ali Zaib Orphan Home donation po
                             <i className="bi bi-folder me-2"></i>
                             Choose File
                           </label>
-                          <p className="mt-2 mb-0 small text-muted">Allowed: JPG, PNG, PDF | Max: 5MB</p>
+                          <p className="mt-2 mb-0 small text-muted text-center">Allowed: JPG, PNG, PDF | Max: 5MB</p>
                         </div>
                       )}
                     </div>
@@ -1677,14 +1934,14 @@ _This is an automated verification message from Ali Zaib Orphan Home donation po
                         <div className="me-3">
                           {verificationStatus === 'uploading' && <div className="spinner-border spinner-border-sm text-primary"></div>}
                           {verificationStatus === 'verifying' && <i className="bi bi-hourglass-split text-warning fs-4"></i>}
-                          {verificationStatus === 'verified' && <i className="bi bi-check-circle-fill text-success fs-4"></i>}
+                          {verificationStatus === 'verified' && <i className="bi bi-clock-history text-warning fs-4"></i>}
                           {verificationStatus === 'rejected' && <i className="bi bi-x-circle-fill text-danger fs-4"></i>}
                         </div>
                         <div>
                           <div className="fw-bold">
                             {verificationStatus === 'uploading' && 'Uploading...'}
-                            {verificationStatus === 'verifying' && 'Processing verification...'}
-                            {verificationStatus === 'verified' && 'Verification Successful!'}
+                            {verificationStatus === 'verifying' && 'Processing...'}
+                            {verificationStatus === 'verified' && 'Proof Submitted — Pending Admin Review'}
                             {verificationStatus === 'rejected' && 'Verification Failed'}
                           </div>
                           {verificationStatus === 'uploading' && (
