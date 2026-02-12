@@ -1223,7 +1223,7 @@ _This is an automated verification message from Ali Zaib Orphan Home donation po
 
                   {/* Custom Amount */}
                   <div className="mb-4">
-                    <label className="form-label fw-bold">Or Enter Custom Amount</label>
+                    <h3 className="mb-4 text-dark">Or Enter Custom Amount</h3>
                     <div className="input-group input-group-lg">
                       <span className="input-group-text bg-primary text-white border-primary">
                         <i className="bi bi-currency-rupee"></i>

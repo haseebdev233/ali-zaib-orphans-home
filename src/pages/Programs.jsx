@@ -106,28 +106,21 @@ function Programs() {
             color: 'white'
           }}>
             <h3 className="fw-bold mb-3">Ready to Make a Difference?</h3>
-            <p className="lead mb-4">
+            <p className="lead mb-4 text-center">
               Join us in our mission to provide comprehensive care and support to orphaned children
             </p>
             <div className="d-flex flex-wrap justify-content-center gap-3">
-              <motion.button
+              <motion.a
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="btn btn-light btn-lg rounded-pill px-4"
-                onClick={() => navigate('/donate')}
+                href="https://chat.whatsapp.com/DW5GhjiufMc5Ab78m3f41z"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-success btn-lg rounded-pill px-4 fw-bold"
               >
-                <i className="bi bi-heart-fill me-2"></i>
-                Donate Now
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="btn btn-outline-light btn-lg rounded-pill px-4"
-                onClick={() => navigate('/volunteer')}
-              >
-                <i className="bi bi-person-plus me-2"></i>
-                Volunteer
-              </motion.button>
+                <i className="bi bi-whatsapp me-2"></i>
+                Join Our WhatsApp Community
+              </motion.a>
             </div>
           </div>
         </motion.div>
