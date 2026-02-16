@@ -796,7 +796,6 @@ Amount: ${formatCurrency(receiptData.amount)}
 Payment Method: Bank Transfer
 
 Bank Transfer Details:
-- JazzCash: 0321 9920015
 - BankIslami: 218500047820005
 - IBAN: PK73BKIP0218500047820005
 
@@ -897,7 +896,6 @@ Thank you for supporting orphan children!`;
 
           <div class="section">
             <strong>Bank Transfer Details:</strong><br>
-            - JazzCash: 0321 9920015<br>
             - BankIslami: 218500047820005<br>
             - IBAN: PK73BKIP0218500047820005
           </div>
@@ -1563,7 +1561,7 @@ _This is an automated verification message from Ali Zaib Orphan Home donation po
                       <i className="bi bi-bank me-2"></i>
                       Transfer to Our Accounts
                     </h5>
-                    
+
                     {/* JazzCash Account */}
                     <div className="mb-4 p-4 rounded-3 border bg-white">
                       <div className="d-flex align-items-center mb-3">
@@ -1575,23 +1573,7 @@ _This is an automated verification message from Ali Zaib Orphan Home donation po
                           <small className="text-muted">Mobile Wallet Transfer</small>
                         </div>
                       </div>
-                      
-                      <div className="mb-3">
-                        <div className="d-flex justify-content-between align-items-center mb-1">
-                          <small className="text-muted">JazzCash Number:</small>
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="btn btn-sm btn-outline-warning"
-                            onClick={() => copyToClipboard('03219920015', 'JazzCash Number')}
-                          >
-                            <i className={`bi ${copiedField === 'JazzCash Number' ? 'bi-check' : 'bi-copy'} me-1`}></i>
-                            Copy
-                          </motion.button>
-                        </div>
-                        <h5 className="fw-bold mb-0">0321 9920015</h5>
-                      </div>
-                      
+
                       <div className="mb-3">
                         <small className="text-muted">Account Title:</small>
                         <div className="fw-bold">Ali Zaib Orphan Home</div>
