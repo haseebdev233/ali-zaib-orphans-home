@@ -52,7 +52,7 @@ function Home() {
           <div className="row">
             <div className="col-12 text-center mb-4">
               <h2 className="fw-bold text-success">Bank Details</h2>
-              <p className="text-muted mb-0">You can donate directly using the details below.</p>
+              <p className="text-muted text-center mb-0">You can donate directly using the details below.</p>
             </div>
           </div>
           <div className="row g-4">
