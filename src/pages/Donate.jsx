@@ -5,6 +5,23 @@ import { ref as databaseRef, push, set, get, update, serverTimestamp, runTransac
 import { db } from '../firebase';
 import { toast } from 'react-toastify';
 import ToastHost from "../Components/ToastHost";
+import emailjs from '@emailjs/browser';
+
+// ============================================================
+// EmailJS Configuration — UPDATE THESE WITH YOUR CREDENTIALS
+// 1. Go to https://www.emailjs.com/ and create a free account
+// 2. Add an Email Service (Gmail, Outlook, etc.) and get SERVICE_ID
+// 3. Create an Email Template with these variables:
+//    {{donor_name}}, {{donor_email}}, {{donor_phone}}, {{donor_message}},
+//    {{donation_type}}, {{donation_amount}}, {{transaction_id}},
+//    {{reference_number}}, {{donation_date}}, {{payment_proof_file}},
+//    {{anonymous}}, {{to_email}}
+// 4. Get your TEMPLATE_ID and PUBLIC_KEY from the dashboard
+// ============================================================
+const EMAILJS_SERVICE_ID = 'service_7ou5sxv';   // Your EmailJS Service ID
+const EMAILJS_TEMPLATE_ID = 'template_vvj94er'; // Your EmailJS Template ID  
+const EMAILJS_PUBLIC_KEY = '8kOqhmCqeBHCcxRUl';     // Your EmailJS Public Key
+const ADMIN_EMAIL = 'pmalizaib@gmail.com';        // Admin email to receive donation notifications
 
 const SimpleDonationTypeSelector = ({ selectedType, setSelectedType }) => {
   return (
@@ -837,6 +854,45 @@ Thank you for supporting orphan children!`;
     window.open(whatsappUrl, '_blank');
   };
 
+  // Send email notification to admin with all donor info
+  const sendDonationEmail = async (donationInfo, proofFileName = '') => {
+    try {
+      const templateParams = {
+        to_email: ADMIN_EMAIL,
+        donor_name: donationInfo.donorInfo?.anonymous ? 'Anonymous Donor' : (donationInfo.donorInfo?.name || 'N/A'),
+        donor_email: donationInfo.donorInfo?.email || 'Not provided',
+        donor_phone: donationInfo.donorInfo?.phone || 'Not provided',
+        donor_message: donationInfo.donorInfo?.message || 'No message',
+        donation_type: formatDonationType(donationInfo.selectedType),
+        donation_amount: formatCurrency(donationInfo.amount),
+        transaction_id: donationInfo.transactionId || 'N/A',
+        reference_number: donationInfo.reference || 'N/A',
+        donation_date: donationInfo.date || new Date().toLocaleDateString('en-PK', { year: 'numeric', month: 'long', day: 'numeric' }),
+        payment_proof_file: proofFileName || 'Not uploaded yet',
+        anonymous: donationInfo.donorInfo?.anonymous ? 'Yes' : 'No',
+        amount_match: donationInfo.amountMatches !== undefined ? (donationInfo.amountMatches ? 'Yes ✅' : 'No ❌ — Needs manual review') : 'N/A',
+        reference_match: donationInfo.referenceMatches !== undefined ? (donationInfo.referenceMatches ? 'Yes ✅' : 'No ❌ — Needs manual review') : 'N/A',
+        user_entered_amount: donationInfo.userEnteredAmount || 'N/A',
+        user_entered_reference: donationInfo.userEnteredReference || 'N/A',
+      };
+
+      const response = await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        templateParams,
+        EMAILJS_PUBLIC_KEY
+      );
+
+      console.log('Email sent successfully:', response.status, response.text);
+      toast.success('Donation details emailed to admin for receipt processing!');
+      return true;
+    } catch (error) {
+      console.error('Failed to send email:', error);
+      toast.warning('Email notification could not be sent. Admin will be notified via WhatsApp.');
+      return false;
+    }
+  };
+
   // Print receipt
   const printReceipt = () => {
     if (!receiptData) return;
@@ -1077,6 +1133,15 @@ Thank you for supporting orphan children!`;
               ? 'Payment proof submitted for review!'
               : 'Proof submitted — flagged for manual verification due to mismatches.');
 
+            // Send email notification to admin with all donation details + proof info
+            await sendDonationEmail({
+              ...receiptData,
+              amountMatches: amtMatch,
+              referenceMatches: refMatch,
+              userEnteredAmount: enteredAmt,
+              userEnteredReference: confirmReference.trim(),
+            }, uploadedFile.name);
+
             // Auto-send WhatsApp message with donation details
             const verificationMsg = `✅ *Payment Proof Uploaded*
 
@@ -1106,6 +1171,9 @@ _This is an automated verification message from Ali Zaib Orphan Home donation po
             // Still mark as verified locally so user can proceed
             setVerificationStatus('verified');
             toast.success('Payment proof accepted!');
+
+            // Try sending email even if Firebase update failed
+            await sendDonationEmail(receiptData, uploadedFile.name);
 
             // Still send WhatsApp even if Firebase update fails
             const fallbackMsg = `✅ *Payment Proof Uploaded*
