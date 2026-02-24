@@ -145,7 +145,7 @@ const childrenProfiles = [
     age: 12,
     story: "Ali Hassan is a kind-hearted boy who loves helping others. He is skilled in arts and crafts and often creates beautiful drawings for the orphanage.",
     photoDescription: "Ali Hassan drawing in his notebook",
-    photo: "/assets/sponsar/Pictures/18. Muhammad Qasim.jpeg",
+    photo: "/assets/sponsar/Pictures/17. Ali Hassan .jpeg",
      
   },
         {
