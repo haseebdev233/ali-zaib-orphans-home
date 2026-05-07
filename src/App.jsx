@@ -1,13 +1,12 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { Suspense, lazy } from "react";
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 import TopBar from "./Components/TopBar";
 import Navbar from "./Components/Navbar";
 import HadithHeadline from "./Components/HadithHeadline";
 import Footer from "./Components/Footer";
 import Loader from "./Components/Loader";
+import ScrollToTop from "./Components/ScrollToTop";
 
 // Lazy load page components for code splitting
 const Home = lazy(() => import("./pages/Home"));
@@ -21,12 +20,13 @@ const Contact = lazy(() => import("./pages/Contact"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const Terms = lazy(() => import("./pages/Terms"));
 const SponsorAnOrphan = lazy(() => import("./pages/SponsorAnOrphan"));
-const Zakat = lazy(() => import("./pages/Zakat"));
 const SupportUs = lazy(() => import("./pages/SupportUs"));
 
 function App() {
   return (
     <Router>
+
+      <ScrollToTop />
 
       <TopBar />
       <HadithHeadline />
@@ -46,7 +46,6 @@ function App() {
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/sponsor-an-orphan" element={<SponsorAnOrphan />} />
-            <Route path="/zakat" element={<Zakat />} />
             <Route path="/support-us" element={<SupportUs />} />
           </Routes>
         </Suspense>
@@ -73,20 +72,6 @@ function App() {
       >
         <i className="bi bi-heart-fill"></i> Donate Now
       </Link>
-
-      {/* Toast Notifications */}
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
 
     </Router>
   );

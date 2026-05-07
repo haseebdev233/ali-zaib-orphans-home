@@ -73,7 +73,7 @@ function About() {
                 <div className="card-body p-4">
                   <div className="d-flex align-items-center mb-3">
                     <div className="bg-success rounded-circle p-3 me-3">
-                      <i className="bi bi-target text-white fs-4"></i>
+                      <i className="bi bi-eye-fill text-white fs-4"></i>
                     </div>
                     <h3 className="card-title text-success mb-0">Our Mission</h3>
                   </div>

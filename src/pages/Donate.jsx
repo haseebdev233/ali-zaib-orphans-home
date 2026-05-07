@@ -1,10 +1,28 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { ref as databaseRef, push, set, serverTimestamp, runTransaction } from 'firebase/database';
+import { ref as databaseRef, push, set, get, update, serverTimestamp, runTransaction } from 'firebase/database';
 import { getStorage, ref as storageRef, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { db } from '../firebase';
 import { toast } from 'react-toastify';
+import ToastHost from "../Components/ToastHost";
+import emailjs from '@emailjs/browser';
+
+// ============================================================
+// EmailJS Configuration — UPDATE THESE WITH YOUR CREDENTIALS
+// 1. Go to https://www.emailjs.com/ and create a free account
+// 2. Add an Email Service (Gmail, Outlook, etc.) and get SERVICE_ID
+// 3. Create an Email Template with these variables:
+//    {{donor_name}}, {{donor_email}}, {{donor_phone}}, {{donor_message}},
+//    {{donation_type}}, {{donation_amount}}, {{transaction_id}},
+//    {{reference_number}}, {{donation_date}}, {{payment_proof_file}},
+//    {{anonymous}}, {{to_email}}
+// 4. Get your TEMPLATE_ID and PUBLIC_KEY from the dashboard
+// ============================================================
+const EMAILJS_SERVICE_ID = 'service_7ou5sxv';   // Your EmailJS Service ID
+const EMAILJS_TEMPLATE_ID = 'template_vvj94er'; // Your EmailJS Template ID  
+const EMAILJS_PUBLIC_KEY = '8kOqhmCqeBHCcxRUl';     // Your EmailJS Public Key
+const ADMIN_EMAIL = 'pmalizaib@gmail.com';        // Admin email to receive donation notifications
 
 const SimpleDonationTypeSelector = ({ selectedType, setSelectedType }) => {
   return (

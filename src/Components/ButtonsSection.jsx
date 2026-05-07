@@ -19,7 +19,7 @@ function ButtonsSection() {
   };
 
   return (
-    <section className="buttons-section py-5 bg-white">
+    <section className="buttons-section py-5 bg-white cv-auto">
       <div className="container">
         <h2 className="text-center mb-4">Join us, make a difference!</h2>
         <motion.div

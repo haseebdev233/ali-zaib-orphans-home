@@ -2,7 +2,7 @@ import React from "react";
 
 function WhoWeAre() {
   return (
-    <section className="who-we-are-section py-5 bg-light fade-in">
+    <section className="who-we-are-section py-5 bg-light fade-in cv-auto">
       <div className="container">
         <div className="row align-items-center">
           <div className="col-md-6">
@@ -20,6 +20,9 @@ function WhoWeAre() {
               alt="Who We Are"
               className="img-fluid rounded"
               loading="lazy"
+              decoding="async"
+              width="720"
+              height="480"
             />
           </div>
         </div>

@@ -51,7 +51,7 @@ function Contact() {
       <div className="container">
         <div className="text-center mb-5">
           <h1 className="display-4 fw-bold text-primary">Contact Us</h1>
-          <p className="lead text-muted">Get in touch with Ali Zaib Orphan Home</p>
+          <p className="lead text-muted text-center">Get in touch with Ali Zaib Orphan Home</p>
         </div>
 
         <div className="row g-4">
@@ -126,11 +126,11 @@ function Contact() {
             <div className="card shadow-lg border-0">
               <div className="card-body text-center">
                 <h4 className="card-title text-secondary">Need More Help?</h4>
-                <p className="card-text">
+                <p className="card-text text-center">
                   For any inquiries, donations, or volunteer opportunities, feel free to reach out to us through any of the above contact methods.
                 </p>
-                <p className="text-muted">
-                  <i className="fas fa-envelope me-2"></i>Email: info@alizaibfoundation.com
+                <p className="text-muted text-center">
+                  <i className="fas fa-envelope me-2 "></i>Email: <a href="mailto:pmalizaib@gmail.com" style={{ color: '#6c757d', textDecoration: 'underline' }}>pmalizaib@gmail.com</a>
                 </p>
               </div>
             </div>

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Container, Row, Col, Card, Button, Alert, Badge } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import ToastHost from "../Components/ToastHost";
 
 // Child profiles data (cleaned and removed IDs 18,19,20)
 const childrenProfiles = [
@@ -144,7 +145,7 @@ const childrenProfiles = [
     age: 12,
     story: "Ali Hassan is a kind-hearted boy who loves helping others. He is skilled in arts and crafts and often creates beautiful drawings for the orphanage.",
     photoDescription: "Ali Hassan drawing in his notebook",
-    photo: "/assets/sponsar/Pictures/18. Muhammad Qasim.jpeg",
+    photo: "/assets/sponsar/Pictures/17. Ali Hassan .jpeg",
      
   },
         {
@@ -159,7 +160,7 @@ const childrenProfiles = [
 ];
 
 // Enhanced Sponsorship Options Component with Premium Styling
-const SponsorshipOptions = () => {
+const SponsorshipOptions = ({ selectedOrphan, setSelectedOrphan }) => {
   const navigate = useNavigate();
   const [selectedOptions, setSelectedOptions] = useState({
     education: false,
@@ -172,7 +173,8 @@ const SponsorshipOptions = () => {
   const handleSelectOption = (option) => {
     setSelectedOptions(prev => ({
       ...prev,
-      [option]: !prev[option]
+      [option]: !prev[option],
+      complete: false  // deselect "Complete" when picking individual options
     }));
   };
 
@@ -249,8 +251,25 @@ const SponsorshipOptions = () => {
             <Col>
               <Badge bg="success" className="mb-3 px-3 py-2 rounded-pill fs-6">FLEXIBLE SPONSORSHIP</Badge>
               <h2 className="display-5 fw-bold text-dark mb-3">Choose Your Sponsorship Path</h2>
-              <p className="lead mb-4" style={{ maxWidth: '700px', margin: '0 auto' }}>
-                Select from our flexible sponsorship options or choose to fully support an orphan's journey to a brighter future
+              {selectedOrphan && (
+                <div className="mb-3">
+                  <Badge bg="primary" className="px-4 py-2 fs-5 rounded-pill">
+                    <i className="fas fa-child me-2 text-center"></i>
+                    Sponsoring: {selectedOrphan}
+                  </Badge>
+                  <button
+                    className="btn btn-sm btn-outline-secondary ms-2 rounded-pill"
+                    onClick={() => setSelectedOrphan('')}
+                  >
+                    <i className="fas fa-times me-1"></i>Clear
+                  </button>
+                </div>
+              )}
+              <p className="lead mb-4 text-center" style={{ maxWidth: '700px', margin: '0 auto' }}>
+                {selectedOrphan
+                  ? `Select a sponsorship plan for ${selectedOrphan}`
+                  : "Select from our flexible sponsorship options or choose to fully support an orphan's journey to a brighter future"
+                }
               </p>
             </Col>
           </Row>
@@ -293,7 +312,7 @@ const SponsorshipOptions = () => {
                         )}
                       </div>
                       <Card.Title className="h4 fw-bold text-dark mb-2">{option.title}</Card.Title>
-                      <Card.Subtitle className="h3 text-dark fw-bold">PKR 5,000<span className="fs-6">/month</span></Card.Subtitle>
+                      <Card.Subtitle className="h3 text-dark fw-bold">{option.price.replace(' / mo', '')}<span className="fs-6">/month</span></Card.Subtitle>
                     </div>
                     
                     <Card.Body className="d-flex flex-column p-4">
@@ -484,7 +503,7 @@ const SponsorshipOptions = () => {
                       <h4 className="text-success fw-bold mb-2">
                         Total: PKR {calculateTotal().toLocaleString()}<span className="fs-6">/month</span>
                       </h4>
-                      <p className="text-muted small mb-0">
+                      <p className="text-muted small mb-0 text-center">
                         <i className="fas fa-info-circle me-1"></i>
                         Recurring monthly support until cancellation
                       </p>
@@ -510,11 +529,27 @@ const SponsorshipOptions = () => {
                     size="lg" 
                     className="px-5 py-3 fw-bold rounded-pill"
                     onClick={() => {
+                      // Build a label from the selected options
+                      let selectionLabel = '';
+                      if (selectedOptions.complete) {
+                        selectionLabel = 'Complete Sponsorship';
+                      } else {
+                        const parts = [];
+                        if (selectedOptions.education) parts.push('Education');
+                        if (selectedOptions.accommodation) parts.push('Accommodation & Clothing');
+                        if (selectedOptions.food) parts.push('Food & Care');
+                        selectionLabel = parts.join(', ');
+                      }
+                      // Prepend orphan name if one is selected
+                      if (selectedOrphan) {
+                        selectionLabel = `Sponsor ${selectedOrphan} — ${selectionLabel}`;
+                      }
                       window.scrollTo(0, 0);
                       navigate('/donate', {
                         state: {
                           sponsorAmount: calculateTotal(),
                           sponsorType: 'other',
+                          sponsorName: selectionLabel,
                           step: 1
                         }
                       });
@@ -560,6 +595,7 @@ const SponsorshipOptions = () => {
 
 function SponsorAnOrphan() {
   const [loadedImages, setLoadedImages] = useState(new Set());
+  const [selectedOrphan, setSelectedOrphan] = useState('');
 
   // Gallery images (using existing images from public/assets/images)
   const galleryImages = [
@@ -578,6 +614,7 @@ function SponsorAnOrphan() {
 
   return (
     <div className="sponsor-orphan-page pt-5">
+      <ToastHost />
       {/* Hero Section */}
       <motion.section
         className="hero-section text-white d-flex align-items-center"
@@ -685,14 +722,14 @@ function SponsorAnOrphan() {
       </motion.section>
 
       {/* Enhanced Sponsorship Options Section */}
-      <SponsorshipOptions />
+      <SponsorshipOptions selectedOrphan={selectedOrphan} setSelectedOrphan={setSelectedOrphan} />
 
       {/* Sponsor An Orphan Section */}
       <motion.section
         className="meet-children py-5 bg-light"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
+        transition={{ duration: 0.3 }}
         viewport={{ once: true }}
       >
         <div className="container">
@@ -700,7 +737,7 @@ function SponsorAnOrphan() {
             className="text-center fw-bold mb-5 text-success"
             initial={{ opacity: 0, y: -30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.2 }}
             viewport={{ once: true }}
           >
             Sponsor An Orphan
@@ -712,7 +749,7 @@ function SponsorAnOrphan() {
                 className="col-lg-4 col-md-6"
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.2, duration: 0.6 }}
+                transition={{ delay: index * 0.05, duration: 0.25 }}
                 viewport={{ once: true }}
               >
                 <div className="card border-0 shadow-sm h-100">
@@ -730,12 +767,16 @@ function SponsorAnOrphan() {
                     <p className="text-center text-muted mb-3">{child.age} years old</p>
                     <p className="card-text mb-3">{child.story}</p>
                     <div className="d-flex justify-content-center">
-                      <Link
-                        to="/donate"
+                      <button
                         className="btn btn-success btn-sm"
+                        onClick={() => {
+                          setSelectedOrphan(child.name);
+                          const el = document.getElementById('sponsorship-options');
+                          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }}
                       >
                         Sponsor {child.name.split(' ')[1]}
-                      </Link>
+                      </button>
                     </div>
                   </div>
                 </div>

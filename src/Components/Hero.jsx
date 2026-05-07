@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 
 const HERO_IMAGES = [
   "/assets/images-webp/1.webp",
@@ -11,74 +10,93 @@ const HERO_IMAGES = [
   "/assets/images-webp/6.webp",
   "/assets/images-webp/7.webp",
 ];
+const TRANSITION_MS = 3000;
+const INTERVAL_MS = 2500;
 
 function Hero() {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
-  const [isTouch, setIsTouch] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [nextIndex, setNextIndex] = useState(1);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [saveData, setSaveData] = useState(false);
   const [isSlowConnection, setIsSlowConnection] = useState(false);
-  const [isStatic, setIsStatic] = useState(false);
-  const heroRef = useRef(null);
 
   // Detect screen size for mobile adjustments
   useEffect(() => {
     const checkScreenSize = () => {
       const width = window.innerWidth;
       setIsMobile(width < 768);
-      setIsStatic(width < 480);
     };
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  // Detect touch devices
   useEffect(() => {
-    setIsTouch('ontouchstart' in window || navigator.maxTouchPoints > 0);
+    if (!window.matchMedia) return;
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+    const handler = (event) => setPrefersReducedMotion(event.matches);
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handler);
+    } else {
+      mediaQuery.addListener(handler);
+    }
+    return () => {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener('change', handler);
+      } else {
+        mediaQuery.removeListener(handler);
+      }
+    };
   }, []);
 
-  // Detect slow connection
   useEffect(() => {
     if ('connection' in navigator) {
       const connection = navigator.connection;
       setIsSlowConnection(connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g');
+      setSaveData(Boolean(connection.saveData));
     }
   }, []);
 
-  // Image cycling with adjusted interval for slow connections
-  useEffect(() => {
-    const interval = isSlowConnection ? 5000 : 3000;
-    const intervalId = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % HERO_IMAGES.length);
-    }, interval);
-    return () => clearInterval(intervalId);
-  }, [isSlowConnection]);
+  const shouldAnimate = !prefersReducedMotion && !saveData && !isSlowConnection;
+  const getNextIndex = (index) => (index + 1) % HERO_IMAGES.length;
 
-  // IntersectionObserver for lazy loading (preload next image when visible)
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const nextIndex = (currentImageIndex + 1) % HERO_IMAGES.length;
-            const img = new Image();
-            img.src = HERO_IMAGES[nextIndex];
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-    if (heroRef.current) observer.observe(heroRef.current);
-    return () => observer.disconnect();
-  }, [currentImageIndex]);
+    setNextIndex(getNextIndex(currentIndex));
+  }, [currentIndex]);
+
+  useEffect(() => {
+    if (!shouldAnimate) return;
+    let transitionTimeout;
+    const intervalTimeout = setTimeout(() => {
+      const upcoming = getNextIndex(currentIndex);
+      setNextIndex(upcoming);
+      setIsTransitioning(true);
+      transitionTimeout = setTimeout(() => {
+        setCurrentIndex(upcoming);
+        setIsTransitioning(false);
+      }, TRANSITION_MS);
+    }, INTERVAL_MS);
+
+    return () => {
+      clearTimeout(intervalTimeout);
+      if (transitionTimeout) clearTimeout(transitionTimeout);
+    };
+  }, [currentIndex, shouldAnimate]);
+
+  useEffect(() => {
+    if (!shouldAnimate) return;
+    const img = new Image();
+    img.src = HERO_IMAGES[nextIndex];
+  }, [nextIndex, shouldAnimate]);
 
   // CSS custom properties for responsive values
   const parallaxIntensity = isMobile ? 0.5 : 1;
-  const animationDuration = isMobile ? 1 : (isSlowConnection ? 3 : 2);
 
   return (
     <section
-      ref={heroRef}
       className="hero-section text-white d-flex align-items-center"
       style={{
         position: 'relative',
@@ -88,103 +106,72 @@ function Hero() {
         paddingTop: isMobile ? '0px' : '90px', // 0 on mobile, 90px on desktop to account for navbar
       }}
     >
-      {isSlowConnection && (
-        <div
-          className="loading-skeleton"
+      <div
+        className="hero-bg-fade"
+        style={{
+          position: 'absolute',
+          top: '0',
+          left: 0,
+          width: '100%',
+          height: '100%',
+          zIndex: -1,
+        }}
+      >
+        <img
+          src={HERO_IMAGES[currentIndex]}
+          alt="Hero background"
+          aria-hidden="true"
+          decoding="async"
+          fetchPriority="high"
+          loading="eager"
+          width="1920"
+          height="1080"
+          sizes="100vw"
+          className={`hero-carousel-img ${!isTransitioning ? 'active' : ''}`}
           style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
             width: '100%',
             height: '100%',
-            background: 'linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
-            backgroundSize: '200% 100%',
-            animation: 'loading 1.5s infinite',
-            zIndex: -1,
+            objectFit: 'cover',
           }}
         />
-      )}
-      <AnimatePresence>
-        <motion.div
-          key={currentImageIndex}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: animationDuration, ease: 'easeOut' }}
+        <img
+          src={HERO_IMAGES[nextIndex]}
+          alt=""
+          aria-hidden="true"
+          decoding="async"
+          fetchPriority="auto"
+          loading="lazy"
+          width="1920"
+          height="1080"
+          sizes="100vw"
+          className={`hero-carousel-img ${isTransitioning ? 'active' : ''}`}
           style={{
-            position: 'absolute',
-            top: '0',
-            left: 0,
             width: '100%',
             height: '100%',
-            zIndex: -1,
-            willChange: 'transform',
+            objectFit: 'cover',
           }}
-        >
-          <picture>
-            <source
-              media="(max-width: 768px)"
-              srcSet={HERO_IMAGES[currentImageIndex]}
-            />
-            <source
-              media="(max-width: 480px)"
-              srcSet={HERO_IMAGES[currentImageIndex]}
-            />
-            <img
-              src={HERO_IMAGES[currentImageIndex]}
-              alt="Hero background"
-              aria-hidden="true"
-              decoding="async"
-              fetchPriority={currentImageIndex === 0 ? "high" : "auto"}
-              loading={currentImageIndex === 0 ? "eager" : "lazy"}
-              className="hero-bg-img"
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: isMobile ? 'cover' : 'cover',
-                willChange: 'transform',
-              }}
-            />
-          </picture>
-        </motion.div>
-      </AnimatePresence>
+        />
+      </div>
       <div className="container text-center" style={{ position: 'relative', zIndex: 1 }}>
-        <motion.h1
-          className="fw-bold text-danger display-5"
+        <h1
+          className="fw-bold text-danger display-5 fade-up"
           style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5), 0 0 10px rgba(255,255,0,0.8), 0 0 20px rgba(255,255,0,0.6)' }}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
         >
           Ali Zaib Orphan Home
           (Aashiana)
-        </motion.h1>
-        <motion.p
-          className="mt-3 text-center fs-3 fw-semibold"
+        </h1>
+        <p
+          className="mt-3 text-center fs-3 fw-semibold fade-up delay-1"
           style={{ textShadow: '2px 2px 4px yellow'}}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
         >
           Caring Orphans, Building Futures
-        </motion.p>
-        <motion.div
-          className="mt-4"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-        >
+        </p>
+        <div className="mt-4 fade-up delay-2">
           <Link to="/donate" className="btn btn-success px-4 me-3 mb-2 rounded-pill fw-bold">
             <i className="bi bi-heart-fill me-2"></i>DONATE NOW
           </Link>
-        </motion.div>
+        </div>
       </div>
-      <style jsx>{`
-        @keyframes loading {
-          0% { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
-        }
-      `}</style>
     </section>
   );
 }

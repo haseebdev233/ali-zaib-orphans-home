@@ -1,35 +1,18 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import logo from '../assets/images/Ali-zaib-Logo.webp';
 
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  const [isMobile, setIsMobile] = useState(false);
-
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
 
-    const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    // Initialize on mount
-    checkScreenSize();
-    
-    // Add event listeners
     window.addEventListener("scroll", handleScroll);
-    window.addEventListener('resize', checkScreenSize);
-    
-    // Cleanup
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener('resize', checkScreenSize);
-    };
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const navItems = [
@@ -42,7 +25,7 @@ function Navbar() {
   ];
 
   return (
-    <motion.nav
+    <nav
       className="navbar navbar-expand-lg fixed-top bg-white"
       style={{
         top: scrolled ? "40px" : "90px", // top is 40px when scrolled, 90px when at top
@@ -87,49 +70,11 @@ function Navbar() {
                 </li>
               ))}
             </ul>
-
-            <Link
-              to="/donate"
-              className="btn btn-success rounded-pill px-4 d-lg-none mt-3"
-              onClick={() => setIsOpen(false)}
-            >
-              Donate Now
-            </Link>
           </div>
         </div>
-
-        <Link
-          to="/donate"
-          className="btn btn-success rounded-pill px-4 d-none d-lg-inline-block"
-          onClick={() => setIsOpen(false)}
-        >
-          Donate Now
-        </Link>
-
       </div>
-    </motion.nav>
+    </nav>
   );
 }
 
-// Add custom styles for nav-link hover effects
-const style = `
-  .navbar .nav-link:hover {
-    color: #198754 !important;
-    text-decoration: underline !important;
-    transition: all 0.3s ease;
-  }
-`;
-
-// Add style component
-const NavbarStyle = () => (
-  <style dangerouslySetInnerHTML={{ __html: style }} />
-);
-
-export default function NavbarWithStyle() {
-  return (
-    <>
-      <NavbarStyle />
-      <Navbar />
-    </>
-  );
-}
+export default Navbar;

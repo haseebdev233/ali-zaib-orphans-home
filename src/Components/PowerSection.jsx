@@ -57,7 +57,7 @@ TestimonialCard.displayName = 'TestimonialCard';
 
 function PowerSection() {
   return (
-    <section className="py-5" style={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)' }}>
+    <section className="py-5 cv-auto" style={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)' }}>
       <div className="container">
         <motion.h2
           className="fw-bold text-primary text-center mb-5"

@@ -1,6 +1,42 @@
 {
   "rules": {
-    ".read": "true",
-    ".write": "true"
+    ".read": false,
+    ".write": false,
+
+    "donations": {
+      ".read": false,
+
+      "$donationId": {
+        ".read": true,
+        ".write": "!data.exists() || data.exists()",
+        ".validate": "newData.hasChildren(['name', 'amount', 'donationId'])"
+      }
+    },
+
+    "counters": {
+      "donationId": {
+        ".read": true,
+        ".write": true,
+        ".validate": "newData.isNumber()"
+      }
+    },
+
+    "volunteers": {
+      ".read": false,
+
+      "$volunteerId": {
+        ".write": "!data.exists()",
+        ".validate": "newData.hasChildren(['name', 'email', 'phone', 'status'])"
+      }
+    },
+
+    "campus-ambassadors": {
+      ".read": false,
+
+      "$ambassadorId": {
+        ".write": "!data.exists()",
+        ".validate": "newData.hasChildren(['name', 'email', 'phone', 'university', 'status'])"
+      }
+    }
   }
 }
