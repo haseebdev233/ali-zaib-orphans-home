@@ -7,6 +7,8 @@ import HadithHeadline from "./Components/HadithHeadline";
 import Footer from "./Components/Footer";
 import Loader from "./Components/Loader";
 import ScrollToTop from "./Components/ScrollToTop";
+import WelcomeBanner from "./Components/WelcomeBanner";
+
 
 // Lazy load page components for code splitting
 const Home = lazy(() => import("./pages/Home"));
@@ -27,6 +29,8 @@ function App() {
     <Router>
 
       <ScrollToTop />
+
+      <WelcomeBanner />
 
       <TopBar />
       <HadithHeadline />
