@@ -926,7 +926,7 @@ Thank you for supporting orphan children!`;
           <div class="header">
             <div class="title">ALI ZAIB ORPHAN HOME</div>
             <div class="subtitle">(UNDER THE PATRONAGE OF ALI ZAIB FOUNDATION)</div>
-            <div class="subtitle">P-68, New Civil Line, Ayesha Road, behind Sind Bad, Faisalabad</div>
+<div class="subtitle">D 30 Masjid Al-Amin Street Khawaja Islam Road Shadman Colony Faisalabad</div>
           </div>
 
           <div class="title" style="text-align: center; margin-bottom: 30px;">DONATION RECEIPT</div>

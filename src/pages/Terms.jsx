@@ -130,7 +130,7 @@ function Terms() {
                   <ul className="list-unstyled mb-4">
                     <li className="mb-2"><strong>Email:</strong> pmalizaib@gmail.com</li>
                     <li className="mb-2"><strong>Phone:</strong> +92 (321) 992-0015</li>
-                    <li className="mb-2"><strong>Address:</strong> P-68 New Civil Lines Ayesha Road Near Sindbad, Faisalabad, Pakistan</li>
+<li className="mb-2"><strong>Address:</strong> D 30 Masjid Al-Amin Street Khawaja Islam Road Shadman Colony Faisalabad, Pakistan</li>
                   </ul>
 
                   <p className="card-text">

@@ -12,7 +12,7 @@ function Contact() {
   const locations = [
     {
       name: 'Orphan Home',
-      address: 'P-68 New Civil Lines Ayesha Road Near Sindbad , Faisalabad Pakistan',
+address: 'D 30 Masjid Al-Amin Street Khawaja Islam Road Shadman Colony Faisalabad Pakistan',
       mapLink: 'https://maps.app.goo.gl/95RzoGVnVPZBbJbw9?g_st=aw',
     },
     {

@@ -104,7 +104,7 @@ const Footer = () => {
             <ul className="list-unstyled">
               <li className="mb-3 d-flex">
                 <i className="bi bi-geo-alt-fill text-success me-3 fs-5"></i>
-                <a href="https://maps.app.goo.gl/95RzoGVnVPZBbJbw9?g_st=aw" target="_blank" rel="noopener noreferrer" className="text-white hover-green text-decoration-none">P-68 New Civil Lines Ayesha Road Near Sindbad , Faisalabad Pakistan</a>
+D 30 Masjid Al-Amin Street Khawaja Islam Road Shadman Colony Faisalabad Pakistan
               </li>
               <li className="mb-3 d-flex">
                 <i className="bi bi-telephone-fill text-success me-3 fs-5"></i>
