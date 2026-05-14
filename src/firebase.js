@@ -14,7 +14,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-const initializeCounter = async () => {
+// Only call this function manually when setting up the database for the first time
+// DO NOT call automatically on every page load
+export const initializeCounter = async () => {
   try {
     // Count existing donations
     const donationsRef = ref(db, 'donations');
@@ -38,7 +40,5 @@ const initializeCounter = async () => {
     console.error('❌ Error:', error);
   }
 };
-
-initializeCounter();
 
 export { db };
