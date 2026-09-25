@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-const HERO_IMAGES = [
-  "/assets/images-webp/1.webp",
-  "/assets/images-webp/2.webp",
-  "/assets/images-webp/3.webp",
-  "/assets/images-webp/4.webp",
-  "/assets/images-webp/5.webp",
-  "/assets/images-webp/6.webp",
-  "/assets/images-webp/7.webp",
+const HERO_SLIDES = [
+  { src: "/assets/hero-carousel/hero-01.jpeg", fit: "contain", position: "center center" },
+  { src: "/assets/hero-carousel/hero-02.jpeg", fit: "cover", position: "center center" },
+  { src: "/assets/hero-carousel/hero-03.jpeg", fit: "cover", position: "center center" },
+  { src: "/assets/hero-carousel/hero-04.jpeg", fit: "cover", position: "center 40%" },
+  { src: "/assets/hero-carousel/hero-05.jpeg", fit: "contain", position: "center center" },
+  { src: "/assets/hero-carousel/hero-06.jpeg", fit: "cover", position: "center center" },
+  { src: "/assets/hero-carousel/hero-07.jpeg", fit: "cover", position: "center 45%" },
+  { src: "/assets/hero-carousel/hero-08.jpeg", fit: "cover", position: "center center" },
+  { src: "/assets/hero-carousel/hero-09.jpeg", fit: "cover", position: "center center" },
+  { src: "/assets/hero-carousel/hero-10.jpeg", fit: "cover", position: "center 35%" },
 ];
 const TRANSITION_MS = 3000;
 const INTERVAL_MS = 2500;
@@ -61,7 +64,7 @@ function Hero() {
   }, []);
 
   const shouldAnimate = !prefersReducedMotion && !saveData && !isSlowConnection;
-  const getNextIndex = (index) => (index + 1) % HERO_IMAGES.length;
+  const getNextIndex = (index) => (index + 1) % HERO_SLIDES.length;
 
   useEffect(() => {
     setNextIndex(getNextIndex(currentIndex));
@@ -89,7 +92,7 @@ function Hero() {
   useEffect(() => {
     if (!shouldAnimate) return;
     const img = new Image();
-    img.src = HERO_IMAGES[nextIndex];
+    img.src = HERO_SLIDES[nextIndex].src;
   }, [nextIndex, shouldAnimate]);
 
   // CSS custom properties for responsive values
@@ -118,7 +121,7 @@ function Hero() {
         }}
       >
         <img
-          src={HERO_IMAGES[currentIndex]}
+          src={HERO_SLIDES[currentIndex].src}
           alt="Hero background"
           aria-hidden="true"
           decoding="async"
@@ -131,11 +134,12 @@ function Hero() {
           style={{
             width: '100%',
             height: '100%',
-            objectFit: 'cover',
+            objectFit: HERO_SLIDES[currentIndex].fit,
+            objectPosition: HERO_SLIDES[currentIndex].position,
           }}
         />
         <img
-          src={HERO_IMAGES[nextIndex]}
+          src={HERO_SLIDES[nextIndex].src}
           alt=""
           aria-hidden="true"
           decoding="async"
@@ -148,7 +152,8 @@ function Hero() {
           style={{
             width: '100%',
             height: '100%',
-            objectFit: 'cover',
+            objectFit: HERO_SLIDES[nextIndex].fit,
+            objectPosition: HERO_SLIDES[nextIndex].position,
           }}
         />
       </div>
