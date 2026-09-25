@@ -5,7 +5,7 @@ function Contact() {
   const phoneNumbers = [
     { number: '+92321-9920015', label: 'Orphan Home' },
     { number: '+92300-8666468', label: 'Orphan Home' },
-    { number: '041-8847000', label: 'Orphan Home' },
+    { number: '0418532300', label: 'Orphan Home' },
     { number: '+92 41 871 4848', label: 'Account Office' },
   ];
 

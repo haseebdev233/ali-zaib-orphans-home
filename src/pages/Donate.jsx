@@ -1752,7 +1752,7 @@ _This is an automated verification message from Ali Zaib Orphan Home donation po
                             <small className="text-muted">Phone Numbers:</small>
                             <div className="fw-bold">0321-9920015</div>
                             <div className="fw-bold">0300-8666468</div>
-                            <div className="fw-bold">041-8847000</div>
+                            <div className="fw-bold">0418532300</div>
                           </div>
                         </div>
                         <div className="col-md-6">
