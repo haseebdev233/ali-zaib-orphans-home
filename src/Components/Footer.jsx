@@ -110,7 +110,7 @@ D 30 Masjid Al-Amin Street Khawaja Islam Road Shadman Colony Faisalabad Pakistan
                 <i className="bi bi-telephone-fill text-success me-3 fs-5"></i>
                 <div>
                   <p className="mb-0 hover-green" onClick={() => handleWhatsAppClick('923219920015')} style={{ cursor: 'pointer' }}>+92 (321) 9920015</p>
-                  <p className="mb-0 hover-green" onClick={() => handlePhoneCall('+92418847000')} style={{ cursor: 'pointer' }}>(041) 8847000</p>
+                  <p className="mb-0 hover-green" onClick={() => handlePhoneCall('+92418532300')} style={{ cursor: 'pointer' }}>(041)8532300</p>
                 </div>
               </li>
               <li className="d-flex">
