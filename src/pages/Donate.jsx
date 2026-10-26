@@ -1,3 +1,5 @@
+import BankAccounts from '../Components/BankAccounts';
+import { bankAccounts } from '../data/bankAccounts';
 import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
@@ -813,8 +815,7 @@ Amount: ${formatCurrency(receiptData.amount)}
 Payment Method: Bank Transfer
 
 Bank Transfer Details:
-- BankIslami: 218500047820005
-- IBAN: PK73BKIP0218500047820005
+${bankAccounts.map((account) => `${account.bank}\n- Account Title: ${account.title}\n- Account Number: ${account.accountNumber}\n- ${account.branchLabel}: ${account.branch}\n- IBAN: ${account.iban}`).join("\n\n")}
 
 ==========================================
 
@@ -952,8 +953,7 @@ Thank you for supporting orphan children!`;
 
           <div class="section">
             <strong>Bank Transfer Details:</strong><br>
-            - BankIslami: 218500047820005<br>
-            - IBAN: PK73BKIP0218500047820005
+            ${bankAccounts.map((account) => `<strong>${account.bank}</strong><br>Account Title: ${account.title}<br>Account Number: ${account.accountNumber}<br>${account.branchLabel}: ${account.branch}<br>IBAN: ${account.iban}`).join("<br><br>")}
           </div>
 
           <div class="footer">
@@ -1679,55 +1679,7 @@ _This is an automated verification message from Ali Zaib Orphan Home donation po
                       </div>
                     </div>
 
-                    {/* BankIslami Account */}
-                    <div className="mb-4 p-4 rounded-3 border bg-white">
-                      <div className="d-flex align-items-center mb-3">
-                        <div className="me-3 p-2 rounded bg-primary text-white">
-                          <i className="bi bi-bank fs-4"></i>
-                        </div>
-                        <div>
-                          <h6 className="fw-bold mb-0">BankIslami</h6>
-                          <small className="text-muted">Bank Account Transfer</small>
-                        </div>
-                      </div>
-                      
-                      <div className="mb-3">
-                        <div className="d-flex justify-content-between align-items-center mb-1">
-                          <small className="text-muted">Account Number:</small>
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="btn btn-sm btn-outline-primary"
-                            onClick={() => copyToClipboard('218500047820005', 'Account Number')}
-                          >
-                            <i className={`bi ${copiedField === 'Account Number' ? 'bi-check' : 'bi-copy'} me-1`}></i>
-                            Copy
-                          </motion.button>
-                        </div>
-                        <h5 className="fw-bold mb-0">218500047820005</h5>
-                      </div>
-                      
-                      <div className="mb-3">
-                        <div className="d-flex justify-content-between align-items-center mb-1">
-                          <small className="text-muted">IBAN Number:</small>
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="btn btn-sm btn-outline-primary"
-                            onClick={() => copyToClipboard('PK73BKIP0218500047820005', 'IBAN Number')}
-                          >
-                            <i className={`bi ${copiedField === 'IBAN Number' ? 'bi-check' : 'bi-copy'} me-1`}></i>
-                            Copy
-                          </motion.button>
-                        </div>
-                        <div className="fw-bold">PK73BKIP0218500047820005</div>
-                      </div>
-                      
-                      <div className="mb-2">
-                        <small className="text-muted">Account Title:</small>
-                        <div className="fw-bold">Ali Zaib Foundation (Orphan Home)</div>
-                      </div>
-                    </div>
+                    <BankAccounts onCopy={copyToClipboard} copiedField={copiedField} />
 
                     {/* Instructions */}
                     <div className="alert alert-info">

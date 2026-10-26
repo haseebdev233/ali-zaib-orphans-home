@@ -1,3 +1,4 @@
+import BankAccounts from '../Components/BankAccounts';
 import { lazy, Suspense } from "react";
 import Hero from "../Components/Hero";
 import LazySection from "../Components/LazySection";
@@ -56,7 +57,7 @@ function Home() {
             </div>
           </div>
           <div className="row g-4">
-            <div className="col-lg-6">
+            <div className="col-lg-4">
               <div className="p-4 rounded-3 border bg-white h-100">
                 <div className="d-flex align-items-center mb-3">
                   <div className="me-3 p-2 rounded bg-warning text-white">
@@ -102,49 +103,7 @@ function Home() {
                 </div>
               </div>
             </div>
-            <div className="col-lg-6">
-              <div className="p-4 rounded-3 border bg-white h-100">
-                <div className="d-flex align-items-center mb-3">
-                  <div className="me-3 p-2 rounded bg-primary text-white">
-                    <i className="bi bi-bank fs-4"></i>
-                  </div>
-                  <div>
-                    <h6 className="fw-bold mb-0">BankIslami</h6>
-                    <small className="text-muted">Bank Account Transfer</small>
-                  </div>
-                </div>
-                <div className="mb-3">
-                  <div className="d-flex justify-content-between align-items-center mb-1">
-                    <small className="text-muted">Account Number:</small>
-                    <button
-                      className="btn btn-sm btn-outline-primary"
-                      onClick={() => copyToClipboard('218500047820005')}
-                    >
-                      <i className="bi bi-copy me-1"></i>
-                      Copy
-                    </button>
-                  </div>
-                  <div className="fw-bold">218500047820005</div>
-                </div>
-                <div className="mb-3">
-                  <small className="text-muted">IBAN Number:</small>
-                  <div className="d-flex justify-content-between align-items-center">
-                    <div className="fw-bold">PK73BKIP0218500047820005</div>
-                    <button
-                      className="btn btn-sm btn-outline-primary"
-                      onClick={() => copyToClipboard('PK73BKIP0218500047820005')}
-                    >
-                      <i className="bi bi-copy me-1"></i>
-                      Copy
-                    </button>
-                  </div>
-                </div>
-                <div className="mb-2">
-                  <small className="text-muted">Account Title:</small>
-                  <div className="fw-bold">Ali Zaib Foundation (Orphan Home)</div>
-                </div>
-              </div>
-            </div>
+            <BankAccounts onCopy={copyToClipboard} columnClassName="col-lg-4" />
           </div>
         </div>
       </section>
