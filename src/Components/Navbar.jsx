@@ -43,15 +43,7 @@ function Navbar() {
           to="/"
           onClick={() => setIsOpen(false)}
         >
-          <img
-            src={logo}
-            alt="Ali Zaib Orphan Home Logo"
-            style={{ height: '40px', marginRight: '10px' }}
-            width="80"
-            height="30"
-            decoding="async"
-            loading="eager"
-          />
+          <img src={logo} alt="Ali Zaib Orphan Home Logo" style={{ height: '40px', marginRight: '10px' }} />
           <span className="d-none d-lg-inline">ALI ZAIB ORPHAN HOME (Aashiana)</span>
         </Link>
 
@@ -78,49 +70,11 @@ function Navbar() {
                 </li>
               ))}
             </ul>
-
-            <Link
-              to="/donate"
-              className="btn btn-success rounded-pill px-4 d-lg-none mt-3"
-              onClick={() => setIsOpen(false)}
-            >
-              Donate Now
-            </Link>
           </div>
         </div>
-
-        <Link
-          to="/donate"
-          className="btn btn-success rounded-pill px-4 d-none d-lg-inline-block"
-          onClick={() => setIsOpen(false)}
-        >
-          Donate Now
-        </Link>
-
       </div>
     </nav>
   );
 }
 
-// Add custom styles for nav-link hover effects
-const style = `
-  .navbar .nav-link:hover {
-    color: #198754 !important;
-    text-decoration: underline !important;
-    transition: all 0.3s ease;
-  }
-`;
-
-// Add style component
-const NavbarStyle = () => (
-  <style dangerouslySetInnerHTML={{ __html: style }} />
-);
-
-export default function NavbarWithStyle() {
-  return (
-    <>
-      <NavbarStyle />
-      <Navbar />
-    </>
-  );
-}
+export default Navbar;
