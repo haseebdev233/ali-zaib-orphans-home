@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link, Outlet, useLocation } from "react-router-dom";
 import { Suspense, lazy } from "react";
 
 import TopBar from "./Components/TopBar";
@@ -23,19 +23,58 @@ const Terms = lazy(() => import("./pages/Terms"));
 const SponsorAnOrphan = lazy(() => import("./pages/SponsorAnOrphan"));
 const SupportUs = lazy(() => import("./pages/SupportUs"));
 
-function App() {
+const Admin = lazy(() => import("./admin/Admin"));
+
+function PublicLayout() {
+  const isDonationPage = useLocation().pathname.replace(/\/$/, '') === '/donate';
   return (
-    <Router>
-
-      <ScrollToTop />
-
+    <>
       <TopBar />
       <HadithHeadline />
       <Navbar />
 
       <div style={{ marginTop: "120px" }}>
         <Suspense fallback={<Loader />}>
-          <Routes>
+          <Outlet />
+        </Suspense>
+      </div>
+
+      <Footer />
+
+      {!isDonationPage && (
+        <>
+          <a
+            href="https://wa.me/923219920015"
+            className="whatsapp-float"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Chat on WhatsApp"
+          >
+            <i className="bi bi-whatsapp"></i>
+          </a>
+
+          <Link
+            to="/donate"
+            className="donate-float"
+            aria-label="Donate Now"
+          >
+            <i className="bi bi-heart-fill"></i> Donate Now
+          </Link>
+        </>
+      )}
+
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <ScrollToTop />
+      <Suspense fallback={<Loader />}>
+        <Routes>
+          <Route path="/admin" element={<Admin />} />
+          <Route element={<PublicLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/programs" element={<Programs />} />
@@ -48,32 +87,9 @@ function App() {
             <Route path="/terms" element={<Terms />} />
             <Route path="/sponsor-an-orphan" element={<SponsorAnOrphan />} />
             <Route path="/support-us" element={<SupportUs />} />
-          </Routes>
-        </Suspense>
-      </div>
-
-      <Footer />
-
-      {/* WhatsApp Floating Button */}
-      <a
-        href="https://wa.me/923219920015"
-        className="whatsapp-float"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Chat on WhatsApp"
-      >
-        <i className="bi bi-whatsapp"></i>
-      </a>
-
-      {/* Donate Now Floating Button */}
-      <Link
-        to="/donate"
-        className="donate-float"
-        aria-label="Donate Now"
-      >
-        <i className="bi bi-heart-fill"></i> Donate Now
-      </Link>
-
+          </Route>
+        </Routes>
+      </Suspense>
     </Router>
   );
 }

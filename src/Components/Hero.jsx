@@ -1,29 +1,20 @@
-import React, { useEffect, useState } from "react";
+import SiteImage from './SiteImage';
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-const HERO_SLIDES = [
-  { src: "/assets/hero-carousel/hero-01.jpeg", fit: "contain", position: "center center" },
-  { src: "/assets/hero-carousel/hero-02.jpeg", fit: "cover", position: "center center" },
-  { src: "/assets/hero-carousel/hero-03.jpeg", fit: "cover", position: "center center" },
-  { src: "/assets/hero-carousel/hero-04.jpeg", fit: "cover", position: "center 40%" },
-  { src: "/assets/hero-carousel/hero-05.jpeg", fit: "contain", position: "center center" },
-  { src: "/assets/hero-carousel/hero-06.jpeg", fit: "cover", position: "center center" },
-  { src: "/assets/hero-carousel/hero-07.jpeg", fit: "cover", position: "center 45%" },
-  { src: "/assets/hero-carousel/hero-08.jpeg", fit: "cover", position: "center center" },
-  { src: "/assets/hero-carousel/hero-09.jpeg", fit: "cover", position: "center center" },
-  { src: "/assets/hero-carousel/hero-10.jpeg", fit: "cover", position: "center 35%" },
-];
 const TRANSITION_MS = 3000;
 const INTERVAL_MS = 2500;
 
-function Hero() {
-  const [isMobile, setIsMobile] = useState(false);
+function Hero({ content }) {
+  const slides = content.heroSlides;
+  const slideCount = slides.length;
+  const currentFallback = "/assets/hero-carousel/hero-01.jpeg";
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [nextIndex, setNextIndex] = useState(1);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const [saveData, setSaveData] = useState(false);
-  const [isSlowConnection, setIsSlowConnection] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches || false);
+  const saveData = navigator.connection?.saveData;
+  const isSlowConnection = ['slow-2g', '2g'].includes(navigator.connection?.effectiveType);
 
   // Detect screen size for mobile adjustments
   useEffect(() => {
@@ -31,7 +22,6 @@ function Hero() {
       const width = window.innerWidth;
       setIsMobile(width < 768);
     };
-    checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
@@ -39,7 +29,6 @@ function Hero() {
   useEffect(() => {
     if (!window.matchMedia) return;
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setPrefersReducedMotion(mediaQuery.matches);
     const handler = (event) => setPrefersReducedMotion(event.matches);
     if (mediaQuery.addEventListener) {
       mediaQuery.addEventListener('change', handler);
@@ -55,30 +44,20 @@ function Hero() {
     };
   }, []);
 
-  useEffect(() => {
-    if ('connection' in navigator) {
-      const connection = navigator.connection;
-      setIsSlowConnection(connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g');
-      setSaveData(Boolean(connection.saveData));
-    }
-  }, []);
-
   const shouldAnimate = !prefersReducedMotion && !saveData && !isSlowConnection;
-  const getNextIndex = (index) => (index + 1) % HERO_SLIDES.length;
+  const visibleIndex = currentIndex % Math.max(1, slideCount);
+  const nextIndex = (visibleIndex + 1) % Math.max(1, slideCount);
+  const fallbackSlide = { src: currentFallback, fit: "cover", position: "center center" };
+  const slide = slides[visibleIndex] ?? fallbackSlide;
+  const nextSlide = slides[nextIndex] ?? fallbackSlide;
 
   useEffect(() => {
-    setNextIndex(getNextIndex(currentIndex));
-  }, [currentIndex]);
-
-  useEffect(() => {
-    if (!shouldAnimate) return;
+    if (!shouldAnimate || slideCount < 2) return;
     let transitionTimeout;
     const intervalTimeout = setTimeout(() => {
-      const upcoming = getNextIndex(currentIndex);
-      setNextIndex(upcoming);
       setIsTransitioning(true);
       transitionTimeout = setTimeout(() => {
-        setCurrentIndex(upcoming);
+        setCurrentIndex(nextIndex);
         setIsTransitioning(false);
       }, TRANSITION_MS);
     }, INTERVAL_MS);
@@ -87,13 +66,7 @@ function Hero() {
       clearTimeout(intervalTimeout);
       if (transitionTimeout) clearTimeout(transitionTimeout);
     };
-  }, [currentIndex, shouldAnimate]);
-
-  useEffect(() => {
-    if (!shouldAnimate) return;
-    const img = new Image();
-    img.src = HERO_SLIDES[nextIndex].src;
-  }, [nextIndex, shouldAnimate]);
+  }, [nextIndex, shouldAnimate, slideCount]);
 
   // CSS custom properties for responsive values
   const parallaxIntensity = isMobile ? 0.5 : 1;
@@ -120,8 +93,9 @@ function Hero() {
           zIndex: -1,
         }}
       >
-        <img
-          src={HERO_SLIDES[currentIndex].src}
+        <SiteImage
+          source={slide.src}
+          fallback={currentFallback}
           alt="Hero background"
           aria-hidden="true"
           decoding="async"
@@ -134,12 +108,13 @@ function Hero() {
           style={{
             width: '100%',
             height: '100%',
-            objectFit: HERO_SLIDES[currentIndex].fit,
-            objectPosition: HERO_SLIDES[currentIndex].position,
+            objectFit: slide.fit,
+            objectPosition: slide.position,
           }}
         />
-        <img
-          src={HERO_SLIDES[nextIndex].src}
+        <SiteImage
+          source={nextSlide.src}
+          fallback={currentFallback}
           alt=""
           aria-hidden="true"
           decoding="async"
@@ -152,8 +127,8 @@ function Hero() {
           style={{
             width: '100%',
             height: '100%',
-            objectFit: HERO_SLIDES[nextIndex].fit,
-            objectPosition: HERO_SLIDES[nextIndex].position,
+            objectFit: nextSlide.fit,
+            objectPosition: nextSlide.position,
           }}
         />
       </div>
@@ -162,14 +137,13 @@ function Hero() {
           className="fw-bold text-danger display-5 fade-up"
           style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5), 0 0 10px rgba(255,255,0,0.8), 0 0 20px rgba(255,255,0,0.6)' }}
         >
-          Ali Zaib Orphan Home
-          (Aashiana)
+          {content.heroTitle}
         </h1>
         <p
           className="mt-3 text-center fs-3 fw-semibold fade-up delay-1"
           style={{ textShadow: '2px 2px 4px yellow'}}
         >
-          Caring Orphans, Building Futures
+          {content.heroIntro}
         </p>
         <div className="mt-4 fade-up delay-2">
           <Link to="/donate" className="btn btn-success px-4 me-3 mb-2 rounded-pill fw-bold">

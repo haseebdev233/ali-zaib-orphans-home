@@ -1,47 +1,12 @@
+import { contactDefaults } from '../data/siteContent';
+import { usePageContent } from '../data/usePageContent';
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 
 function Contact() {
-  const phoneNumbers = [
-    { number: '+92321-9920015', label: 'Orphan Home' },
-    { number: '+92300-8666468', label: 'Orphan Home' },
-    { number: '0418532300', label: 'Orphan Home' },
-    { number: '+92 41 871 4848', label: 'Account Office' },
-  ];
-
-  const locations = [
-    {
-      name: 'Orphan Home',
-address: 'D 30 Masjid Al-Amin Street Khawaja Islam Road Shadman Colony Faisalabad Pakistan',
-      mapLink: 'https://maps.app.goo.gl/95RzoGVnVPZBbJbw9?g_st=aw',
-    },
-    {
-      name: 'Head Office',
-      address: 'Ali Zaib Foundation, inside Faisalabad Teaching Hospital, Ghulam Muhammad Abad, Faisalabad',
-      mapLink: 'https://www.google.com/maps/search/?api=1&query=Ali+Zaib+Foundation,+inside+Faisalabad+Teaching+Hospital,+Ghulam+Muhammad+Abad,+Faisalabad',
-    },
-    {
-      name: 'Account Office',
-      address: '16 Y L , Madina Town, Faisalabad',
-      mapLink: 'https://www.google.com/maps/search/16+Y+L+,+Madina+Town,+Faisalabad/@31.430014,73.0223434,12z/data=!3m1!4b1?entry=ttu&g_ep=EgoyMDI2MDIwMS4wIKXMDSoASAFQAw%3D%3D',
-    },
-  ];
-
-  const handleWhatsAppClick = (phone) => {
-    const whatsappUrl = `https://wa.me/${phone.replace(/-/g, '')}`;
-    window.open(whatsappUrl, '_blank');
-  };
-
-  const handlePhoneClick = (phone) => {
-    window.location.href = `tel:${phone}`;
-  };
-
-  const handleLocationClick = (mapLink) => {
-    window.open(mapLink, '_blank');
-  };
-
+  const content = usePageContent('contact', contactDefaults);
   return (
-    <motion.div
+    <Motion.div
       className="container-fluid py-5"
       style={{ backgroundColor: '#f8f9fa' }}
       initial={{ opacity: 0 }}
@@ -50,8 +15,8 @@ address: 'D 30 Masjid Al-Amin Street Khawaja Islam Road Shadman Colony Faisalaba
     >
       <div className="container">
         <div className="text-center mb-5">
-          <h1 className="display-4 fw-bold text-primary">Contact Us</h1>
-          <p className="lead text-muted text-center">Get in touch with Ali Zaib Orphan Home</p>
+          <h1 className="display-4 fw-bold text-primary">{content.title}</h1>
+          <p className="lead text-muted text-center">{content.intro}</p>
         </div>
 
         <div className="row g-4">
@@ -64,28 +29,28 @@ address: 'D 30 Masjid Al-Amin Street Khawaja Islam Road Shadman Colony Faisalaba
                 </h3>
               </div>
               <div className="card-body">
-                {phoneNumbers.map((phone, index) => (
-                  <div key={index} className="d-flex justify-content-between align-items-center mb-3 p-3 border rounded">
+                {content.phones.map((phone, index) => (
+                  <div key={phone.id} className="d-flex justify-content-between align-items-center mb-3 p-3 border rounded">
                     <div>
                       <strong>{phone.label}:</strong> {phone.number}
                     </div>
                     <div>
                       {index < 2 && (
-                        <button
+                        <a
                           className="btn btn-success btn-sm me-2"
-                          onClick={() => handleWhatsAppClick(phone.number)}
+                          href={`https://wa.me/${phone.number.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer"
                           title="Open in WhatsApp"
                         >
                           <i className="fab fa-whatsapp"></i> WhatsApp
-                        </button>
+                        </a>
                       )}
-                      <button
+                      <a
                         className="btn btn-primary btn-sm"
-                        onClick={() => handlePhoneClick(phone.number)}
+                        href={`tel:${phone.number}`}
                         title="Call"
                       >
                         <i className="fas fa-phone"></i> Call
-                      </button>
+                      </a>
                     </div>
                   </div>
                 ))}
@@ -102,17 +67,17 @@ address: 'D 30 Masjid Al-Amin Street Khawaja Islam Road Shadman Colony Faisalaba
                 </h3>
               </div>
               <div className="card-body">
-                {locations.map((location, index) => (
-                  <div key={index} className="mb-4 p-3 border rounded">
+                {content.locations.map((location) => (
+                  <div key={location.id} className="mb-4 p-3 border rounded">
                     <h5 className="text-primary">{location.name}</h5>
                     <p className="mb-3">{location.address}</p>
-                    <button
+                    <a
                       className="btn btn-info btn-sm"
-                      onClick={() => handleLocationClick(location.mapLink)}
+                      href={location.mapLink.startsWith("https://") ? location.mapLink : undefined} target="_blank" rel="noopener noreferrer"
                       title="View on Map"
                     >
                       <i className="fas fa-map"></i> View Location
-                    </button>
+                    </a>
                   </div>
                 ))}
               </div>
@@ -130,14 +95,14 @@ address: 'D 30 Masjid Al-Amin Street Khawaja Islam Road Shadman Colony Faisalaba
                   For any inquiries, donations, or volunteer opportunities, feel free to reach out to us through any of the above contact methods.
                 </p>
                 <p className="text-muted text-center">
-                  <i className="fas fa-envelope me-2 "></i>Email: <a href="mailto:pmalizaib@gmail.com" style={{ color: '#6c757d', textDecoration: 'underline' }}>pmalizaib@gmail.com</a>
+                  <i className="fas fa-envelope me-2 "></i>Email: <a href={`mailto:${content.email}`} style={{ color: '#6c757d', textDecoration: 'underline' }}>{content.email}</a>
                 </p>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </motion.div>
+    </Motion.div>
   );
 }
 

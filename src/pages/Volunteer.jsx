@@ -1,3 +1,5 @@
+import { volunteerDefaults } from '../data/siteContent';
+import { usePageContent } from '../data/usePageContent';
 import { useState } from 'react';
 import { ref as databaseRef, push, set, serverTimestamp } from 'firebase/database';
 import { db } from '../firebase';
@@ -5,6 +7,7 @@ import { toast } from 'react-toastify';
 import ToastHost from "../Components/ToastHost";
 
 function Volunteer() {
+  const content = usePageContent('volunteer', volunteerDefaults);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -33,9 +36,9 @@ function Volunteer() {
 
   const validatePhone = (phone) => {
     if (!phone.trim()) return 'Phone number is required';
-    const digits = phone.replace(/[\s\-\+\(\)]/g, '');
+    const digits = phone.replace(/[\s\-+()]/g, '');
     if (digits.length < 10 || digits.length > 13) return 'Phone number must be 10-13 digits';
-    if (!/^[\d\s\-\+\(\)]+$/.test(phone)) return 'Please enter a valid phone number';
+    if (!/^[\d\s\-+()]+$/.test(phone)) return 'Please enter a valid phone number';
     return '';
   };
 
@@ -61,18 +64,15 @@ function Volunteer() {
   };
 
   const handleSubmit = async (e) => {
-    console.log('handleSubmit called');
     e.preventDefault();
     setSubmitError(null);
     setSubmitSuccess(false);
 
     // Validation
     if (!validateForm()) {
-      console.log('Validation failed');
       return;
     }
 
-    console.log('Validation passed, submitting...');
     setIsSubmitting(true);
 
     try {
@@ -84,7 +84,6 @@ function Volunteer() {
         status: 'pending'
       });
 
-      console.log('Volunteer application submitted with ID: ', newRef.key);
       setSubmitSuccess(true);
       toast.success('Volunteer application submitted successfully!');
 
@@ -113,9 +112,9 @@ function Volunteer() {
         <div className="col-12 col-md-8 col-lg-6">
           <div className="card shadow">
             <div className="card-body">
-              <h2 className="text-center mb-4">Become a Volunteer</h2>
+              <h2 className="text-center mb-4">{content.title}</h2>
               <p className="text-center text-muted mb-4">
-                Join us in making a difference. Fill out the form below to get started.
+                {content.intro}
               </p>
 
               <form onSubmit={handleSubmit}>
@@ -126,6 +125,7 @@ function Volunteer() {
                     className={`form-control ${formErrors.name ? 'is-invalid' : formData.name.trim().length >= 3 ? 'is-valid' : ''}`}
                     id="name"
                     name="name"
+                    maxLength={120}
                     placeholder="Enter your full name"
                     value={formData.name}
                     onChange={handleChange}
@@ -142,6 +142,7 @@ function Volunteer() {
                     className={`form-control ${formErrors.email ? 'is-invalid' : formData.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) ? 'is-valid' : ''}`}
                     id="email"
                     name="email"
+                    maxLength={254}
                     placeholder="Enter your email"
                     value={formData.email}
                     onChange={handleChange}
@@ -155,9 +156,10 @@ function Volunteer() {
                   <label htmlFor="phone" className="form-label">Phone Number *</label>
                   <input
                     type="tel"
-                    className={`form-control ${formErrors.phone ? 'is-invalid' : formData.phone && formData.phone.replace(/[\s\-\+\(\)]/g, '').length >= 10 ? 'is-valid' : ''}`}
+                    className={`form-control ${formErrors.phone ? 'is-invalid' : formData.phone && formData.phone.replace(/[\s\-+()]/g, '').length >= 10 ? 'is-valid' : ''}`}
                     id="phone"
                     name="phone"
+                    maxLength={40}
                     placeholder="Enter your phone number"
                     value={formData.phone}
                     onChange={handleChange}
@@ -173,6 +175,7 @@ function Volunteer() {
                     className="form-control"
                     id="skills"
                     name="skills"
+                    maxLength={2000}
                     rows="3"
                     placeholder="Tell us about your skills or areas of interest (e.g., teaching, event planning, etc.)"
                     value={formData.skills}
@@ -203,6 +206,7 @@ function Volunteer() {
                     className="form-control"
                     id="message"
                     name="message"
+                    maxLength={2000}
                     rows="3"
                     placeholder="Any additional information or questions?"
                     value={formData.message}

@@ -1,14 +1,13 @@
+import { useImageSource } from '../data/useImageSource';
+import SiteImage from '../Components/SiteImage';
+import { aboutDefaults } from '../data/siteContent';
+import { usePageContent } from '../data/usePageContent';
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 
 function About() {
-  const certificates = [
-    '/assets/Certificates/Details of Ali Zaib Orphan Home-1-7_page-0003.jpg',
-    '/assets/Certificates/Details of Ali Zaib Orphan Home-1-7_page-0004.jpg',
-    '/assets/Certificates/Details of Ali Zaib Orphan Home-1-7_page-0005.jpg',
-    '/assets/Certificates/Details of Ali Zaib Orphan Home-1-7_page-0006.jpg',
-    '/assets/Certificates/Details of Ali Zaib Orphan Home-1-7_page-0007.jpg',
-  ];
+  const content = usePageContent('about', aboutDefaults);
+  const heroImage = useImageSource(content.heroImage, aboutDefaults.heroImage);
 
   return (
     <>
@@ -16,7 +15,7 @@ function About() {
       <section
         className="hero-section text-white d-flex align-items-center"
         style={{
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(/assets/images-webp/2.webp)`,
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${JSON.stringify(heroImage)})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -24,13 +23,13 @@ function About() {
         }}
       >
         <div className="container text-center">
-          <h1 className="display-4 fw-bold mb-4">About Ali Zaib Orphan Home</h1>
-          <p className="lead text-center">Transforming lives and building hope for orphaned children</p>
+          <h1 className="display-4 fw-bold mb-4">{content.title}</h1>
+          <p className="lead text-center">{content.intro}</p>
         </div>
       </section>
 
       {/* About Us Section */}
-      <motion.section
+      <Motion.section
         className="py-5"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -42,12 +41,12 @@ function About() {
             <div className="col-lg-8 mx-auto text-center">
               <h2 className="text-success mb-4">About Us</h2>
               <p className="lead mb-4">
-                Ali Zaib Orphan Home operates under the patronage of Ali Zaib Foundation, a charitable, non-profit organization serving humanity in need since 1995. It is dedicated to nurturing orphaned and vulnerable children, providing them with a safe and supportive environment where hope and opportunity replace loss and despair.
+                {content.about}
               </p>
             </div>
           </div>
         </div>
-      </motion.section>
+      </Motion.section>
 
       {/* Vision and Mission */}
       <section className="py-5 bg-light">
@@ -63,7 +62,7 @@ function About() {
                     <h3 className="card-title text-success mb-0">Our Vision</h3>
                   </div>
                   <p className="card-text lead">
-                    To create a world where every orphaned and vulnerable child has access to love, care, education, and opportunities to realize their full potential, transforming their hardships into hope for a brighter future.
+                    {content.vision}
                   </p>
                 </div>
               </div>
@@ -78,7 +77,7 @@ function About() {
                     <h3 className="card-title text-success mb-0">Our Mission</h3>
                   </div>
                   <p className="card-text lead">
-                    To provide orphaned children with safety, education, healthcare, and emotional support, empowering them to overcome hardships, build resilience, and grow into confident, compassionate individuals.
+                    {content.mission}
                   </p>
                 </div>
               </div>
@@ -88,7 +87,7 @@ function About() {
       </section>
 
       {/* Facilities Section */}
-      <motion.section
+      <Motion.section
         className="py-5"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -98,105 +97,30 @@ function About() {
         <div className="container">
           <div className="row">
             <div className="col-12 text-center mb-5">
-              <h2 className="text-success">Facilities for Orphan Children</h2>
-              <p className="lead">At Ali Zaib Orphan Home, we provide orphan children with more than just shelter—we give them hope, care, and opportunities to thrive.</p>
+              <h2 className="text-success">{content.facilitiesTitle}</h2>
+              <p className="lead">{content.facilitiesIntro}</p>
             </div>
           </div>
           <div className="row g-4">
-            <div className="col-md-6 col-lg-4">
-              <div className="card h-100 border-0 shadow-sm">
-                <div className="card-body text-center p-4">
-                  <div className="bg-success rounded-circle p-3 d-inline-block mb-3">
-                    <i className="bi bi-house-door-fill text-white fs-3"></i>
+            {content.facilities.map((facility) => (
+              <div className="col-md-6 col-lg-4" key={facility.id}>
+                <div className="card h-100 border-0 shadow-sm">
+                  <div className="card-body text-center p-4">
+                    <div className="bg-success rounded-circle p-3 d-inline-block mb-3">
+                      <i className={`bi ${facility.icon || "bi-heart-fill"} text-white fs-3`} aria-hidden="true" />
+                    </div>
+                    <h5 className="card-title text-success">{facility.title}</h5>
+                    <p className="card-text">{facility.description}</p>
                   </div>
-                  <h5 className="card-title text-success">Safe Boarding & Lodging</h5>
-                  <p className="card-text">Providing a secure home environment for the orphans.</p>
                 </div>
               </div>
-            </div>
-            <div className="col-md-6 col-lg-4">
-              <div className="card h-100 border-0 shadow-sm">
-                <div className="card-body text-center p-4">
-                  <div className="bg-success rounded-circle p-3 d-inline-block mb-3">
-                    <i className="bi bi-egg-fried text-white fs-3"></i>
-                  </div>
-                  <h5 className="card-title text-success">Nutritious Meals & Clothing</h5>
-                  <p className="card-text">Meeting their basic needs with quality food and clothing.</p>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-6 col-lg-4">
-              <div className="card h-100 border-0 shadow-sm">
-                <div className="card-body text-center p-4">
-                  <div className="bg-success rounded-circle p-3 d-inline-block mb-3">
-                    <i className="bi bi-book-fill text-white fs-3"></i>
-                  </div>
-                  <h5 className="card-title text-success">Quality Education</h5>
-                  <p className="card-text">Unlocking their academic potential through tutoring and education.</p>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-6 col-lg-4">
-              <div className="card h-100 border-0 shadow-sm">
-                <div className="card-body text-center p-4">
-                  <div className="bg-success rounded-circle p-3 d-inline-block mb-3">
-                    <i className="bi bi-briefcase-fill text-white fs-3"></i>
-                  </div>
-                  <h5 className="card-title text-success">Career Guidance</h5>
-                  <p className="card-text">Preparing them for a bright future with skill development.</p>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-6 col-lg-4">
-              <div className="card h-100 border-0 shadow-sm">
-                <div className="card-body text-center p-4">
-                  <div className="bg-success rounded-circle p-3 d-inline-block mb-3">
-                    <i className="bi bi-heart-fill text-white fs-3"></i>
-                  </div>
-                  <h5 className="card-title text-success">Religious Education</h5>
-                  <p className="card-text">Nurturing character and values through moral guidance.</p>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-6 col-lg-4">
-              <div className="card h-100 border-0 shadow-sm">
-                <div className="card-body text-center p-4">
-                  <div className="bg-success rounded-circle p-3 d-inline-block mb-3">
-                    <i className="bi bi-heart-pulse-fill text-white fs-3"></i>
-                  </div>
-                  <h5 className="card-title text-success">Healthcare Services</h5>
-                  <p className="card-text">Regular check-ups and medical care for good health.</p>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-6 col-lg-4">
-              <div className="card h-100 border-0 shadow-sm">
-                <div className="card-body text-center p-4">
-                  <div className="bg-success rounded-circle p-3 d-inline-block mb-3">
-                    <i className="bi bi-shield-check text-white fs-3"></i>
-                  </div>
-                  <h5 className="card-title text-success">Life Skills & Support</h5>
-                  <p className="card-text">Building resilience and confidence through emotional support.</p>
-                </div>
-              </div>
-            </div>
-            <div className="col-md-6 col-lg-4">
-              <div className="card h-100 border-0 shadow-sm">
-                <div className="card-body text-center p-4">
-                  <div className="bg-success rounded-circle p-3 d-inline-block mb-3">
-                    <i className="bi bi-trophy-fill text-white fs-3"></i>
-                  </div>
-                  <h5 className="card-title text-success">Sports & Arts</h5>
-                  <p className="card-text">Holistic growth through recreational activities and arts.</p>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
-      </motion.section>
+      </Motion.section>
 
       {/* Recognition Section */}
-      <motion.section
+      <Motion.section
         className="py-5 bg-light"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -206,21 +130,21 @@ function About() {
         <div className="container">
           <div className="row">
             <div className="col-12 text-center mb-5">
-              <h2 className="text-success">Recognition</h2>
-              <p className="lead text-center">Our achievements and certifications.</p>
+              <h2 className="text-success">{content.recognitionTitle}</h2>
+              <p className="lead text-center">{content.recognitionIntro}</p>
             </div>
           </div>
           <div className="row g-4">
-            {certificates.map((cert, index) => (
-              <div key={index} className="col-md-6 col-lg-4">
+            {content.certificates.map((cert) => (
+              <div key={cert.id} className="col-md-6 col-lg-4">
                 <div className="card h-100 border-0 shadow-sm">
-                  <img src={cert} alt={`Certificate ${index + 1}`} className="card-img-top" />
+                  <SiteImage source={cert.src} alt={cert.alt} className="card-img-top" />
                 </div>
               </div>
             ))}
           </div>
         </div>
-      </motion.section>
+      </Motion.section>
     </>
   );
 }

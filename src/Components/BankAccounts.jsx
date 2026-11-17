@@ -1,7 +1,7 @@
 import { bankAccounts } from '../data/bankAccounts';
 
-export default function BankAccounts({ onCopy, copiedField, columnClassName = 'mb-4' }) {
-  return bankAccounts.map((account) => (
+export default function BankAccounts({ accounts = bankAccounts, onCopy, copiedField, columnClassName = 'mb-4' }) {
+  return accounts.map((account) => (
     <div key={account.id} className={columnClassName}>
       <div className="p-4 rounded-3 border bg-white h-100">
         <div className="d-flex align-items-center mb-3">
@@ -9,7 +9,7 @@ export default function BankAccounts({ onCopy, copiedField, columnClassName = 'm
             <i className="bi bi-bank fs-4"></i>
           </div>
           <div>
-            <h6 className="fw-bold mb-0">{account.bank}</h6>
+            <h3 className="bank-account-heading fw-bold mb-0">{account.bank}</h3>
             <small className="text-muted">Bank Account Transfer</small>
           </div>
         </div>

@@ -1,11 +1,14 @@
+import { campusAmbassadorDefaults } from '../data/siteContent';
+import { usePageContent } from '../data/usePageContent';
 import { useState } from 'react';
 import { ref as databaseRef, push, set, serverTimestamp } from 'firebase/database';
 import { db } from '../firebase';
 import { toast } from 'react-toastify';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import ToastHost from "../Components/ToastHost";
 
 function CampusAmbassador() {
+  const content = usePageContent('campus-ambassador', campusAmbassadorDefaults);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -39,9 +42,9 @@ function CampusAmbassador() {
 
   const validatePhone = (phone) => {
     if (!phone.trim()) return 'Phone number is required';
-    const digits = phone.replace(/[\s\-\+\(\)]/g, '');
+    const digits = phone.replace(/[\s\-+()]/g, '');
     if (digits.length < 10 || digits.length > 13) return 'Phone number must be 10-13 digits';
-    if (!/^[\d\s\-\+\(\)]+$/.test(phone)) return 'Please enter a valid phone number';
+    if (!/^[\d\s\-+()]+$/.test(phone)) return 'Please enter a valid phone number';
     return '';
   };
 
@@ -81,18 +84,15 @@ function CampusAmbassador() {
   };
 
   const handleSubmit = async (e) => {
-    console.log('handleSubmit called');
     e.preventDefault();
     setSubmitError(null);
     setSubmitSuccess(false);
 
     // Validation
     if (!validateForm()) {
-      console.log('Validation failed');
       return;
     }
 
-    console.log('Validation passed, submitting...');
     setIsSubmitting(true);
 
     try {
@@ -104,7 +104,6 @@ function CampusAmbassador() {
         status: 'pending'
       });
 
-      console.log('Campus Ambassador application submitted with ID: ', newRef.key);
       setSubmitSuccess(true);
       toast.success('Campus Ambassador application submitted successfully!');
 
@@ -133,7 +132,7 @@ function CampusAmbassador() {
   return (
     <>
       <ToastHost />
-      <motion.div
+      <Motion.div
         className="container py-5"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -143,9 +142,9 @@ function CampusAmbassador() {
         <div className="col-12 col-md-10 col-lg-8">
           {/* Header Section */}
           <div className="text-center mb-5">
-            <h1 className="display-4 fw-bold text-primary mb-3">Become a Campus Ambassador</h1>
+            <h1 className="display-4 fw-bold text-primary mb-3">{content.title}</h1>
             <p className="lead text-muted mb-4">
-              Join our elite team of student leaders who make a real difference on their campuses and in the community.
+              {content.intro}
             </p>
             <div className="row g-4 mb-4">
               <div className="col-md-4">
@@ -190,6 +189,7 @@ function CampusAmbassador() {
                         className={`form-control ${formErrors.name ? 'is-invalid' : formData.name.trim().length >= 3 ? 'is-valid' : ''}`}
                         id="name"
                         name="name"
+                        maxLength={120}
                         placeholder="Enter your full name"
                         value={formData.name}
                         onChange={handleChange}
@@ -211,6 +211,7 @@ function CampusAmbassador() {
                         className={`form-control ${formErrors.email ? 'is-invalid' : formData.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) ? 'is-valid' : ''}`}
                         id="email"
                         name="email"
+                        maxLength={254}
                         placeholder="your.email@university.edu"
                         value={formData.email}
                         onChange={handleChange}
@@ -229,9 +230,10 @@ function CampusAmbassador() {
                       </span>
                       <input
                         type="tel"
-                        className={`form-control ${formErrors.phone ? 'is-invalid' : formData.phone && formData.phone.replace(/[\s\-\+\(\)]/g, '').length >= 10 ? 'is-valid' : ''}`}
+                        className={`form-control ${formErrors.phone ? 'is-invalid' : formData.phone && formData.phone.replace(/[\s\-+()]/g, '').length >= 10 ? 'is-valid' : ''}`}
                         id="phone"
                         name="phone"
+                        maxLength={40}
                         placeholder="+92 300 1234567"
                         value={formData.phone}
                         onChange={handleChange}
@@ -253,6 +255,7 @@ function CampusAmbassador() {
                         className={`form-control ${formErrors.university ? 'is-invalid' : formData.university.trim().length >= 3 ? 'is-valid' : ''}`}
                         id="university"
                         name="university"
+                        maxLength={180}
                         placeholder="Institute Name"
                         value={formData.university}
                         onChange={handleChange}
@@ -311,6 +314,7 @@ function CampusAmbassador() {
                         className="form-control"
                         id="socialMedia"
                         name="socialMedia"
+                        maxLength={1000}
                         placeholder="@yourhandle"
                         value={formData.socialMedia}
                         onChange={handleChange}
@@ -341,6 +345,7 @@ function CampusAmbassador() {
                       className="form-control"
                       id="experience"
                       name="experience"
+                      maxLength={2000}
                       rows="3"
                       placeholder="Tell us about your leadership roles, volunteer work, or any relevant experience..."
                       value={formData.experience}
@@ -354,6 +359,7 @@ function CampusAmbassador() {
                       className="form-control"
                       id="motivation"
                       name="motivation"
+                      maxLength={2000}
                       rows="4"
                       placeholder="Share your motivation and what you hope to achieve as a campus ambassador..."
                       value={formData.motivation}
@@ -368,6 +374,7 @@ function CampusAmbassador() {
                       className={`form-control ${formErrors.contribution ? 'is-invalid' : formData.contribution.trim().length >= 20 ? 'is-valid' : ''}`}
                       id="contribution"
                       name="contribution"
+                      maxLength={3000}
                       rows="4"
                       placeholder="Describe your plans and contributions..."
                       value={formData.contribution}
@@ -460,7 +467,7 @@ function CampusAmbassador() {
           </div>
         </div>
       </div>
-      </motion.div>
+      </Motion.div>
     </>
   );
 }

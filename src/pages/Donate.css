@@ -1,0 +1,27 @@
+.donate-page { background: #eef3f3; color: #173038; padding-bottom: clamp(3rem, 7vw, 5rem); }
+.donate-page p { text-align: start !important; }
+.donate-container { width: min(100% - 2rem, 68rem); margin-inline: auto; }
+.donate-header { background: #17363e; color: #fff; padding: clamp(1.9rem, 4vw, 2.7rem) 0; border-bottom: 4px solid #65a89e; }
+.donate-header h1 { max-width: 55rem; margin: 0 0 .65rem; font-size: clamp(2rem, 4.75vw, 3.2rem); font-weight: 750; letter-spacing: -.035em; }
+.donate-header p { max-width: 40rem; color: #e1edeb; font-size: 1.05rem; margin: 0; }
+.donate-body { padding-top: 2rem; }
+.donate-body h2 { color: #17363e; font-weight: 750; letter-spacing: -.025em; }
+.donate-body .bank-account-heading { color: #17363e; }
+.donate-body .bg-primary { background: #1b6360 !important; }
+.donate-body .btn-outline-primary { --bs-btn-color: #205853; --bs-btn-border-color: #63918b; --bs-btn-hover-bg: #205853; --bs-btn-hover-border-color: #205853; }
+.donate-form { max-width: 52rem; margin: 2rem auto 0; background: #fff; border: 1px solid #d5dfe0; border-radius: .75rem; padding: clamp(1rem, 4vw, 2rem); scroll-margin-top: 9rem; }
+.donate-page .form-label { font-weight: 600; }
+.donate-form .form-control, .donate-form .form-select { margin-top: .25rem; border-color: #aebfc0; }
+.donate-form .form-control:focus, .donate-form .form-select:focus { border-color: #246963; box-shadow: 0 0 0 .2rem #24696333; }
+.donate-presets { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .5rem; }
+.donate-presets button { border-color: #aebfc0; color: #205853; }
+.donate-presets button:hover, .donate-presets button[aria-pressed="true"] { background: #e0efeb; color: #17363e; border-color: #63918b; }
+.donate-primary { --bs-btn-color: #fff; --bs-btn-bg: #1b6058; --bs-btn-border-color: #1b6058; --bs-btn-hover-color: #fff; --bs-btn-hover-bg: #144d47; --bs-btn-hover-border-color: #144d47; --bs-btn-disabled-color: #fff; --bs-btn-disabled-bg: #1b6058; font-weight: 650; padding: .65rem 1.25rem; }
+.donate-confirmation { background: #ebf6f1; border-radius: .5rem; padding: 1rem; }
+.donate-confirmation p { margin-top: .5rem; }
+.donate-error { color: #a3292c; }
+.donate-help { color: #4c5e64; font-size: .94rem; }
+.donate-help a { color: #205853; font-weight: 650; text-decoration: underline; }
+@media (max-width: 575px) {
+  .donate-header { padding-top: 3.25rem; }
+}

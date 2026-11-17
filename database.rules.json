@@ -2,40 +2,239 @@
   "rules": {
     ".read": false,
     ".write": false,
-
+    "adminUids": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid"
+      }
+    },
+    "sitePages": {
+      "$page": {
+        ".read": "$page === 'home' || $page === 'about' || $page === 'programs' || $page === 'gallery' || $page === 'donate' || $page === 'volunteer' || $page === 'campus-ambassador' || $page === 'contact' || $page === 'privacy' || $page === 'terms' || $page === 'sponsor-an-orphan' || $page === 'support-us'",
+        ".write": "auth != null && root.child('adminUids').child(auth.uid).val() === true && ($page === 'home' || $page === 'about' || $page === 'programs' || $page === 'gallery' || $page === 'donate' || $page === 'volunteer' || $page === 'campus-ambassador' || $page === 'contact' || $page === 'privacy' || $page === 'terms' || $page === 'sponsor-an-orphan' || $page === 'support-us') && newData.exists()",
+        ".validate": "newData.hasChildren(['revision']) && ((!data.exists() && newData.child('revision').val() === 1) || (data.exists() && newData.child('revision').val() === data.child('revision').val() + 1))",
+        "revision": {
+          ".validate": "newData.isNumber()"
+        },
+        "content": {
+          "$field": {
+            ".validate": "newData.isString() && newData.val().length <= 200000"
+          }
+        },
+        "$other": {
+          ".validate": "false"
+        },
+        "images": {
+          "$id": {
+            ".validate": "$id.matches(/^[A-Za-z0-9_-]{20}$/) && newData.val() === true"
+          }
+        }
+      }
+    },
+    "siteMedia": {
+      "$id": {
+        ".read": "auth != null && root.child('adminUids').child(auth.uid).val() === true || (data.exists() && root.child('sitePages').child(data.child('page').val()).child('images').child($id).val() === true)",
+        ".write": "auth != null && root.child('adminUids').child(auth.uid).val() === true && $id.matches(/^[A-Za-z0-9_-]{20}$/) && ((!data.exists() && newData.exists()) || (data.exists() && !newData.exists() && !newData.parent().parent().child('sitePages').child(data.child('page').val()).child('images').child($id).exists()))",
+        ".validate": "newData.hasChildren(['page', 'image']) && newData.parent().parent().child('sitePages').child(newData.child('page').val()).child('images').child($id).val() === true",
+        "page": {
+          ".validate": "newData.val() === 'home' || newData.val() === 'about' || newData.val() === 'programs' || newData.val() === 'gallery' || newData.val() === 'donate' || newData.val() === 'volunteer' || newData.val() === 'campus-ambassador' || newData.val() === 'contact' || newData.val() === 'privacy' || newData.val() === 'terms' || newData.val() === 'sponsor-an-orphan' || newData.val() === 'support-us'"
+        },
+        "image": {
+          ".validate": "newData.isString() && newData.val().length <= 600000 && newData.val().length >= 30 && newData.val().beginsWith('data:image/webp;base64,')"
+        },
+        "$other": {
+          ".validate": "false"
+        }
+      }
+    },
     "donations": {
-      ".read": false,
-
-      "$donationId": {
-        ".read": true,
-        ".write": "!data.exists() || data.exists()",
-        ".validate": "newData.hasChildren(['name', 'amount', 'donationId'])"
+      ".read": "auth != null && root.child('adminUids').child(auth.uid).val() === true",
+      "$id": {
+        ".write": "$id.matches(/^[A-Za-z0-9_-]{20}$/) && !data.exists() && newData.hasChildren(['amount', 'selectedType', 'displayType', 'paymentMethod', 'bankReference', 'donorInfo', 'reference', 'donationId', 'status', 'submittedAt']) && !newData.hasChild('reviewStatus') && ((newData.hasChildren(['paymentProofFileName', 'paymentProofType', 'paymentProofSize']) && newData.parent().parent().child('donationProofs').child($id).exists()) || (!newData.hasChild('paymentProofFileName') && !newData.hasChild('paymentProofType') && !newData.hasChild('paymentProofSize') && !newData.parent().parent().child('donationProofs').child($id).exists() && newData.child('bankReference').val().length > 0))",
+        "amount": {
+          ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 1000000000"
+        },
+        "selectedType": {
+          ".validate": "newData.isString() && newData.val().length <= 200 && newData.val().length >= 1"
+        },
+        "displayType": {
+          ".validate": "newData.isString() && newData.val().length <= 200 && newData.val().length >= 1"
+        },
+        "paymentMethod": {
+          ".validate": "newData.isString() && newData.val().length <= 120 && newData.val().length >= 1"
+        },
+        "bankReference": {
+          ".validate": "newData.isString() && newData.val().length <= 120"
+        },
+        "donorInfo": {
+          ".validate": "newData.hasChildren(['name', 'email', 'phone', 'message', 'anonymous']) && (newData.child('anonymous').val() === true || newData.child('name').val().length > 0) && (newData.child('email').val().length > 0 || newData.child('phone').val().length > 0)",
+          "name": {
+            ".validate": "newData.isString() && newData.val().length <= 120"
+          },
+          "email": {
+            ".validate": "newData.isString() && newData.val().length <= 254"
+          },
+          "phone": {
+            ".validate": "newData.isString() && newData.val().length <= 40"
+          },
+          "message": {
+            ".validate": "newData.isString() && newData.val().length <= 1500"
+          },
+          "anonymous": {
+            ".validate": "newData.isBoolean()"
+          },
+          "$other": {
+            ".validate": "false"
+          }
+        },
+        "reference": {
+          ".validate": "newData.val() === 'AZOH-' + $id"
+        },
+        "donationId": {
+          ".validate": "newData.val() === 'AZOH-' + $id"
+        },
+        "status": {
+          ".validate": "newData.val() === 'pending'"
+        },
+        "submittedAt": {
+          ".validate": "newData.isNumber() && newData.val() <= now && newData.val() > now - 600000"
+        },
+        "paymentProofFileName": {
+          ".validate": "newData.isString() && newData.val().length <= 180 && newData.val().length >= 1"
+        },
+        "paymentProofType": {
+          ".validate": "newData.val() === 'image/jpeg' || newData.val() === 'image/png' || newData.val() === 'image/webp' || newData.val() === 'application/pdf'"
+        },
+        "paymentProofSize": {
+          ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 2097152"
+        },
+        "reviewStatus": {
+          ".write": "auth != null && root.child('adminUids').child(auth.uid).val() === true && data.parent().exists() && newData.exists()",
+          ".validate": "newData.val() === 'pending' || newData.val() === 'verified' || newData.val() === 'rejected'"
+        },
+        "$other": {
+          ".validate": "false"
+        },
+        "paymentAccountId": {
+          ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 40"
+        }
       }
     },
-
-    "counters": {
-      "donationId": {
-        ".read": true,
-        ".write": true,
-        ".validate": "newData.isNumber()"
+    "donationProofs": {
+      "$id": {
+        ".read": "auth != null && root.child('adminUids').child(auth.uid).val() === true",
+        ".write": "$id.matches(/^[A-Za-z0-9_-]{20}$/) && !data.exists() && newData.exists() && !root.child('donations').child($id).exists() && newData.parent().parent().child('donations').child($id).hasChild('paymentProofType')",
+        ".validate": "newData.isString() && newData.val().length <= 2796300 && newData.val().length >= 28 && newData.val().beginsWith('data:' + newData.parent().parent().child('donations').child($id).child('paymentProofType').val() + ';base64,')"
       }
     },
-
     "volunteers": {
-      ".read": false,
-
-      "$volunteerId": {
-        ".write": "!data.exists()",
-        ".validate": "newData.hasChildren(['name', 'email', 'phone', 'status'])"
+      ".read": "auth != null && root.child('adminUids').child(auth.uid).val() === true",
+      "$id": {
+        ".write": "$id.matches(/^[A-Za-z0-9_-]{20}$/) && !data.exists() && newData.hasChildren(['name', 'email', 'phone', 'status', 'submittedAt', 'skills', 'availability', 'message']) && !newData.hasChild('reviewStatus')",
+        "name": {
+          ".validate": "newData.isString() && newData.val().length <= 120 && newData.val().length >= 3"
+        },
+        "email": {
+          ".validate": "newData.isString() && newData.val().length <= 254 && newData.val().length >= 3"
+        },
+        "phone": {
+          ".validate": "newData.isString() && newData.val().length <= 40 && newData.val().length >= 10"
+        },
+        "status": {
+          ".validate": "newData.val() === 'pending'"
+        },
+        "submittedAt": {
+          ".validate": "newData.isNumber() && newData.val() <= now && newData.val() > now - 600000"
+        },
+        "skills": {
+          ".validate": "newData.isString() && newData.val().length <= 2000"
+        },
+        "availability": {
+          ".validate": "newData.isString() && newData.val().length <= 100"
+        },
+        "message": {
+          ".validate": "newData.isString() && newData.val().length <= 2000"
+        },
+        "reviewStatus": {
+          ".write": "auth != null && root.child('adminUids').child(auth.uid).val() === true && data.parent().exists() && newData.exists()",
+          ".validate": "newData.val() === 'pending' || newData.val() === 'approved' || newData.val() === 'declined'"
+        },
+        "$other": {
+          ".validate": "false"
+        }
       }
     },
-
     "campus-ambassadors": {
-      ".read": false,
-
-      "$ambassadorId": {
-        ".write": "!data.exists()",
-        ".validate": "newData.hasChildren(['name', 'email', 'phone', 'university', 'status'])"
+      ".read": "auth != null && root.child('adminUids').child(auth.uid).val() === true",
+      "$id": {
+        ".write": "$id.matches(/^[A-Za-z0-9_-]{20}$/) && !data.exists() && newData.hasChildren(['name', 'email', 'phone', 'status', 'submittedAt', 'university', 'gender', 'year', 'experience', 'motivation', 'socialMedia', 'availability', 'contribution']) && !newData.hasChild('reviewStatus')",
+        "name": {
+          ".validate": "newData.isString() && newData.val().length <= 120 && newData.val().length >= 3"
+        },
+        "email": {
+          ".validate": "newData.isString() && newData.val().length <= 254 && newData.val().length >= 3"
+        },
+        "phone": {
+          ".validate": "newData.isString() && newData.val().length <= 40 && newData.val().length >= 10"
+        },
+        "status": {
+          ".validate": "newData.val() === 'pending'"
+        },
+        "submittedAt": {
+          ".validate": "newData.isNumber() && newData.val() <= now && newData.val() > now - 600000"
+        },
+        "university": {
+          ".validate": "newData.isString() && newData.val().length <= 180 && newData.val().length >= 3"
+        },
+        "gender": {
+          ".validate": "newData.isString() && newData.val().length <= 100"
+        },
+        "year": {
+          ".validate": "newData.isString() && newData.val().length <= 100"
+        },
+        "experience": {
+          ".validate": "newData.isString() && newData.val().length <= 2000"
+        },
+        "motivation": {
+          ".validate": "newData.isString() && newData.val().length <= 2000"
+        },
+        "socialMedia": {
+          ".validate": "newData.isString() && newData.val().length <= 1000"
+        },
+        "availability": {
+          ".validate": "newData.isString() && newData.val().length <= 100"
+        },
+        "contribution": {
+          ".validate": "newData.isString() && newData.val().length <= 3000 && newData.val().length >= 20"
+        },
+        "reviewStatus": {
+          ".write": "auth != null && root.child('adminUids').child(auth.uid).val() === true && data.parent().exists() && newData.exists()",
+          ".validate": "newData.val() === 'pending' || newData.val() === 'approved' || newData.val() === 'declined'"
+        },
+        "$other": {
+          ".validate": "false"
+        }
+      }
+    },
+    "newsletter-subscribers": {
+      ".read": "auth != null && root.child('adminUids').child(auth.uid).val() === true",
+      "$id": {
+        ".write": "$id.matches(/^[A-Za-z0-9_-]{20}$/) && !data.exists() && newData.hasChildren(['email', 'status', 'submittedAt']) && !newData.hasChild('reviewStatus')",
+        "email": {
+          ".validate": "newData.isString() && newData.val().length <= 254 && newData.val().matches(/^[^@ ]+@[^@ ]+[.][^@ ]+$/)"
+        },
+        "status": {
+          ".validate": "newData.val() === 'subscribed'"
+        },
+        "submittedAt": {
+          ".validate": "newData.isNumber() && newData.val() <= now && newData.val() > now - 600000"
+        },
+        "reviewStatus": {
+          ".write": "auth != null && root.child('adminUids').child(auth.uid).val() === true && data.parent().exists() && newData.exists()",
+          ".validate": "newData.val() === 'subscribed' || newData.val() === 'unsubscribed'"
+        },
+        "$other": {
+          ".validate": "false"
+        }
       }
     }
   }

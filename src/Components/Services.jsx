@@ -1,9 +1,7 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
-function Services() {
-  const [selectedAmount, setSelectedAmount] = useState(500);
+function Services({ content }) {
 
   return (
     <section className="py-5 cv-auto" style={{ 
@@ -12,7 +10,7 @@ function Services() {
     }}>
       <div className="container py-5">
         {/* Header */}
-        <motion.div
+        <Motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -22,17 +20,17 @@ function Services() {
             color: '#2c3e50',
             textShadow: '2px 2px 4px rgba(0,0,0,0.1)'
           }}>
-            <span style={{ color: '#3498db' }}>DONATE</span> & MAKE A DIFFERENCE
+            {content.servicesTitle}
           </h1>
           <p className="lead text-muted text-center mb-4">
-            Every contribution helps us provide better care, education, and support for orphaned children
+            {content.servicesIntro}
           </p>
-        </motion.div>
+        </Motion.div>
 
         <div className="row g-5">
           {/* Right Column - What Your Donation Provides */}
           <div className="col-lg-12">
-            <motion.div
+            <Motion.div
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
@@ -41,7 +39,7 @@ function Services() {
               <div className="card border-0 shadow-lg rounded-4">
                 <div className="card-body p-5">
                   <h4 className="fw-bold mb-4 text-center" style={{ color: '#2c3e50', fontSize: '2rem' }}>
-                    What Your Donation Provides to the Orphans
+                    {content.servicesImpact}
                   </h4>
                   <div className="row g-4">
                     {[
@@ -89,7 +87,7 @@ function Services() {
                       }
                     ].map((item, index) => (
                       <div key={index} className="col-12 col-md-6 col-lg-4">
-                        <motion.div
+                        <Motion.div
                           whileHover={{ y: -10, scale: 1.02 }}
                           className="text-center p-4 rounded-4 h-100"
                           style={{ 
@@ -116,14 +114,14 @@ function Services() {
                           <p className="text-muted text-center mb-0" style={{ fontSize: '1.1rem' }}>
                             {item.desc}
                           </p>
-                        </motion.div>
+                        </Motion.div>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
-            </motion.div>
-            <motion.div
+            </Motion.div>
+            <Motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
@@ -158,7 +156,7 @@ function Services() {
                 <i className="bi bi-heart-fill me-2"></i>
                 One Time Donation
               </Link>
-            </motion.div>
+            </Motion.div>
           </div>
         </div>
       </div>
@@ -236,11 +234,11 @@ const ServicesStyles = () => (
   `}</style>
 );
 
-export default function PremiumDonationServices() {
+export default function PremiumDonationServices({ content }) {
   return (
     <>
       <ServicesStyles />
-      <Services />
+      <Services content={content} />
     </>
   );
 }

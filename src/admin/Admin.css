@@ -1,0 +1,44 @@
+.admin-shell { min-height: 100vh; background: #f4f7f6; color: #243832; }
+.admin-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem clamp(1rem, 4vw, 3rem); color: #fff; background: #183b32; }
+.admin-header a { display: block; color: #fff; font-size: 1.1rem; font-weight: 700; text-decoration: none; }
+.admin-header a:hover { text-decoration: underline; }
+.admin-header span { display: block; color: #d6e7df; font-size: .875rem; }
+.admin-login { width: min(100% - 2rem, 25rem); margin: clamp(2rem, 8vw, 5rem) auto; padding: 1.5rem; border: 1px solid #dce6e0; border-radius: .75rem; background: #fff; }
+.admin-login h1 { font-size: 1.65rem; margin-bottom: 1.15rem; }
+.admin-dashboard { display: grid; grid-template-columns: 14rem minmax(0, 1fr); align-items: start; gap: 1.5rem; max-width: 85rem; margin-inline: auto; padding: clamp(1rem, 3vw, 2rem); }
+.admin-sidebar, .admin-workspace { background: #fff; border: 1px solid #dce6e0; border-radius: .65rem; padding: clamp(.85rem, 2vw, 1.4rem); }
+.admin-sidebar h2 { font-size: .82rem; letter-spacing: .035em; text-transform: uppercase; color: #52685f; margin: 1.1rem 0 .5rem; }
+.admin-sidebar h2:first-child { margin-top: 0; }
+.admin-sidebar a { display: block; color: #28453a; padding: .4rem .65rem; border-radius: .35rem; text-decoration: none; font-size: .94rem; }
+.admin-sidebar a:hover, .admin-sidebar a[aria-current] { background: #e5f0e9; color: #174732; }
+.admin-sidebar a[aria-current] { font-weight: 700; }
+.admin-workspace h2 { font-size: clamp(1.5rem, 4vw, 2rem); }
+.admin-field { display: grid; gap: .35rem; margin-bottom: 1rem; font-weight: 600; }
+.admin-field .form-control, .admin-field .form-select { font-weight: 400; }
+.admin-list { padding: .9rem; margin-bottom: 1rem; border: 1px solid #dce6e0; border-radius: .5rem; }
+.admin-list h3 { margin: 0; font-size: 1rem; font-weight: 700; }
+.admin-item { margin-bottom: .45rem; border: 1px solid #dce6e0; border-radius: .4rem; }
+.admin-item summary { cursor: pointer; padding: .55rem .75rem; font-weight: 600; overflow-wrap: anywhere; }
+.admin-item[open] > summary { border-bottom: 1px solid #dce6e0; background: #f4f7f6; }
+.admin-item-body { padding: .8rem; }
+.admin-image-field { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; margin-bottom: 1rem; }
+.admin-image-field .admin-field { min-width: min(100%, 14rem); flex: 1; margin: 0; }
+.admin-image-preview { width: 6rem; height: 4rem; object-fit: contain; border: 1px solid #dce6e0; border-radius: .35rem; }
+.admin-publish { border-top: 1px solid #dce6e0; padding: .85rem 0 .25rem; position: sticky; bottom: 0; background: #fff; }
+.admin-empty { padding: 1rem; background: #f4f7f6; border-radius: .5rem; }
+.admin-submission summary > span:first-child { display: inline-block; vertical-align: middle; font-weight: 400; padding-left: .25rem; }
+.admin-submission-meta { display: inline-flex; gap: .5rem; flex-wrap: wrap; align-items: center; margin-left: .75rem; font-weight: 400; }
+.admin-status { display: inline-block; padding: .15rem .45rem; border-radius: .35rem; background: #f6efda; color: #5c4400; font-size: .8rem; }
+.admin-status-verified, .admin-status-approved, .admin-status-subscribed { background: #e2f3e7; color: #1b5b38; }
+.admin-status-rejected, .admin-status-declined, .admin-status-unsubscribed { background: #fae8e7; color: #8c302e; }
+.admin-record-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: .8rem; overflow-wrap: anywhere; }
+.admin-record-fields dt { font-size: .85rem; color: #435b51; }
+.admin-record-fields dd { margin: 0; white-space: pre-wrap; }
+.admin-record-nested { grid-column: 1 / -1; border-top: 1px solid #dce6e0; padding-top: .65rem; }
+.admin-record-nested dl { margin: .45rem 0 0; }
+.admin-review { display: flex; flex-wrap: wrap; gap: .75rem; align-items: end; }
+.admin-review .admin-field { margin-bottom: 0; }
+@media (max-width: 767px) {
+  .admin-dashboard { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+  .admin-sidebar a { display: inline-block; }
+}

@@ -1,8 +1,8 @@
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import image1 from "../assets/images-webp/2.webp";
+import SiteImage from './SiteImage';
 
-function JoinSection() {
+function JoinSection({ content }) {
   return (
     <section className="py-5 bg-light cv-auto">
       <div className="container py-5">
@@ -10,7 +10,7 @@ function JoinSection() {
 
           {/* Left Image Column */}
           <div className="col-lg-5">
-            <motion.div
+            <Motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
@@ -23,8 +23,8 @@ function JoinSection() {
                 overflow: 'hidden',
                 boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)'
               }}>
-                <img
-                  src={image1}
+                <SiteImage
+                  source={content.joinPhoto}
                   className="img-fluid w-100"
                   alt="Children at Ali Zaib Orphan Home"
                   style={{
@@ -85,12 +85,12 @@ function JoinSection() {
                 borderRadius: '50%',
                 zIndex: -1
               }}></div>
-            </motion.div>
+            </Motion.div>
           </div>
 
           {/* Right Content Column */}
           <div className="col-lg-7">
-            <motion.div
+            <Motion.div
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -101,7 +101,7 @@ function JoinSection() {
                 color: '#1e3a8a',
                 lineHeight: '1.2'
               }}>
-                We Have Power Today To Change Tomorrow!
+                {content.joinTitle}
               </h1>
 
               {/* Description Text */}
@@ -111,13 +111,13 @@ function JoinSection() {
                 fontWeight: '400',
                 lineHeight: '1.8'
               }}>
-                Ali Zaib Orphan Home believes that every child deserves a secure childhood and a hopeful future. Our foster care system ensures emotional stability while our educational and spiritual guidance builds confidence and discipline.
+                {content.joinIntro}
               </p>
 
               {/* Feature Boxes */}
               <div className="row mt-5">
                 <div className="col-lg-3 col-md-6 mb-4">
-                  <motion.div
+                  <Motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -145,10 +145,10 @@ function JoinSection() {
                     <h5 style={{ color: '#333', fontSize: '1.1rem', fontWeight: '600' }}>
                       Free Education
                     </h5>
-                  </motion.div>
+                  </Motion.div>
                 </div>
                 <div className="col-lg-3 col-md-6 mb-4">
-                  <motion.div
+                  <Motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -176,10 +176,10 @@ function JoinSection() {
                     <h5 style={{ color: '#333', fontSize: '1.1rem', fontWeight: '600' }}>
                       Healthcare Support
                     </h5>
-                  </motion.div>
+                  </Motion.div>
                 </div>
                 <div className="col-lg-3 col-md-6 mb-4">
-                  <motion.div
+                  <Motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -207,10 +207,10 @@ function JoinSection() {
                     <h5 style={{ color: '#333', fontSize: '1.1rem', fontWeight: '600' }}>
                       Skill Development
                     </h5>
-                  </motion.div>
+                  </Motion.div>
                 </div>
                 <div className="col-lg-3 col-md-6 mb-4">
-                  <motion.div
+                  <Motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
@@ -238,12 +238,12 @@ function JoinSection() {
                     <h5 style={{ color: '#333', fontSize: '1.1rem', fontWeight: '600' }}>
                       Food & Shelter
                     </h5>
-                  </motion.div>
+                  </Motion.div>
                 </div>
               </div>
 
               {/* About Us Button */}
-              <motion.div
+              <Motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -275,8 +275,8 @@ function JoinSection() {
                     <i className="bi bi-arrow-right ms-2"></i>
                   </button>
                 </Link>
-              </motion.div>
-            </motion.div>
+              </Motion.div>
+            </Motion.div>
           </div>
 
         </div>
@@ -385,11 +385,11 @@ const JoinSectionStyles = () => (
   `}</style>
 );
 
-export default function PremiumJoinSection() {
+export default function PremiumJoinSection({ content }) {
   return (
     <>
       <JoinSectionStyles />
-      <JoinSection />
+      <JoinSection content={content} />
     </>
   );
 }

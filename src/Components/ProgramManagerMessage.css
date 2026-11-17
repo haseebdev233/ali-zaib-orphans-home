@@ -1,0 +1,11 @@
+.program-manager { background: #f0f5f1; color: #24382d; padding: clamp(2.5rem, 6vw, 5rem) 0; }
+.program-manager-inner { width: min(100% - 2rem, 69rem); margin-inline: auto; display: grid; grid-template-columns: minmax(13rem, 19rem) minmax(0, 1fr); align-items: start; gap: clamp(1.75rem, 5vw, 4rem); }
+.program-manager-photo { width: 100%; height: auto; aspect-ratio: 693 / 977; object-fit: cover; border-radius: .75rem; }
+.program-manager h2 { color: #194532; font-size: clamp(1.9rem, 4.5vw, 2.75rem); letter-spacing: -.025em; font-weight: 750; margin-bottom: 1.2rem; }
+.program-manager p { line-height: 1.75; margin-bottom: 1rem; }
+.program-manager-signature { display: grid; gap: .2rem; padding-inline-start: .9rem; border-inline-start: 3px solid #688c74; }
+.program-manager-signature strong { color: #194532; font-size: 1.13rem; }
+@media (max-width: 767px) {
+  .program-manager-inner { grid-template-columns: minmax(0, 1fr); }
+  .program-manager-photo { width: min(100%, 15rem); }
+}

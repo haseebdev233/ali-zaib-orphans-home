@@ -1,0 +1,4 @@
+.wallet-details { padding: 1rem 1.25rem; background: #fff; border: 1px solid #d5dfe0; border-radius: .5rem; }
+.wallet-details summary { cursor: pointer; }
+.wallet-qr { width: min(100%, 12rem); height: auto; border-radius: .35rem; }
+.bank-account-heading { font-size: 1.1rem; }

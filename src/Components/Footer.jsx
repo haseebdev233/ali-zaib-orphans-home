@@ -1,3 +1,4 @@
+import NewsletterForm from './NewsletterForm';
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -130,17 +131,7 @@ D 30 Masjid Al-Amin Street Khawaja Islam Road Shadman Colony Faisalabad Pakistan
             <p className="text-white-50 mb-4">
               Subscribe to our newsletter for updates.
             </p>
-            <div className="input-group mb-4">
-              <input 
-                type="email" 
-                className="form-control" 
-                placeholder="Enter your email" 
-                aria-label="Email"
-              />
-              <button className="btn btn-success" type="button">
-                <i className="bi bi-send"></i>
-              </button>
-            </div>
+            <NewsletterForm />
             
             {/* Social Media Links */}
             <h6 className="text-uppercase text-success mb-3">Follow Us</h6>
